@@ -17,6 +17,7 @@ export const QUERY_FOCUS_IDS = {
 const QUERY_RULES = [
   {
     focusAreaId: QUERY_FOCUS_IDS.CURRENT_MAJOR_PERIOD,
+    topicId: "current-major-period",
     topic: "当前大限",
     reason: "用户询问当前所在大限，需要把报告收敛到当前大限定位。",
     patterns: [
@@ -26,6 +27,7 @@ const QUERY_RULES = [
   },
   {
     focusAreaId: QUERY_FOCUS_IDS.MAJOR_PERIODS,
+    topicId: "major-periods",
     topic: "大限骨架",
     reason: "用户询问大限或人生阶段，需要查看大限年龄段骨架。",
     patterns: [
@@ -35,27 +37,55 @@ const QUERY_RULES = [
   },
   {
     focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
-    topic: "命宫三方四正",
-    reason: "用户询问命宫、事业、财帛或整体格局，当前先映射到命宫三方四正。",
+    topicId: "life-structure",
+    topic: "命宫格局",
+    palaceNames: ["命宫", "财帛宫", "官禄宫", "迁移宫"],
+    reason: "用户询问命宫、整体或基础格局，当前先映射到命宫三方四正。",
     patterns: [
-      /命宫|三方四正|格局|整体|基础画像|本命/u,
-      /事业|工作|职业|官禄|财帛|财运|赚钱|收入|迁移|外出|发展/u
+      /命宫|三方四正|格局|整体|基础画像|本命/u
     ]
   },
   {
+    focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
+    topicId: "career",
+    topic: "事业",
+    palaceNames: ["官禄宫"],
+    reason: "用户询问事业、工作或职业，需要在命宫三方四正中优先查看官禄宫。",
+    patterns: [/事业|工作|职业|官禄/u]
+  },
+  {
+    focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
+    topicId: "wealth",
+    topic: "财帛",
+    palaceNames: ["财帛宫"],
+    reason: "用户询问财帛、财运或收入，需要在命宫三方四正中优先查看财帛宫。",
+    patterns: [/财帛|财运|赚钱|收入|资源经营/u]
+  },
+  {
+    focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
+    topicId: "travel",
+    topic: "迁移",
+    palaceNames: ["迁移宫"],
+    reason: "用户询问外出、迁移或外部发展，需要在命宫三方四正中优先查看迁移宫。",
+    patterns: [/迁移|外出|外部|外地|异地|远行/u]
+  },
+  {
     focusAreaId: QUERY_FOCUS_IDS.BODY_PALACE,
+    topicId: "body-palace",
     topic: "身宫落点",
     reason: "用户询问身宫，需要查看后天行为重心。",
     patterns: [/身宫/u]
   },
   {
     focusAreaId: QUERY_FOCUS_IDS.STAR_BALANCE,
+    topicId: "star-balance",
     topic: "星曜类别",
     reason: "用户询问星曜，需要先查看主星、辅星、煞曜、空曜的类别平衡。",
     patterns: [/星曜|主星|辅星|煞曜|空曜|火星|铃星|擎羊|陀罗/u]
   },
   {
     focusAreaId: QUERY_FOCUS_IDS.BIRTH_YEAR_TRANSFORMATIONS,
+    topicId: "birth-year-transformations",
     topic: "生年四化",
     reason: "用户询问四化，需要查看本命盘中的禄权科忌结构。",
     patterns: [/生年四化|四化|化禄|化权|化科|化忌|禄权科忌/u]
@@ -84,6 +114,10 @@ export function parseQueryIntentFromText(text) {
     hasIntent: focusAreaIds.length > 0,
     focusAreaIds,
     topics: uniqueInOrder(normalizedItems.map((item) => item.topic)),
+    topicIds: uniqueInOrder(normalizedItems.map((item) => item.topicId)),
+    primaryPalaceNames: uniqueInOrder(
+      normalizedItems.flatMap((item) => item.palaceNames ?? [])
+    ),
     matchedItems: normalizedItems,
     sourceText
   };
@@ -101,6 +135,8 @@ export function normalizeQueryIntent(queryIntent) {
     hasIntent: focusAreaIds.length > 0,
     focusAreaIds,
     topics: normalizeTopics(queryIntent.topics, focusAreaIds),
+    topicIds: uniqueInOrder(queryIntent.topicIds ?? []),
+    primaryPalaceNames: uniqueInOrder(queryIntent.primaryPalaceNames ?? []),
     matchedItems: queryIntent.matchedItems ?? [],
     sourceText: queryIntent.sourceText ?? ""
   };
@@ -119,7 +155,9 @@ function collectMatchedItems(text) {
 
     return [{
       focusAreaId: rule.focusAreaId,
+      topicId: rule.topicId,
       topic: rule.topic,
+      palaceNames: rule.palaceNames ?? [],
       source: match[0],
       reason: rule.reason
     }];
@@ -160,6 +198,8 @@ function createEmptyQueryIntent() {
     hasIntent: false,
     focusAreaIds: [],
     topics: [],
+    topicIds: [],
+    primaryPalaceNames: [],
     matchedItems: [],
     sourceText: ""
   };

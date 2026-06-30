@@ -120,6 +120,7 @@ test("createIntakeSessionFromText uses query intent to narrow the drafted report
 
   assert.equal(session.status, "drafted");
   assert.deepEqual(session.queryIntent.focusAreaIds, ["life-triad"]);
+  assert.deepEqual(session.queryIntent.topics, ["事业", "财帛"]);
   assert.deepEqual(
     session.pipelineResult.reportPlan.sections.map((section) => section.id),
     ["life-triad"]

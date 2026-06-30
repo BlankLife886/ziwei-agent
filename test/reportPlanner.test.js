@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
 import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
 import { buildChart } from "../src/chartBuilder.js";
@@ -163,6 +164,46 @@ test("createReportPlan includes current major period section when available", ()
   ]);
   assert.ok(section.evidence.some((item) => item.includes("虚岁37岁")));
   assert.ok(section.writingPrompt.includes("不把阶段定位写成事件断语"));
+});
+
+test("createReportPlan specializes life triad section for career and wealth intent", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
+    queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+  const section = reportPlan.sections[0];
+
+  assert.deepEqual(
+    reportPlan.sections.map((item) => item.id),
+    ["life-triad"]
+  );
+  assert.equal(section.title, "事业与财帛专题：命宫与三方四正");
+  assert.ok(section.purpose.includes("官禄宫、财帛宫"));
+  assert.deepEqual(section.queryContext.topicIds, ["career", "wealth"]);
+  assert.deepEqual(section.queryContext.primaryPalaceNames, [
+    "官禄宫",
+    "财帛宫"
+  ]);
+  assert.ok(section.guidingQuestions[0].includes("官禄宫、财帛宫"));
+  assert.ok(section.writingPrompt.includes("事业、财帛"));
+});
+
+test("createReportPlan accepts external topic context without matched items", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
+    queryIntent: {
+      hasIntent: true,
+      focusAreaIds: ["life-triad"],
+      topics: ["财帛"],
+      topicIds: ["wealth"],
+      primaryPalaceNames: ["财帛宫"]
+    }
+  });
+  const reportPlan = createReportPlan(agentResult);
+  const section = reportPlan.sections[0];
+
+  assert.equal(section.title, "财帛专题：命宫与三方四正");
+  assert.deepEqual(section.queryContext.primaryPalaceNames, ["财帛宫"]);
+  assert.ok(section.writingPrompt.includes("财帛宫"));
 });
 
 function createSampleProfile() {

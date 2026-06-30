@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { createReportDraft } from "../src/agent/reportComposer.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
 import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
@@ -167,6 +168,39 @@ test("createReportDraft writes current major period as locator-only", () => {
   assert.ok(paragraph.text.includes("还不能代表该阶段的具体吉凶"));
   assert.deepEqual(paragraph.interpretationRefs, [
     "interpretation.current-major-period.locator-only"
+  ]);
+});
+
+test("createReportDraft keeps life triad synthesis focused on requested topics", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()), {
+      queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")
+    })
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const section = reportDraft.sections[0];
+  const paragraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation";
+  });
+  const basisParagraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation-basis";
+  });
+
+  assert.equal(section.title, "事业与财帛专题：命宫与三方四正");
+  assert.ok(paragraph.text.includes("优先查看官禄宫、财帛宫"));
+  assert.ok(paragraph.text.includes("财帛宫见天相、天魁、火星"));
+  assert.ok(paragraph.text.includes("官禄宫见天府、擎羊"));
+  assert.ok(!paragraph.text.includes("迁移宫见廉贞"));
+  assert.ok(basisParagraph.text.includes("财帛宫的分析角色"));
+  assert.ok(basisParagraph.text.includes("官禄宫的分析角色"));
+  assert.ok(!basisParagraph.text.includes("迁移宫的分析角色"));
+  assert.ok(!basisParagraph.text.includes("廉贞在迁移宫"));
+  assert.ok(!paragraph.interpretationRefs.includes(
+    "interpretation.star.lian-zhen.travel"
+  ));
+  assert.deepEqual(section.queryContext.primaryPalaceNames, [
+    "官禄宫",
+    "财帛宫"
   ]);
 });
 

@@ -19,7 +19,9 @@ test("parseQueryIntentFromText maps career and wealth questions to life triad", 
 
   assert.equal(result.status, "matched");
   assert.deepEqual(result.focusAreaIds, ["life-triad"]);
-  assert.deepEqual(result.topics, ["命宫三方四正"]);
+  assert.deepEqual(result.topics, ["事业", "财帛"]);
+  assert.deepEqual(result.topicIds, ["career", "wealth"]);
+  assert.deepEqual(result.primaryPalaceNames, ["官禄宫", "财帛宫"]);
 });
 
 test("parseQueryIntentFromText can collect multiple focus areas", () => {
@@ -30,6 +32,14 @@ test("parseQueryIntentFromText can collect multiple focus areas", () => {
     "birth-year-transformations"
   ]);
   assert.deepEqual(result.topics, ["身宫落点", "生年四化"]);
+});
+
+test("parseQueryIntentFromText does not treat generic development as migration", () => {
+  const result = parseQueryIntentFromText("我想看事业发展。");
+
+  assert.deepEqual(result.focusAreaIds, ["life-triad"]);
+  assert.deepEqual(result.topicIds, ["career"]);
+  assert.deepEqual(result.primaryPalaceNames, ["官禄宫"]);
 });
 
 test("parseQueryIntentFromText returns no intent for unrelated text", () => {

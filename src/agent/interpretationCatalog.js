@@ -93,6 +93,7 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.PALACE_ROLE_LIFE,
     title: "命宫的分析角色",
     topic: "palace-role",
+    palaceName: "命宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
     text: "命宫优先用于观察命主的基础气质、主观倾向和命盘分析的中心点。"
@@ -101,6 +102,7 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
     title: "财帛宫的分析角色",
     topic: "palace-role",
+    palaceName: "财帛宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
     text: "财帛宫用于观察资源经营、财务态度和现实层面的取用方式。"
@@ -109,6 +111,7 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.PALACE_ROLE_CAREER,
     title: "官禄宫的分析角色",
     topic: "palace-role",
+    palaceName: "官禄宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
     text: "官禄宫用于观察事业路径、职责承担和社会角色的展开方式。"
@@ -117,6 +120,7 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL,
     title: "迁移宫的分析角色",
     topic: "palace-role",
+    palaceName: "迁移宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
     text: "迁移宫用于观察外部环境、出行变动和命主面对外界时的表现。"

@@ -19,7 +19,7 @@ npm start
 - `src/agent/ziweiPipeline.js`: 统一编排 agent 主流程，把排盘结果转换为分析上下文、报告规划和正文草稿。
 - `src/agent/intakeSession.js`: 维护多轮输入中的出生资料草稿，把用户新补充的字段合并后重新调用完整 agent 流程。
 - `src/agent/profilePatchParser.js`: 把用户自然语言补充转换为可审计的结构化资料 patch，支持出生资料和分析日期，并保留字段来源片段。
-- `src/agent/queryIntentParser.js`: 把“看当前大限 / 看事业 / 看财帛 / 看四化”等自然语言问题转换为可审计的查询意图，用于收敛本轮报告章节。
+- `src/agent/queryIntentParser.js`: 把“看当前大限 / 看事业 / 看财帛 / 看四化”等自然语言问题转换为可审计的查询意图，用于收敛本轮报告章节，并保留事业、财帛、迁移等专题上下文。
 - `src/agent/referenceCatalog.js`: 定义本地规则与分析框架引用 id，后续可映射到书籍、PDF、笔记或知识库片段。
 - `src/agent/interpretationCatalog.js`: 定义当前可用的命理解释条目，让报告正文引用受控解释，而不是直接散写断语。
 - `src/agent/inputQuestionnaire.js`: 把缺失字段转换为结构化追问，包括字段名、提问话术、示例和追问原因，方便后续接入聊天 UI 或多轮 agent。

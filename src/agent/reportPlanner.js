@@ -31,8 +31,11 @@ export function createReportPlan(agentResult) {
     status: "planned",
     role: agentResult.role,
     subject: agentResult.subject,
+    queryIntent: agentResult.queryIntent,
     opening: buildOpening(agentResult),
-    sections: agentResult.focusAreas.map(buildSectionFromFocusArea),
+    sections: agentResult.focusAreas.map((focusArea) => {
+      return buildSectionFromFocusArea(focusArea, agentResult.queryIntent);
+    }),
     guardrails: buildGuardrails(agentResult)
   };
 }
@@ -51,17 +54,19 @@ function buildOpening(agentResult) {
   ];
 }
 
-function buildSectionFromFocusArea(focusArea) {
+function buildSectionFromFocusArea(focusArea, queryIntent) {
   const evidenceItems = normalizeEvidenceItems(focusArea);
   const interpretationRefs = getInterpretationRefs(focusArea.id, evidenceItems);
   const interpretations = findInterpretations(interpretationRefs);
   const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
+  const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
 
   return {
     id: focusArea.id,
-    title: focusArea.title,
-    purpose: focusArea.reason,
-    guidingQuestions: getGuidingQuestions(focusArea.id),
+    title: getSectionTitle(focusArea, queryContext),
+    purpose: getSectionPurpose(focusArea, queryContext),
+    queryContext,
+    guidingQuestions: getGuidingQuestions(focusArea.id, queryContext),
     evidence: evidenceItems.map((item) => item.text),
     evidenceItems,
     evidenceRefs: evidenceItems.map((item) => item.id),
@@ -69,7 +74,7 @@ function buildSectionFromFocusArea(focusArea) {
     interpretations,
     referenceRefs,
     references: findReferences(referenceRefs),
-    writingPrompt: getWritingPrompt(focusArea.id)
+    writingPrompt: getWritingPrompt(focusArea.id, queryContext)
   };
 }
 
@@ -184,7 +189,70 @@ function getStarRoleInterpretationRefs(evidenceItems) {
   return [...new Set(refs)];
 }
 
-function getGuidingQuestions(focusAreaId) {
+function buildSectionQueryContext(focusAreaId, queryIntent) {
+  if (!queryIntent?.hasIntent) {
+    return {
+      hasIntent: false,
+      topics: [],
+      topicIds: [],
+      primaryPalaceNames: []
+    };
+  }
+
+  const matchedItems = (queryIntent.matchedItems ?? []).filter((item) => {
+    return item.focusAreaId === focusAreaId;
+  });
+
+  if (matchedItems.length === 0 && queryIntent.focusAreaIds?.includes(focusAreaId)) {
+    return {
+      hasIntent: true,
+      topics: queryIntent.topics ?? [],
+      topicIds: queryIntent.topicIds ?? [],
+      primaryPalaceNames: queryIntent.primaryPalaceNames ?? [],
+      matchedItems: []
+    };
+  }
+
+  const topicIds = uniqueInOrder(matchedItems.map((item) => item.topicId));
+  const topics = uniqueInOrder(matchedItems.map((item) => item.topic));
+  const primaryPalaceNames = uniqueInOrder(
+    matchedItems.flatMap((item) => item.palaceNames ?? [])
+  );
+
+  return {
+    hasIntent: topicIds.length > 0,
+    topics,
+    topicIds,
+    primaryPalaceNames,
+    matchedItems
+  };
+}
+
+function getSectionTitle(focusArea, queryContext) {
+  if (focusArea.id === "life-triad" && queryContext.hasIntent) {
+    return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
+  }
+
+  return focusArea.title;
+}
+
+function getSectionPurpose(focusArea, queryContext) {
+  if (focusArea.id === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
+    return `本轮按用户问题聚焦${queryContext.topics.join("、")}，在命宫三方四正中优先查看${queryContext.primaryPalaceNames.join("、")}，并保留其余三方四正宫位作为结构参照。`;
+  }
+
+  return focusArea.reason;
+}
+
+function getGuidingQuestions(focusAreaId, queryContext) {
+  if (focusAreaId === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
+    return [
+      `${queryContext.primaryPalaceNames.join("、")}分别提供了哪些已排出的宫位和星曜证据？`,
+      "命宫与其余三方四正宫位如何作为本轮专题的结构参照？",
+      "当前哪些判断仍需等待大限四化、流年和更多组合规则？"
+    ];
+  }
+
   const questionsByArea = {
     "life-triad": [
       "命宫本身呈现什么样的基础气质？",
@@ -224,7 +292,11 @@ function getGuidingQuestions(focusAreaId) {
   ];
 }
 
-function getWritingPrompt(focusAreaId) {
+function getWritingPrompt(focusAreaId, queryContext) {
+  if (focusAreaId === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
+    return `围绕用户指定的${queryContext.topics.join("、")}主题写保守分析，优先引用${queryContext.primaryPalaceNames.join("、")}证据，并明确不能推具体事件。`;
+  }
+
   const promptsByArea = {
     "life-triad": "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
     "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
@@ -243,4 +315,8 @@ function buildGuardrails(agentResult) {
     "没有实现的规则不得伪装成已经计算过的结果。",
     ...agentResult.limitations
   ];
+}
+
+function uniqueInOrder(values) {
+  return [...new Set(values.filter(Boolean))];
 }

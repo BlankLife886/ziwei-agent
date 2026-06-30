@@ -29,9 +29,15 @@ export function createReportDraft(reportPlan) {
 }
 
 function composeSectionDraft(section) {
+  const displayedInterpretations = getDisplayedInterpretations(section);
+  const displayedInterpretationRefs = displayedInterpretations.map((item) => {
+    return item.id;
+  });
+
   return {
     id: section.id,
     title: section.title,
+    queryContext: section.queryContext,
     interpretationRefs: section.interpretationRefs,
     interpretations: section.interpretations,
     referenceRefs: section.referenceRefs,
@@ -51,17 +57,17 @@ function composeSectionDraft(section) {
       ),
       createParagraph(
         "interpretation-basis",
-        composeInterpretationBasisParagraph(section),
+        composeInterpretationBasisParagraph(displayedInterpretations),
         [],
         section.referenceRefs,
-        section.interpretationRefs
+        displayedInterpretationRefs
       ),
       createParagraph(
         "interpretation",
         composeInterpretationParagraph(section),
         section.evidenceRefs,
         section.referenceRefs,
-        section.interpretationRefs
+        displayedInterpretationRefs
       )
     ]
   };
@@ -75,12 +81,12 @@ function composeEvidenceParagraph(section) {
   return `【可用证据】${section.evidence.join("；")}。`;
 }
 
-function composeInterpretationBasisParagraph(section) {
-  if (!section.interpretations || section.interpretations.length === 0) {
+function composeInterpretationBasisParagraph(interpretations) {
+  if (!interpretations || interpretations.length === 0) {
     return "【解释依据】本节尚未挂接解释条目，只保留证据描述。";
   }
 
-  const interpretationSummaries = section.interpretations.map((interpretation) => {
+  const interpretationSummaries = interpretations.map((interpretation) => {
     return `${interpretation.title}：${trimSentenceEnd(interpretation.text)}`;
   });
 
@@ -120,10 +126,11 @@ function composeLifeTriadParagraph(section) {
     return item.includes("命宫") && item.includes("无已安星曜");
   });
   const starRoleSynthesis = composeStarRoleSynthesis(section);
+  const lifePalaceBoundary = composeLifePalaceBoundary(section);
 
   if (emptyLifePalace) {
     return `【草稿判断】${joinJudgmentParts([
-      getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE),
+      lifePalaceBoundary,
       starRoleSynthesis
     ])}`;
   }
@@ -200,10 +207,63 @@ function getInterpretationText(section, interpretationId) {
   return interpretation?.text ?? "本节缺少对应解释条目，暂只保留证据描述，不扩展判断。";
 }
 
+function composeLifePalaceBoundary(section) {
+  const primaryPalaceNames = section.queryContext?.primaryPalaceNames ?? [];
+
+  if (primaryPalaceNames.length === 0) {
+    return getInterpretationText(
+      section,
+      INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE
+    );
+  }
+
+  return `命宫本身目前没有已安入的星曜，因此不宜只凭命宫下结论；本轮按用户主题优先查看${primaryPalaceNames.join("、")}，其余三方四正宫位只作为结构参照`;
+}
+
+function getDisplayedInterpretations(section) {
+  const interpretations = section.interpretations ?? [];
+  const primaryPalaceNames = section.queryContext?.primaryPalaceNames ?? [];
+
+  if (section.id !== "life-triad" || primaryPalaceNames.length === 0) {
+    return orderInterpretationsByRefs(interpretations, section.interpretationRefs);
+  }
+
+  const displayedPalaceNames = new Set(["命宫", ...primaryPalaceNames]);
+
+  const filteredInterpretations = interpretations.filter((interpretation) => {
+    if (interpretation.topic === "palace-role" || interpretation.topic === "star-role") {
+      return displayedPalaceNames.has(interpretation.palaceName);
+    }
+
+    return true;
+  });
+
+  return orderInterpretationsByRefs(filteredInterpretations, section.interpretationRefs);
+}
+
+function orderInterpretationsByRefs(interpretations, interpretationRefs = []) {
+  const interpretationsById = new Map(interpretations.map((item) => {
+    return [item.id, item];
+  }));
+
+  return interpretationRefs.flatMap((id) => {
+    const interpretation = interpretationsById.get(id);
+
+    return interpretation ? [interpretation] : [];
+  });
+}
+
 function composeStarRoleSynthesis(section) {
-  const starRoleInterpretations = section.interpretations?.filter((item) => {
+  let starRoleInterpretations = section.interpretations?.filter((item) => {
     return item.topic === "star-role";
   }) ?? [];
+  const primaryPalaceNames = section.queryContext?.primaryPalaceNames ?? [];
+
+  if (primaryPalaceNames.length > 0) {
+    starRoleInterpretations = starRoleInterpretations.filter((item) => {
+      return primaryPalaceNames.includes(item.palaceName);
+    });
+  }
 
   if (starRoleInterpretations.length === 0) {
     return "";
