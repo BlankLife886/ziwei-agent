@@ -82,7 +82,8 @@ export function formatReportPlan(reportPlan) {
         `  写作提示：${section.writingPrompt}`,
         `  关键问题：${section.guidingQuestions.join(" / ")}`,
         "  可用证据：",
-        ...formatEvidenceItems(section)
+        ...formatEvidenceItems(section),
+        ...formatReferences(section)
       ];
     }),
     "",
@@ -130,18 +131,41 @@ function formatEvidenceItems(section) {
   });
 }
 
+function formatReferences(section) {
+  if (!section.references || section.references.length === 0) {
+    return [];
+  }
+
+  return [
+    "  参考依据：",
+    ...section.references.map((reference) => {
+      return `    - [${reference.id}] ${reference.title}`;
+    })
+  ];
+}
+
 function formatParagraph(paragraph) {
   if (typeof paragraph === "string") {
     return paragraph;
   }
 
   const evidenceRefs = paragraph.evidenceRefs ?? [];
+  const referenceRefs = paragraph.referenceRefs ?? [];
+  const notes = [];
 
-  if (evidenceRefs.length === 0) {
+  if (evidenceRefs.length > 0) {
+    notes.push(`证据：${evidenceRefs.join("、")}`);
+  }
+
+  if (referenceRefs.length > 0) {
+    notes.push(`参考：${referenceRefs.join("、")}`);
+  }
+
+  if (notes.length === 0) {
     return paragraph.text;
   }
 
-  return `${paragraph.text}（证据：${evidenceRefs.join("、")}）`;
+  return `${paragraph.text}（${notes.join("；")}）`;
 }
 
 function formatProfileSummary(buildResult) {

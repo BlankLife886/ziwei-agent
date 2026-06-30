@@ -17,6 +17,11 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
       return item.id === "core.life-palace-branch" && item.text === "命宫在巳";
     })
   );
+  assert.ok(
+    agentResult.evidenceItems
+      .find((item) => item.id === "core.life-palace-branch")
+      .referenceRefs.includes("rule.life-body-palace")
+  );
   assert.deepEqual(
     agentResult.focusAreas.map((area) => area.id),
     ["life-triad", "body-palace", "star-balance"]
@@ -30,6 +35,12 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
     agentResult.focusAreas
       .find((area) => area.id === "life-triad")
       .evidenceItems.some((item) => item.id === "life-triad.wealth-palace")
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "life-triad")
+      .evidenceItems.find((item) => item.id === "life-triad.wealth-palace")
+      .referenceRefs.includes("framework.life-triad")
   );
   assert.ok(
     agentResult.limitations.some((item) => item.includes("尚未接入四化"))

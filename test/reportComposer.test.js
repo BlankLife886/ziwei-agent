@@ -36,6 +36,13 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       "life-triad.travel-palace"
     ]
   );
+  assert.deepEqual(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .referenceRefs,
+    ["framework.life-triad", "rule.star-placement"]
+  );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });
 

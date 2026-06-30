@@ -60,6 +60,8 @@ test("formatReportPlan renders report sections and guardrails", () => {
   assert.ok(lines.some((line) => line.includes("写作提示")));
   assert.ok(lines.some((line) => line.includes("关键问题")));
   assert.ok(lines.some((line) => line.includes("[life-triad.life-palace]")));
+  assert.ok(lines.includes("  参考依据："));
+  assert.ok(lines.some((line) => line.includes("[framework.life-triad]")));
   assert.ok(lines.includes("写作边界："));
 });
 
@@ -73,6 +75,7 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.includes("开篇："));
   assert.ok(lines.some((line) => line.includes("【草稿判断】")));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
+  assert.ok(lines.some((line) => line.includes("参考：framework.life-triad")));
   assert.ok(lines.includes("收束："));
 });
 

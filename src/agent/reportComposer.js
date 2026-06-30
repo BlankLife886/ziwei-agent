@@ -30,17 +30,26 @@ function composeSectionDraft(section) {
   return {
     id: section.id,
     title: section.title,
+    referenceRefs: section.referenceRefs,
+    references: section.references,
     paragraphs: [
-      createParagraph("purpose", composePurposeParagraph(section), []),
+      createParagraph(
+        "purpose",
+        composePurposeParagraph(section),
+        [],
+        section.referenceRefs
+      ),
       createParagraph(
         "evidence",
         composeEvidenceParagraph(section),
-        section.evidenceRefs
+        section.evidenceRefs,
+        section.referenceRefs
       ),
       createParagraph(
         "interpretation",
         composeInterpretationParagraph(section),
-        section.evidenceRefs
+        section.evidenceRefs,
+        section.referenceRefs
       )
     ]
   };
@@ -104,10 +113,11 @@ function composeClosing(reportPlan) {
   ];
 }
 
-function createParagraph(kind, text, evidenceRefs) {
+function createParagraph(kind, text, evidenceRefs, referenceRefs) {
   return {
     kind,
     text,
-    evidenceRefs
+    evidenceRefs,
+    referenceRefs
   };
 }

@@ -1,3 +1,5 @@
+import { findReferences } from "./referenceCatalog.js";
+
 // 命理报告草稿规划器。
 //
 // 这一层仍然不负责“断命”，而是把 agent 已经整理好的 focusAreas
@@ -39,6 +41,7 @@ function buildOpening(agentResult) {
 
 function buildSectionFromFocusArea(focusArea) {
   const evidenceItems = normalizeEvidenceItems(focusArea);
+  const referenceRefs = collectReferenceRefs(evidenceItems);
 
   return {
     id: focusArea.id,
@@ -48,6 +51,8 @@ function buildSectionFromFocusArea(focusArea) {
     evidence: evidenceItems.map((item) => item.text),
     evidenceItems,
     evidenceRefs: evidenceItems.map((item) => item.id),
+    referenceRefs,
+    references: findReferences(referenceRefs),
     writingPrompt: getWritingPrompt(focusArea.id)
   };
 }
@@ -61,9 +66,18 @@ function normalizeEvidenceItems(focusArea) {
     return {
       id: `${focusArea.id}.evidence-${index + 1}`,
       text,
-      source: "agent.focusArea.evidence"
+      source: "agent.focusArea.evidence",
+      referenceRefs: []
     };
   });
+}
+
+function collectReferenceRefs(evidenceItems) {
+  const referenceRefs = evidenceItems.flatMap((item) => {
+    return item.referenceRefs ?? [];
+  });
+
+  return [...new Set(referenceRefs)];
 }
 
 function getGuidingQuestions(focusAreaId) {

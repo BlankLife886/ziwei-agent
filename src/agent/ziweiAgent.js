@@ -1,3 +1,5 @@
+import { REFERENCE_IDS } from "./referenceCatalog.js";
+
 // 命理师 agent 外壳。
 //
 // 这里先不接大模型，也不急着输出复杂断语。
@@ -93,27 +95,32 @@ function buildCoreEvidenceItems(chart, palaceByName) {
     createEvidenceItem(
       "core.life-palace-branch",
       `命宫在${chart.lifePalace.branch}`,
-      "chart.lifePalace"
+      "chart.lifePalace",
+      [REFERENCE_IDS.LIFE_BODY_PALACE]
     ),
     createEvidenceItem(
       "core.body-palace-location",
       `身宫在${chart.bodyPalace.name}（${chart.bodyPalace.branch}）`,
-      "chart.bodyPalace"
+      "chart.bodyPalace",
+      [REFERENCE_IDS.LIFE_BODY_PALACE]
     ),
     createEvidenceItem(
       "core.five-element-class",
       `五行局为${chart.fiveElementClass.name}`,
-      "chart.fiveElementClass"
+      "chart.fiveElementClass",
+      [REFERENCE_IDS.FIVE_ELEMENT_CLASS]
     ),
     createEvidenceItem(
       "core.life-palace-stars",
       `命宫星曜：${formatPalaceStars(lifePalace)}`,
-      "chart.palaces.命宫"
+      "chart.palaces.命宫",
+      [REFERENCE_IDS.STAR_PLACEMENT]
     ),
     createEvidenceItem(
       "core.body-palace-stars",
       `身宫星曜：${formatPalaceStars(bodyPalace)}`,
-      `chart.palaces.${chart.bodyPalace.name}`
+      `chart.palaces.${chart.bodyPalace.name}`,
+      [REFERENCE_IDS.STAR_PLACEMENT]
     )
   ];
 }
@@ -179,22 +186,26 @@ function buildStarBalanceEvidenceItems(chart) {
     createEvidenceItem(
       "star-balance.main-stars",
       `主星 ${totals.mainStars} 颗`,
-      "chart.palaces.mainStars"
+      "chart.palaces.mainStars",
+      [REFERENCE_IDS.STAR_BALANCE]
     ),
     createEvidenceItem(
       "star-balance.auxiliary-stars",
       `辅星 ${totals.auxiliaryStars} 颗`,
-      "chart.palaces.auxiliaryStars"
+      "chart.palaces.auxiliaryStars",
+      [REFERENCE_IDS.STAR_BALANCE]
     ),
     createEvidenceItem(
       "star-balance.malefic-stars",
       `煞曜 ${totals.maleficStars} 颗`,
-      "chart.palaces.maleficStars"
+      "chart.palaces.maleficStars",
+      [REFERENCE_IDS.STAR_BALANCE]
     ),
     createEvidenceItem(
       "star-balance.void-stars",
       `空曜 ${totals.voidStars} 颗`,
-      "chart.palaces.voidStars"
+      "chart.palaces.voidStars",
+      [REFERENCE_IDS.STAR_BALANCE]
     )
   ];
 }
@@ -205,16 +216,30 @@ function createPalaceEvidenceItem(scope, palace) {
   return createEvidenceItem(
     `${scope}.${palaceId}`,
     formatPalaceSnapshot(palace),
-    `chart.palaces.${palace.name}`
+    `chart.palaces.${palace.name}`,
+    getPalaceEvidenceReferenceRefs(scope)
   );
 }
 
-function createEvidenceItem(id, text, source) {
+function createEvidenceItem(id, text, source, referenceRefs = []) {
   return {
     id,
     text,
-    source
+    source,
+    referenceRefs
   };
+}
+
+function getPalaceEvidenceReferenceRefs(scope) {
+  if (scope === "life-triad") {
+    return [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  if (scope === "body-palace") {
+    return [REFERENCE_IDS.BODY_PALACE, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  return [REFERENCE_IDS.STAR_PLACEMENT];
 }
 
 function formatEvidenceText(evidenceItem) {
