@@ -1,7 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { createReportDraft } from "./agent/reportComposer.js";
-import { createReportPlan } from "./agent/reportPlanner.js";
-import { createZiweiAgentResponse } from "./agent/ziweiAgent.js";
+import { runZiweiPipeline } from "./agent/ziweiPipeline.js";
 import { buildChart } from "./chartBuilder.js";
 import {
   formatAgentBriefing,
@@ -20,17 +18,15 @@ async function main() {
 
   const profile = JSON.parse(await readFile(profilePath, "utf8"));
   const buildResult = buildChart(profile);
-  const agentResult = createZiweiAgentResponse(buildResult);
-  const reportPlan = createReportPlan(agentResult);
-  const reportDraft = createReportDraft(reportPlan);
+  const pipelineResult = runZiweiPipeline(buildResult);
   const lines = [
-    ...formatBuildResult(buildResult),
+    ...formatBuildResult(pipelineResult.buildResult),
     "",
-    ...formatAgentBriefing(agentResult),
+    ...formatAgentBriefing(pipelineResult.agentResult),
     "",
-    ...formatReportPlan(reportPlan),
+    ...formatReportPlan(pipelineResult.reportPlan),
     "",
-    ...formatReportDraft(reportDraft)
+    ...formatReportDraft(pipelineResult.reportDraft)
   ];
 
   for (const line of lines) {
