@@ -140,6 +140,38 @@ export function formatReportDraft(reportDraft) {
   ];
 }
 
+export function formatReportAudit(reportAudit) {
+  if (reportAudit.status === "skipped") {
+    return [
+      "Agent 报告审计：已跳过",
+      "- 报告规划或正文草稿尚未完成，暂不执行输出审计。"
+    ];
+  }
+
+  const issueLines = reportAudit.issues.length > 0
+    ? [
+        "审计问题：",
+        ...reportAudit.issues.map((issue) => {
+          return `- [${issue.id}] ${issue.message}`;
+        })
+      ]
+    : ["审计问题：无"];
+  const warningLines = reportAudit.warnings.length > 0
+    ? [
+        "审计警告：",
+        ...reportAudit.warnings.map((warning) => {
+          return `- [${warning.id}] ${warning.message}`;
+        })
+      ]
+    : ["审计警告：无"];
+
+  return [
+    `Agent 报告审计：${reportAudit.status === "passed" ? "通过" : "未通过"}`,
+    ...issueLines,
+    ...warningLines
+  ];
+}
+
 function formatEvidenceItems(section) {
   if (!section.evidenceItems) {
     return section.evidence.map((item) => `    - ${item}`);

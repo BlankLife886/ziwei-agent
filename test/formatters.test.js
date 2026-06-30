@@ -7,6 +7,7 @@ import { buildChart } from "../src/chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatReportAudit,
   formatReportDraft,
   formatReportPlan
 } from "../src/formatters.js";
@@ -116,6 +117,49 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.some((line) => line.includes("解释：interpretation.life-triad.structure")));
   assert.ok(lines.some((line) => line.includes("解释：interpretation.life-triad.structure") && line.includes("interpretation.star.tian-fu.career")));
   assert.ok(lines.includes("收束："));
+});
+
+test("formatReportAudit renders passed, skipped, and failed audit states", () => {
+  assert.deepEqual(formatReportAudit({
+    status: "passed",
+    issues: [],
+    warnings: []
+  }), [
+    "Agent 报告审计：通过",
+    "审计问题：无",
+    "审计警告：无"
+  ]);
+
+  assert.deepEqual(formatReportAudit({
+    status: "skipped",
+    issues: [],
+    warnings: []
+  }), [
+    "Agent 报告审计：已跳过",
+    "- 报告规划或正文草稿尚未完成，暂不执行输出审计。"
+  ]);
+
+  assert.deepEqual(formatReportAudit({
+    status: "failed",
+    issues: [
+      {
+        id: "paragraph-ref-outside-section",
+        message: "段落引用了不属于本章节的 evidenceRefs。"
+      }
+    ],
+    warnings: [
+      {
+        id: "risk-language.event-timing",
+        message: "出现时间或事件断语。"
+      }
+    ]
+  }), [
+    "Agent 报告审计：未通过",
+    "审计问题：",
+    "- [paragraph-ref-outside-section] 段落引用了不属于本章节的 evidenceRefs。",
+    "审计警告：",
+    "- [risk-language.event-timing] 出现时间或事件断语。"
+  ]);
 });
 
 function createSampleProfile() {

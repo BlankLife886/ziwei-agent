@@ -4,6 +4,7 @@ import { buildChart } from "./chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatReportAudit,
   formatReportDraft,
   formatReportPlan
 } from "./formatters.js";
@@ -26,7 +27,9 @@ async function main() {
     "",
     ...formatReportPlan(pipelineResult.reportPlan),
     "",
-    ...formatReportDraft(pipelineResult.reportDraft)
+    ...formatReportDraft(pipelineResult.reportDraft),
+    "",
+    ...formatReportAudit(pipelineResult.reportAudit)
   ];
 
   for (const line of lines) {
