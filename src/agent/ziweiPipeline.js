@@ -42,6 +42,10 @@ function derivePipelineStatus({ agentResult, reportPlan, reportDraft }) {
     return "planned";
   }
 
+  if (agentResult.status === "ready") {
+    return reportPlan.status;
+  }
+
   return agentResult.status;
 }
 
@@ -55,7 +59,7 @@ function deriveNextAction({ agentResult, reportPlan, reportDraft }) {
   }
 
   if (reportPlan.status !== "planned") {
-    return "请先完成报告规划，再生成正文草稿。";
+    return reportPlan.messages?.[0] ?? "请先完成报告规划，再生成正文草稿。";
   }
 
   if (reportDraft.status !== "drafted") {

@@ -27,15 +27,33 @@ export function createReportPlan(agentResult) {
     };
   }
 
+  const sections = agentResult.focusAreas.map((focusArea) => {
+    return buildSectionFromFocusArea(focusArea, agentResult.queryIntent);
+  });
+
+  if (sections.length === 0) {
+    return {
+      status: "blocked",
+      role: agentResult.role,
+      subject: agentResult.subject,
+      queryIntent: agentResult.queryIntent,
+      opening: buildOpening(agentResult),
+      messages: [
+        "当前查询目标已识别，但还没有可用报告章节，暂不能生成正文草稿。"
+      ],
+      blockers: agentResult.limitations,
+      sections: [],
+      guardrails: buildGuardrails(agentResult)
+    };
+  }
+
   return {
     status: "planned",
     role: agentResult.role,
     subject: agentResult.subject,
     queryIntent: agentResult.queryIntent,
     opening: buildOpening(agentResult),
-    sections: agentResult.focusAreas.map((focusArea) => {
-      return buildSectionFromFocusArea(focusArea, agentResult.queryIntent);
-    }),
+    sections,
     guardrails: buildGuardrails(agentResult)
   };
 }

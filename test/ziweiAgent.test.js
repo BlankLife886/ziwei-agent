@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
 import { buildChart } from "../src/chartBuilder.js";
 
@@ -148,6 +149,34 @@ test("createZiweiAgentResponse keeps all evidence but filters focus areas by que
   assert.ok(
     agentResult.limitations.some((item) => {
       return item.includes("本轮已按查询意图收敛章节");
+    })
+  );
+});
+
+test("createZiweiAgentResponse exposes final report domains and planned limits", () => {
+  const buildResult = buildChart(createSampleProfile());
+  const agentResult = createZiweiAgentResponse(buildResult, {
+    queryIntent: parseQueryIntentFromText("我想看婚姻、因果和前世今生。")
+  });
+
+  assert.deepEqual(agentResult.queryIntent.reportDomainIds, [
+    "marriage",
+    "karma",
+    "past-and-present"
+  ]);
+  assert.deepEqual(
+    agentResult.reportDomains.map((domain) => domain.title),
+    ["婚姻感情报告", "因果主题报告", "前世今生主题报告"]
+  );
+  assert.deepEqual(agentResult.focusAreas, []);
+  assert.ok(
+    agentResult.limitations.some((item) => {
+      return item.includes("最终报告目标：婚姻感情报告、因果主题报告、前世今生主题报告");
+    })
+  );
+  assert.ok(
+    agentResult.limitations.some((item) => {
+      return item.includes("只完成目标登记，尚不能输出深入断语");
     })
   );
 });

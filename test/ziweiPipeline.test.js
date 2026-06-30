@@ -48,6 +48,20 @@ test("runZiweiPipeline narrows report sections by query intent", () => {
   );
 });
 
+test("runZiweiPipeline blocks report-only domains without supported sections", () => {
+  const queryIntent = parseQueryIntentFromText("我想看婚姻、因果和前世今生。");
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    queryIntent
+  });
+
+  assert.equal(pipelineResult.status, "blocked");
+  assert.equal(pipelineResult.agentResult.status, "ready");
+  assert.equal(pipelineResult.reportPlan.status, "blocked");
+  assert.equal(pipelineResult.reportDraft.status, "blocked");
+  assert.ok(pipelineResult.nextAction.includes("没有可用报告章节"));
+  assert.deepEqual(pipelineResult.reportPlan.sections, []);
+});
+
 test("runZiweiPipeline keeps the chain blocked when input is incomplete", () => {
   const profile = createSampleProfile();
   delete profile.birth_time;

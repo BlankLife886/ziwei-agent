@@ -1,5 +1,6 @@
 import { buildInputQuestions } from "./inputQuestionnaire.js";
 import { normalizeQueryIntent } from "./queryIntentParser.js";
+import { findReportDomains } from "./reportDomainCatalog.js";
 import { REFERENCE_IDS } from "./referenceCatalog.js";
 
 // 命理师 agent 外壳。
@@ -21,12 +22,14 @@ const PALACE_EVIDENCE_IDS = {
 
 export function createZiweiAgentResponse(buildResult, options = {}) {
   const queryIntent = normalizeQueryIntent(options.queryIntent);
+  const reportDomains = findReportDomains(queryIntent.reportDomainIds);
 
   if (buildResult.status === "invalid") {
     return {
       status: "invalid_input",
       role: "ziwei-fortune-analyst",
       queryIntent,
+      reportDomains,
       messages: ["出生资料格式不正确，暂不能排盘。"],
       nextQuestions: [],
       questionItems: [],
@@ -44,6 +47,7 @@ export function createZiweiAgentResponse(buildResult, options = {}) {
       status: "needs_input",
       role: "ziwei-fortune-analyst",
       queryIntent,
+      reportDomains,
       messages: ["出生资料还不完整，需要先补齐关键字段。"],
       nextQuestions: buildResult.validation.missingFields.map((field) => {
         return `请补充 ${field}`;
@@ -66,6 +70,7 @@ export function createZiweiAgentResponse(buildResult, options = {}) {
     status: "ready",
     role: "ziwei-fortune-analyst",
     queryIntent,
+    reportDomains,
     messages: [
       "命盘已经建立，可以进入命理分析。",
       "当前 agent 会先基于命盘证据组织分析重点，避免在规则未实现时过度断言。"
@@ -78,7 +83,7 @@ export function createZiweiAgentResponse(buildResult, options = {}) {
     focusAreas: selectedFocusAreas,
     allFocusAreas: focusAreas,
     unavailableFocusAreaIds: getUnavailableFocusAreaIds(focusAreas, queryIntent),
-    limitations: buildLimitations(chart, queryIntent)
+    limitations: buildLimitations(chart, queryIntent, reportDomains)
   };
 }
 
@@ -223,16 +228,27 @@ function buildFocusAreas(chart, palaceByName) {
   });
 }
 
-function buildLimitations(chart, queryIntent) {
+function buildLimitations(chart, queryIntent, reportDomains = []) {
   const dynamicScope = chart.currentMajorPeriod
     ? "生年四化、大限年龄段与当前大限定位"
     : "生年四化与大限年龄段";
   const queryScope = queryIntent.hasIntent
     ? [`本轮已按查询意图收敛章节：${queryIntent.topics.join("、")}。`]
     : [];
+  const reportGoalScope = reportDomains.length > 0
+    ? [`最终报告目标：${reportDomains.map((domain) => domain.title).join("、")}。`]
+    : [];
+  const plannedDomains = reportDomains.filter((domain) => {
+    return domain.currentSupport === "planned";
+  });
+  const plannedDomainScope = plannedDomains.length > 0
+    ? [`以下报告领域只完成目标登记，尚不能输出深入断语：${plannedDomains.map((domain) => domain.title).join("、")}。`]
+    : [];
 
   return [
     ...queryScope,
+    ...reportGoalScope,
+    ...plannedDomainScope,
     `已接入${dynamicScope}，但尚未接入大限四化、流年，因此不能推具体年份事件。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];

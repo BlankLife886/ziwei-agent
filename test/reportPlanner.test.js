@@ -144,6 +144,26 @@ test("createReportPlan blocks report sections until required input exists", () =
   assert.ok(reportPlan.blockers.includes("请补充 birth_time"));
 });
 
+test("createReportPlan blocks report-only domains without supported sections", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
+    queryIntent: parseQueryIntentFromText("我想看婚姻、因果和前世今生。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+
+  assert.equal(reportPlan.status, "blocked");
+  assert.deepEqual(reportPlan.sections, []);
+  assert.ok(
+    reportPlan.messages.some((message) => {
+      return message.includes("没有可用报告章节");
+    })
+  );
+  assert.ok(
+    reportPlan.blockers.some((blocker) => {
+      return blocker.includes("只完成目标登记");
+    })
+  );
+});
+
 test("createReportPlan includes current major period section when available", () => {
   const agentResult = createZiweiAgentResponse(buildChart({
     ...createSampleProfile(),
