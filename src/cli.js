@@ -5,7 +5,7 @@ import {
   formatAgentBriefing,
   formatBuildResult,
   formatReportAudit,
-  formatReportDraft,
+  formatReportOutput,
   formatReportPlan
 } from "./formatters.js";
 
@@ -27,9 +27,9 @@ async function main() {
     "",
     ...formatReportPlan(pipelineResult.reportPlan),
     "",
-    ...formatReportDraft(pipelineResult.reportDraft),
+    ...formatReportAudit(pipelineResult.reportAudit),
     "",
-    ...formatReportAudit(pipelineResult.reportAudit)
+    ...formatReportOutput(pipelineResult.reportOutput)
   ];
 
   for (const line of lines) {

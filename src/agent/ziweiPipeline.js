@@ -1,6 +1,7 @@
 import { createReportDraft } from "./reportComposer.js";
 import { auditReportOutput } from "./reportAuditor.js";
 import { createReportPlan } from "./reportPlanner.js";
+import { publishReportOutput } from "./reportPublisher.js";
 import { normalizeQueryIntent } from "./queryIntentParser.js";
 import { createZiweiAgentResponse } from "./ziweiAgent.js";
 
@@ -17,27 +18,52 @@ export function runZiweiPipeline(buildResult, options = {}) {
   const reportPlan = createReportPlan(agentResult);
   const reportDraft = createReportDraft(reportPlan);
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
+  const reportOutput = publishReportOutput(reportDraft, reportAudit);
 
   return {
-    status: derivePipelineStatus({ agentResult, reportPlan, reportDraft, reportAudit }),
-    nextAction: deriveNextAction({ agentResult, reportPlan, reportDraft, reportAudit }),
+    status: derivePipelineStatus({
+      agentResult,
+      reportPlan,
+      reportDraft,
+      reportAudit,
+      reportOutput
+    }),
+    nextAction: deriveNextAction({
+      agentResult,
+      reportPlan,
+      reportDraft,
+      reportAudit,
+      reportOutput
+    }),
     queryIntent,
     buildResult,
     agentResult,
     reportPlan,
     reportDraft,
     reportAudit,
+    reportOutput,
     steps: [
       buildStep("query-intent", queryIntent.status),
       buildStep("agent-context", agentResult.status),
       buildStep("report-plan", reportPlan.status),
       buildStep("report-draft", reportDraft.status),
-      buildStep("report-audit", reportAudit.status)
+      buildStep("report-audit", reportAudit.status),
+      buildStep("report-output", reportOutput.status)
     ]
   };
 }
 
-function derivePipelineStatus({ agentResult, reportPlan, reportDraft, reportAudit }) {
+function derivePipelineStatus({
+  agentResult,
+  reportPlan,
+  reportDraft,
+  reportAudit,
+  reportOutput
+}) {
+  if (reportOutput.status === "published") {
+    return "published";
+  }
+
   if (reportAudit.status === "failed") {
     return "audit_failed";
   }
@@ -57,7 +83,13 @@ function derivePipelineStatus({ agentResult, reportPlan, reportDraft, reportAudi
   return agentResult.status;
 }
 
-function deriveNextAction({ agentResult, reportPlan, reportDraft, reportAudit }) {
+function deriveNextAction({
+  agentResult,
+  reportPlan,
+  reportDraft,
+  reportAudit,
+  reportOutput
+}) {
   if (agentResult.status === "invalid_input") {
     return "请先修正出生资料格式，再重新排盘。";
   }
@@ -82,7 +114,11 @@ function deriveNextAction({ agentResult, reportPlan, reportDraft, reportAudit })
     return "报告审计未通过，请先修复证据链、引用链或越界断语。";
   }
 
-  return "可以审阅报告草稿，或继续接入知识库与更细的命理规则。";
+  if (reportOutput.status !== "published") {
+    return "请先通过报告发布门禁，再输出用户报告。";
+  }
+
+  return "可以审阅已发布的用户报告，或继续接入知识库与更细的命理规则。";
 }
 
 function buildStep(id, status) {

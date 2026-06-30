@@ -55,11 +55,12 @@ test("createIntakeSession reruns the full pipeline after new input is merged", (
     birth_time: "23:30"
   });
 
-  assert.equal(session.status, "drafted");
+  assert.equal(session.status, "published");
   assert.equal(session.profileDraft.birth_time, "23:30");
   assert.deepEqual(session.questionItems, []);
   assert.equal(session.buildResult.status, "complete");
   assert.equal(session.pipelineResult.reportDraft.status, "drafted");
+  assert.equal(session.pipelineResult.reportOutput.status, "published");
 });
 
 test("createIntakeSessionFromText parses text and reruns the full pipeline", () => {
@@ -68,10 +69,11 @@ test("createIntakeSessionFromText parses text and reruns the full pipeline", () 
     "晚上11点半，上海出生。"
   );
 
-  assert.equal(session.status, "drafted");
+  assert.equal(session.status, "published");
   assert.equal(session.profileDraft.birth_time, "23:30");
   assert.equal(session.profileDraft.birth_place, "上海");
   assert.deepEqual(session.questionItems, []);
+  assert.equal(session.pipelineResult.reportOutput.status, "published");
   assert.ok(
     session.extractedItems.some((item) => {
       return item.field === "birth_time" && item.source === "晚上11点半";
@@ -91,9 +93,10 @@ test("createIntakeSessionFromText accepts relative analysis date for current maj
     }
   );
 
-  assert.equal(session.status, "drafted");
+  assert.equal(session.status, "published");
   assert.deepEqual(session.queryIntent.focusAreaIds, ["current-major-period"]);
   assert.equal(session.profileDraft.analysis_date, "2026-06-30");
+  assert.equal(session.pipelineResult.reportOutput.status, "published");
   assert.equal(session.buildResult.chart.currentMajorPeriod.age, 37);
   assert.equal(
     session.buildResult.chart.currentMajorPeriod.period.palaceName,
@@ -118,11 +121,12 @@ test("createIntakeSessionFromText uses query intent to narrow the drafted report
     }
   );
 
-  assert.equal(session.status, "drafted");
+  assert.equal(session.status, "published");
   assert.deepEqual(session.queryIntent.focusAreaIds, [
     "career-palace",
     "wealth-palace"
   ]);
+  assert.equal(session.pipelineResult.reportOutput.status, "published");
   assert.deepEqual(session.queryIntent.topics, ["事业", "财帛"]);
   assert.deepEqual(
     session.pipelineResult.reportPlan.sections.map((section) => section.id),
@@ -152,9 +156,10 @@ test("createIntakeSessionFromText drafts current stage for current-year fortune 
     }
   );
 
-  assert.equal(session.status, "drafted");
+  assert.equal(session.status, "published");
   assert.equal(session.profileDraft.analysis_date, "2026-06-30");
   assert.deepEqual(session.queryIntent.focusAreaIds, ["current-stage"]);
+  assert.equal(session.pipelineResult.reportOutput.status, "published");
   assert.deepEqual(
     session.pipelineResult.reportDraft.sections.map((section) => section.id),
     ["current-stage"]

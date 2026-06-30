@@ -172,6 +172,37 @@ export function formatReportAudit(reportAudit) {
   ];
 }
 
+export function formatReportOutput(reportOutput) {
+  if (reportOutput.status !== "published") {
+    return [
+      "用户报告：暂不能发布",
+      ...reportOutput.messages.map((message) => `- ${message}`)
+    ];
+  }
+
+  return [
+    "用户报告：",
+    reportOutput.title,
+    "",
+    "开篇：",
+    ...reportOutput.introduction.map((line) => `- ${line}`),
+    "",
+    ...reportOutput.sections.flatMap((section) => {
+      return [
+        section.title,
+        ...section.paragraphs.map((paragraph) => {
+          return `- ${formatParagraph(paragraph)}`;
+        }),
+        ""
+      ];
+    }),
+    "收束：",
+    ...reportOutput.closing.map((line) => `- ${line}`),
+    "",
+    `发布门禁：报告审计${reportOutput.audit.status === "passed" ? "通过" : "未通过"}`
+  ];
+}
+
 function formatEvidenceItems(section) {
   if (!section.evidenceItems) {
     return section.evidence.map((item) => `    - ${item}`);

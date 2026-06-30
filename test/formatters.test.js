@@ -9,6 +9,7 @@ import {
   formatBuildResult,
   formatReportAudit,
   formatReportDraft,
+  formatReportOutput,
   formatReportPlan
 } from "../src/formatters.js";
 
@@ -160,6 +161,45 @@ test("formatReportAudit renders passed, skipped, and failed audit states", () =>
     "审计警告：",
     "- [risk-language.event-timing] 出现时间或事件断语。"
   ]);
+});
+
+test("formatReportOutput renders only published user reports", () => {
+  assert.deepEqual(formatReportOutput({
+    status: "blocked",
+    messages: ["报告审计未通过，不能发布用户报告。"],
+    sections: []
+  }), [
+    "用户报告：暂不能发布",
+    "- 报告审计未通过，不能发布用户报告。"
+  ]);
+
+  const lines = formatReportOutput({
+    status: "published",
+    title: "示例命主的紫微斗数本命盘分析草稿",
+    introduction: ["本报告以示例命主的本命盘为分析对象。"],
+    sections: [
+      {
+        title: "命宫与三方四正",
+        paragraphs: [
+          {
+            text: "【草稿判断】当前只写结构底稿。",
+            evidenceRefs: ["life-triad.life-palace"],
+            referenceRefs: ["framework.life-triad"],
+            interpretationRefs: ["interpretation.life-triad.structure"]
+          }
+        ]
+      }
+    ],
+    closing: ["以上草稿只使用当前排盘已经生成的证据。"],
+    audit: {
+      status: "passed"
+    }
+  });
+
+  assert.ok(lines.includes("用户报告："));
+  assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
+  assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
+  assert.ok(lines.includes("发布门禁：报告审计通过"));
 });
 
 function createSampleProfile() {

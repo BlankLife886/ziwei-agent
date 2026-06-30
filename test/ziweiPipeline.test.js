@@ -7,18 +7,26 @@ import { buildChart } from "../src/chartBuilder.js";
 test("runZiweiPipeline produces the complete agent output chain", () => {
   const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()));
 
-  assert.equal(pipelineResult.status, "drafted");
+  assert.equal(pipelineResult.status, "published");
   assert.equal(pipelineResult.agentResult.status, "ready");
   assert.equal(pipelineResult.reportPlan.status, "planned");
   assert.equal(pipelineResult.reportDraft.status, "drafted");
+  assert.equal(pipelineResult.reportOutput.status, "published");
   assert.deepEqual(
     pipelineResult.steps.map((step) => step.id),
-    ["query-intent", "agent-context", "report-plan", "report-draft", "report-audit"]
+    [
+      "query-intent",
+      "agent-context",
+      "report-plan",
+      "report-draft",
+      "report-audit",
+      "report-output"
+    ]
   );
   assert.equal(pipelineResult.steps[0].status, "none");
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.deepEqual(pipelineResult.reportAudit.issues, []);
-  assert.ok(pipelineResult.nextAction.includes("审阅报告草稿"));
+  assert.ok(pipelineResult.nextAction.includes("审阅已发布的用户报告"));
 });
 
 test("runZiweiPipeline narrows report sections by query intent", () => {
@@ -60,7 +68,7 @@ test("runZiweiPipeline drafts current stage for fortune intent", () => {
     { queryIntent }
   );
 
-  assert.equal(pipelineResult.status, "drafted");
+  assert.equal(pipelineResult.status, "published");
   assert.deepEqual(pipelineResult.queryIntent.focusAreaIds, ["current-stage"]);
   assert.deepEqual(
     pipelineResult.reportPlan.sections.map((section) => section.id),
@@ -106,8 +114,9 @@ test("runZiweiPipeline drafts a conservative marriage report section", () => {
     queryIntent
   });
 
-  assert.equal(pipelineResult.status, "drafted");
+  assert.equal(pipelineResult.status, "published");
   assert.equal(pipelineResult.reportPlan.status, "planned");
+  assert.equal(pipelineResult.reportOutput.status, "published");
   assert.deepEqual(
     pipelineResult.reportPlan.sections.map((section) => section.id),
     ["spouse-palace"]
@@ -130,6 +139,7 @@ test("runZiweiPipeline keeps the chain blocked when input is incomplete", () => 
   assert.equal(pipelineResult.reportPlan.status, "blocked");
   assert.equal(pipelineResult.reportDraft.status, "blocked");
   assert.equal(pipelineResult.reportAudit.status, "skipped");
+  assert.equal(pipelineResult.reportOutput.status, "blocked");
   assert.ok(pipelineResult.nextAction.includes("补齐出生资料"));
 });
 
@@ -145,6 +155,7 @@ test("runZiweiPipeline keeps invalid input out of report generation", () => {
   assert.equal(pipelineResult.agentResult.status, "invalid_input");
   assert.deepEqual(pipelineResult.reportPlan.sections, []);
   assert.deepEqual(pipelineResult.reportDraft.sections, []);
+  assert.equal(pipelineResult.reportOutput.status, "blocked");
 });
 
 function createSampleProfile() {
