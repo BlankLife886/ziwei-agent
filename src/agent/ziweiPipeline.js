@@ -59,6 +59,10 @@ function deriveNextAction({ agentResult, reportPlan, reportDraft }) {
   }
 
   if (reportPlan.status !== "planned") {
+    if (reportPlan.nextQuestions?.length > 0) {
+      return "请先补充本轮专题所需资料，再生成报告正文草稿。";
+    }
+
     return reportPlan.messages?.[0] ?? "请先完成报告规划，再生成正文草稿。";
   }
 

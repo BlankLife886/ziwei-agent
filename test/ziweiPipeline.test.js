@@ -71,6 +71,19 @@ test("runZiweiPipeline drafts current stage for fortune intent", () => {
   );
 });
 
+test("runZiweiPipeline asks for analysis date when current stage is unavailable", () => {
+  const queryIntent = parseQueryIntentFromText("我想看未来运势。");
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    queryIntent
+  });
+
+  assert.equal(pipelineResult.status, "blocked");
+  assert.deepEqual(pipelineResult.reportPlan.missingTopicFields, [
+    "analysis_date"
+  ]);
+  assert.ok(pipelineResult.nextAction.includes("补充本轮专题所需资料"));
+});
+
 test("runZiweiPipeline blocks report-only domains without supported sections", () => {
   const queryIntent = parseQueryIntentFromText("我想看因果和前世今生。");
   const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {

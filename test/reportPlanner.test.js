@@ -347,6 +347,21 @@ test("createReportPlan includes current stage synthesis when available", () => {
   assert.ok(section.writingPrompt.includes("不推今年具体事件"));
 });
 
+test("createReportPlan asks for analysis date when current stage is unavailable", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
+    queryIntent: parseQueryIntentFromText("我想看未来运势。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+
+  assert.equal(reportPlan.status, "blocked");
+  assert.deepEqual(reportPlan.sections, []);
+  assert.deepEqual(reportPlan.missingTopicFields, ["analysis_date"]);
+  assert.deepEqual(reportPlan.nextQuestions, ["请补充 analysis_date"]);
+  assert.deepEqual(reportPlan.questionItems.map((item) => item.field), [
+    "analysis_date"
+  ]);
+});
+
 test("createReportPlan creates dedicated career and wealth sections for matching intent", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
     queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")

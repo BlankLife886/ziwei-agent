@@ -16,6 +16,20 @@ test("buildInputQuestions creates structured questions for known missing fields"
   ]);
 });
 
+test("buildInputQuestions creates structured question for analysis date", () => {
+  const questions = buildInputQuestions(["analysis_date"]);
+
+  assert.deepEqual(questions, [
+    {
+      field: "analysis_date",
+      required: true,
+      prompt: "请提供本次想分析的日期，格式为 YYYY-MM-DD；如果看当前阶段，也可以说“今天”或“今年”。",
+      example: "2026-06-30",
+      reason: "当前阶段和当前大限需要一个分析日期，才能按虚岁定位命主所在大限。"
+    }
+  ]);
+});
+
 test("buildInputQuestions keeps unknown fields askable", () => {
   const questions = buildInputQuestions(["custom_field"]);
 

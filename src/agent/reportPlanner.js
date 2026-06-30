@@ -37,6 +37,8 @@ export function createReportPlan(agentResult) {
   });
 
   if (sections.length === 0) {
+    const missingTopicFields = getMissingTopicFields(agentResult);
+
     return {
       status: "blocked",
       role: agentResult.role,
@@ -47,6 +49,9 @@ export function createReportPlan(agentResult) {
         "当前查询目标已识别，但还没有可用报告章节，暂不能生成正文草稿。"
       ],
       blockers: agentResult.limitations,
+      questionItems: agentResult.questionItems,
+      nextQuestions: agentResult.nextQuestions,
+      missingTopicFields,
       sections: [],
       guardrails: buildGuardrails(agentResult)
     };
@@ -172,6 +177,10 @@ function buildGuardrails(agentResult) {
     "没有实现的规则不得伪装成已经计算过的结果。",
     ...agentResult.limitations
   ];
+}
+
+function getMissingTopicFields(agentResult) {
+  return (agentResult.questionItems ?? []).map((item) => item.field);
 }
 
 function uniqueInOrder(values) {

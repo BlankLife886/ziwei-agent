@@ -229,6 +229,15 @@ test("createZiweiAgentResponse marks current stage unavailable without analysis 
 
   assert.deepEqual(agentResult.focusAreas, []);
   assert.deepEqual(agentResult.unavailableFocusAreaIds, ["current-stage"]);
+  assert.deepEqual(agentResult.nextQuestions, ["请补充 analysis_date"]);
+  assert.deepEqual(agentResult.questionItems.map((item) => item.field), [
+    "analysis_date"
+  ]);
+  assert.ok(
+    agentResult.limitations.some((item) => {
+      return item.includes("当前查询还需要补充字段：analysis_date");
+    })
+  );
 });
 
 test("createZiweiAgentResponse exposes final report domains and planned limits", () => {

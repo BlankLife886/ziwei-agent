@@ -35,6 +35,11 @@ const QUESTION_BY_FIELD = {
     example: "Shanghai, China",
     reason: "出生地用于记录资料来源，后续真太阳时也会依赖地点。"
   },
+  analysis_date: {
+    prompt: "请提供本次想分析的日期，格式为 YYYY-MM-DD；如果看当前阶段，也可以说“今天”或“今年”。",
+    example: "2026-06-30",
+    reason: "当前阶段和当前大限需要一个分析日期，才能按虚岁定位命主所在大限。"
+  },
   timezone: {
     prompt: "请提供出生地时区。",
     example: "Asia/Shanghai",
