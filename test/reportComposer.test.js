@@ -73,7 +73,7 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .referenceRefs,
-    ["framework.life-triad", "rule.star-placement"]
+    ["framework.life-triad", "rule.star-placement", "framework.palace-role"]
   );
   assert.deepEqual(
     reportDraft.sections
@@ -152,24 +152,53 @@ test("createReportDraft writes spouse palace as conservative marriage draft", ()
   });
 
   assert.equal(section.id, "spouse-palace");
-  assert.equal(section.title, "婚姻专题：夫妻宫");
+  assert.equal(section.title, "婚姻专题：夫妻宫三方四正");
+  assert.ok(paragraph.text.includes("不应只看夫妻宫单点"));
+  assert.ok(paragraph.text.includes("迁移宫的外部互动"));
+  assert.ok(paragraph.text.includes("官禄宫的现实承担"));
+  assert.ok(paragraph.text.includes("福德宫的内在感受"));
   assert.ok(paragraph.text.includes("关系互动倾向"));
   assert.ok(paragraph.text.includes("不能推结婚时间"));
   assert.ok(paragraph.text.includes("夫妻宫见武曲、七杀、铃星"));
+  assert.ok(paragraph.text.includes("迁移宫见廉贞、贪狼、天官"));
+  assert.ok(paragraph.text.includes("官禄宫见天府、擎羊"));
+  assert.ok(paragraph.text.includes("福德宫见紫微、破军、左辅、右弼、天钺、陀罗"));
   assert.ok(paragraph.text.includes("关系中的现实责任和边界感"));
   assert.ok(basisParagraph.text.includes("夫妻宫的分析角色"));
+  assert.ok(basisParagraph.text.includes("福德宫的分析角色"));
   assert.ok(basisParagraph.text.includes("武曲在夫妻宫的保守解释"));
-  assert.deepEqual(paragraph.evidenceRefs, ["spouse-palace.spouse-palace"]);
+  assert.deepEqual(paragraph.evidenceRefs, [
+    "spouse-palace.spouse-palace",
+    "spouse-palace.travel-palace",
+    "spouse-palace.career-palace",
+    "spouse-palace.wellbeing-palace"
+  ]);
   assert.deepEqual(paragraph.referenceRefs, [
     "framework.spouse-palace",
-    "rule.star-placement"
+    "rule.star-placement",
+    "framework.palace-role"
   ]);
   assert.deepEqual(paragraph.interpretationRefs, [
+    "interpretation.spouse-triad.structure",
     "interpretation.palace-role.spouse",
+    "interpretation.palace-role.travel",
+    "interpretation.palace-role.career",
+    "interpretation.palace-role.wellbeing",
     "interpretation.spouse-palace.static-only",
     "interpretation.star.wu-qu.spouse",
     "interpretation.star.qi-sha.spouse",
-    "interpretation.star.ling-xing.spouse"
+    "interpretation.star.ling-xing.spouse",
+    "interpretation.star.lian-zhen.travel",
+    "interpretation.star.tan-lang.travel",
+    "interpretation.star.tian-guan.travel",
+    "interpretation.star.tian-fu.career",
+    "interpretation.star.qing-yang.career",
+    "interpretation.star.zi-wei.wellbeing",
+    "interpretation.star.po-jun.wellbeing",
+    "interpretation.star.zuo-fu.wellbeing",
+    "interpretation.star.you-bi.wellbeing",
+    "interpretation.star.tian-yue.wellbeing",
+    "interpretation.star.tuo-luo.wellbeing"
   ]);
 });
 

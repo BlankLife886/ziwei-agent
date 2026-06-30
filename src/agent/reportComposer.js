@@ -157,6 +157,7 @@ function composeBodyPalaceParagraph(section) {
 
 function composeSpousePalaceParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
+    getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE),
     getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY),
     composeStarRoleSynthesis(section)
   ])}`;
@@ -270,7 +271,7 @@ function composeStarRoleSynthesis(section) {
   }) ?? [];
   const primaryPalaceNames = section.queryContext?.primaryPalaceNames ?? [];
 
-  if (primaryPalaceNames.length > 0) {
+  if (section.id === "life-triad" && primaryPalaceNames.length > 0) {
     starRoleInterpretations = starRoleInterpretations.filter((item) => {
       return primaryPalaceNames.includes(item.palaceName);
     });
@@ -280,7 +281,10 @@ function composeStarRoleSynthesis(section) {
     return "";
   }
 
-  const groups = groupStarRoleInterpretations(starRoleInterpretations).map(
+  const palaceOrder = section.evidenceItems?.map((item) => {
+    return item.metadata?.palaceName;
+  }).filter(Boolean) ?? [];
+  const groups = groupStarRoleInterpretations(starRoleInterpretations, palaceOrder).map(
     ([palaceName, interpretations]) => {
       const starNames = interpretations.map((item) => item.starName).join("、");
       const summaries = interpretations.map((item) => item.synthesis).join("、");
@@ -292,7 +296,7 @@ function composeStarRoleSynthesis(section) {
   return `${groups.join("；")}。这些线索仍属于本命盘静态结构，需再结合生年四化、限运和更多组合验证。`;
 }
 
-function groupStarRoleInterpretations(interpretations) {
+function groupStarRoleInterpretations(interpretations, palaceOrder = []) {
   const groupsByPalace = new Map();
 
   interpretations.forEach((interpretation) => {
@@ -307,7 +311,17 @@ function groupStarRoleInterpretations(interpretations) {
     ]);
   });
 
-  return [...groupsByPalace.entries()];
+  const orderedEntries = palaceOrder.flatMap((palaceName) => {
+    const interpretationsForPalace = groupsByPalace.get(palaceName);
+
+    return interpretationsForPalace ? [[palaceName, interpretationsForPalace]] : [];
+  });
+  const orderedPalaces = new Set(palaceOrder);
+  const remainingEntries = [...groupsByPalace.entries()].filter(([palaceName]) => {
+    return !orderedPalaces.has(palaceName);
+  });
+
+  return [...orderedEntries, ...remainingEntries];
 }
 
 function joinJudgmentParts(parts) {

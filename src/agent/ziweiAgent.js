@@ -13,12 +13,14 @@ import { REFERENCE_IDS } from "./referenceCatalog.js";
 // 4. 哪些能力尚未实现，不能过度断言。
 
 const LIFE_TRIAD_PALACE_NAMES = ["命宫", "财帛宫", "官禄宫", "迁移宫"];
+const SPOUSE_TRIAD_PALACE_NAMES = ["夫妻宫", "迁移宫", "官禄宫", "福德宫"];
 const PALACE_EVIDENCE_IDS = {
   命宫: "life-palace",
   夫妻宫: "spouse-palace",
   财帛宫: "wealth-palace",
   官禄宫: "career-palace",
-  迁移宫: "travel-palace"
+  迁移宫: "travel-palace",
+  福德宫: "wellbeing-palace"
 };
 
 export function createZiweiAgentResponse(buildResult, options = {}) {
@@ -171,6 +173,9 @@ function buildFocusAreas(chart, palaceByName) {
   const lifeTriadPalaces = LIFE_TRIAD_PALACE_NAMES.map((name) => {
     return palaceByName.get(name);
   }).filter(Boolean);
+  const spouseTriadPalaces = SPOUSE_TRIAD_PALACE_NAMES.map((name) => {
+    return palaceByName.get(name);
+  }).filter(Boolean);
 
   const focusAreas = [
     {
@@ -183,14 +188,11 @@ function buildFocusAreas(chart, palaceByName) {
     },
     {
       id: "spouse-palace",
-      title: "夫妻宫",
-      reason: "夫妻宫用于建立婚姻感情报告的静态关系线索；当前只看已排出的宫位和星曜，不推具体婚恋事件。",
-      evidenceItems: [
-        createPalaceEvidenceItem(
-          "spouse-palace",
-          palaceByName.get("夫妻宫")
-        )
-      ]
+      title: "夫妻宫三方四正",
+      reason: "夫妻宫用于建立婚姻感情报告的静态关系线索；当前合看夫妻、迁移、官禄、福德四宫，不推具体婚恋事件。",
+      evidenceItems: spouseTriadPalaces.map((palace) => {
+        return createPalaceEvidenceItem("spouse-palace", palace);
+      })
     },
     {
       id: "body-palace",

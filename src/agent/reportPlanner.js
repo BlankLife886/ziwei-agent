@@ -156,7 +156,8 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
 
   if (focusAreaId === "spouse-palace") {
     return [
-      INTERPRETATION_IDS.PALACE_ROLE_SPOUSE,
+      INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
+      ...getPalaceRoleInterpretationRefs(evidenceItems),
       INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY,
       ...getStarRoleInterpretationRefs(evidenceItems)
     ];
@@ -187,7 +188,8 @@ function getPalaceRoleInterpretationRefs(evidenceItems) {
     夫妻宫: INTERPRETATION_IDS.PALACE_ROLE_SPOUSE,
     财帛宫: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
     官禄宫: INTERPRETATION_IDS.PALACE_ROLE_CAREER,
-    迁移宫: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL
+    迁移宫: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL,
+    福德宫: INTERPRETATION_IDS.PALACE_ROLE_WELLBEING
   };
 
   const refs = evidenceItems.flatMap((item) => {
@@ -273,7 +275,7 @@ function getSectionPurpose(focusArea, queryContext) {
   }
 
   if (focusArea.id === "spouse-palace" && queryContext.primaryPalaceNames.length > 0) {
-    return `本轮按用户问题聚焦${queryContext.topics.join("、")}，优先查看${queryContext.primaryPalaceNames.join("、")}的已排出宫位和星曜，只建立关系模式底稿。`;
+    return `本轮按用户问题聚焦${queryContext.topics.join("、")}，以${queryContext.primaryPalaceNames.join("、")}为本宫，并合看迁移宫、官禄宫、福德宫建立婚姻感情结构底稿。`;
   }
 
   return focusArea.reason;
@@ -295,8 +297,8 @@ function getGuidingQuestions(focusAreaId, queryContext) {
       "三方四正里哪些星曜是当前最明确的证据？"
     ],
     "spouse-palace": [
-      "夫妻宫中已经排出了哪些主星、辅星、煞曜或空曜？",
-      "这些星曜只能支持哪些关系互动层面的保守观察？",
+      "夫妻宫、迁移宫、官禄宫、福德宫分别提供了哪些已排出的宫位和星曜证据？",
+      "这些证据如何分别指向关系互动、外部相处、现实承担和内在感受？",
       "哪些婚恋判断必须等待四化、限运、流年和合参规则？"
     ],
     "body-palace": [
@@ -339,7 +341,7 @@ function getWritingPrompt(focusAreaId, queryContext) {
 
   const promptsByArea = {
     "life-triad": "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
-    "spouse-palace": "围绕夫妻宫写婚姻感情的保守结构分析，只描述关系互动线索，不推结婚时间、分合事件或伴侣具体身份。",
+    "spouse-palace": "围绕夫妻宫三方四正写婚姻感情的保守结构分析，只描述关系互动、外部相处、现实承担和内在感受，不推结婚时间、分合事件或伴侣具体身份。",
     "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
     "star-balance": "先做星曜类别统计，再提醒读者当前缺少大限四化和流年，不能过度推演。",
     "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",

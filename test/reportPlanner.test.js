@@ -41,7 +41,7 @@ test("createReportPlan turns ready agent context into report sections", () => {
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "life-triad")
       .referenceRefs,
-    ["framework.life-triad", "rule.star-placement"]
+    ["framework.life-triad", "rule.star-placement", "framework.palace-role"]
   );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "life-triad")
@@ -97,23 +97,48 @@ test("createReportPlan turns ready agent context into report sections", () => {
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
       .referenceRefs,
-    ["framework.spouse-palace", "rule.star-placement"]
+    ["framework.spouse-palace", "rule.star-placement", "framework.palace-role"]
   );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
       .interpretationRefs,
     [
+      "interpretation.spouse-triad.structure",
       "interpretation.palace-role.spouse",
+      "interpretation.palace-role.travel",
+      "interpretation.palace-role.career",
+      "interpretation.palace-role.wellbeing",
       "interpretation.spouse-palace.static-only",
       "interpretation.star.wu-qu.spouse",
       "interpretation.star.qi-sha.spouse",
-      "interpretation.star.ling-xing.spouse"
+      "interpretation.star.ling-xing.spouse",
+      "interpretation.star.lian-zhen.travel",
+      "interpretation.star.tan-lang.travel",
+      "interpretation.star.tian-guan.travel",
+      "interpretation.star.tian-fu.career",
+      "interpretation.star.qing-yang.career",
+      "interpretation.star.zi-wei.wellbeing",
+      "interpretation.star.po-jun.wellbeing",
+      "interpretation.star.zuo-fu.wellbeing",
+      "interpretation.star.you-bi.wellbeing",
+      "interpretation.star.tian-yue.wellbeing",
+      "interpretation.star.tuo-luo.wellbeing"
     ]
   );
   assert.ok(
     reportPlan.sections
       .find((section) => section.id === "spouse-palace")
       .evidence.some((item) => item.includes("夫妻宫卯"))
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "spouse-palace")
+      .evidenceRefs,
+    [
+      "spouse-palace.spouse-palace",
+      "spouse-palace.travel-palace",
+      "spouse-palace.career-palace",
+      "spouse-palace.wellbeing-palace"
+    ]
   );
   assert.deepEqual(
     reportPlan.sections
@@ -198,11 +223,11 @@ test("createReportPlan creates spouse palace section for marriage intent", () =>
     reportPlan.sections.map((item) => item.id),
     ["spouse-palace"]
   );
-  assert.equal(section.title, "婚姻专题：夫妻宫");
-  assert.ok(section.purpose.includes("夫妻宫"));
+  assert.equal(section.title, "婚姻专题：夫妻宫三方四正");
+  assert.ok(section.purpose.includes("迁移宫、官禄宫、福德宫"));
   assert.deepEqual(section.queryContext.primaryPalaceNames, ["夫妻宫"]);
   assert.ok(section.writingPrompt.includes("不推结婚时间"));
-  assert.ok(section.guidingQuestions[0].includes("夫妻宫"));
+  assert.ok(section.guidingQuestions[0].includes("夫妻宫、迁移宫、官禄宫、福德宫"));
 });
 
 test("createReportPlan includes current major period section when available", () => {

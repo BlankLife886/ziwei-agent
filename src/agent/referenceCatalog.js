@@ -11,6 +11,7 @@ export const REFERENCE_IDS = {
   BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
+  PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
   SPOUSE_PALACE: "framework.spouse-palace",
   BODY_PALACE: "framework.body-palace",
@@ -55,6 +56,12 @@ const REFERENCES = [
     note: "根据分析日期按虚岁定位当前年龄，再匹配已排出的大限年龄段。"
   },
   {
+    id: REFERENCE_IDS.PALACE_ROLE,
+    title: "十二宫角色分析框架",
+    type: "analysis-framework",
+    note: "为命宫、夫妻宫、财帛宫、官禄宫、迁移宫、福德宫等宫位提供基础语义，供不同专题复用。"
+  },
+  {
     id: REFERENCE_IDS.LIFE_TRIAD,
     title: "命宫与三方四正分析框架",
     type: "analysis-framework",
@@ -62,9 +69,9 @@ const REFERENCES = [
   },
   {
     id: REFERENCE_IDS.SPOUSE_PALACE,
-    title: "夫妻宫分析框架",
+    title: "夫妻宫三方四正分析框架",
     type: "analysis-framework",
-    note: "先以夫妻宫观察关系模式和伴侣互动线索，再等待四化、限运和合参规则补足细断。"
+    note: "以夫妻宫为本宫，合看迁移、官禄、福德作为婚姻感情的静态结构参照，再等待四化、限运和流年补足细断。"
   },
   {
     id: REFERENCE_IDS.BODY_PALACE,

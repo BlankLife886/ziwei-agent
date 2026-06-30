@@ -14,10 +14,18 @@ export const INTERPRETATION_IDS = {
   PALACE_ROLE_WEALTH: "interpretation.palace-role.wealth",
   PALACE_ROLE_CAREER: "interpretation.palace-role.career",
   PALACE_ROLE_TRAVEL: "interpretation.palace-role.travel",
+  PALACE_ROLE_WELLBEING: "interpretation.palace-role.wellbeing",
+  SPOUSE_TRIAD_STRUCTURE: "interpretation.spouse-triad.structure",
   SPOUSE_PALACE_STATIC_ONLY: "interpretation.spouse-palace.static-only",
   STAR_WU_QU_SPOUSE: "interpretation.star.wu-qu.spouse",
   STAR_QI_SHA_SPOUSE: "interpretation.star.qi-sha.spouse",
   STAR_LING_XING_SPOUSE: "interpretation.star.ling-xing.spouse",
+  STAR_ZI_WEI_WELLBEING: "interpretation.star.zi-wei.wellbeing",
+  STAR_PO_JUN_WELLBEING: "interpretation.star.po-jun.wellbeing",
+  STAR_ZUO_FU_WELLBEING: "interpretation.star.zuo-fu.wellbeing",
+  STAR_YOU_BI_WELLBEING: "interpretation.star.you-bi.wellbeing",
+  STAR_TIAN_YUE_WELLBEING: "interpretation.star.tian-yue.wellbeing",
+  STAR_TUO_LUO_WELLBEING: "interpretation.star.tuo-luo.wellbeing",
   STAR_TIAN_XIANG_WEALTH: "interpretation.star.tian-xiang.wealth",
   STAR_TIAN_KUI_WEALTH: "interpretation.star.tian-kui.wealth",
   STAR_HUO_XING_WEALTH: "interpretation.star.huo-xing.wealth",
@@ -49,6 +57,36 @@ const STAR_ROLE_INTERPRETATION_RULES = [
     palaceName: "夫妻宫",
     starName: "铃星",
     interpretationId: INTERPRETATION_IDS.STAR_LING_XING_SPOUSE
+  },
+  {
+    palaceName: "福德宫",
+    starName: "紫微",
+    interpretationId: INTERPRETATION_IDS.STAR_ZI_WEI_WELLBEING
+  },
+  {
+    palaceName: "福德宫",
+    starName: "破军",
+    interpretationId: INTERPRETATION_IDS.STAR_PO_JUN_WELLBEING
+  },
+  {
+    palaceName: "福德宫",
+    starName: "左辅",
+    interpretationId: INTERPRETATION_IDS.STAR_ZUO_FU_WELLBEING
+  },
+  {
+    palaceName: "福德宫",
+    starName: "右弼",
+    interpretationId: INTERPRETATION_IDS.STAR_YOU_BI_WELLBEING
+  },
+  {
+    palaceName: "福德宫",
+    starName: "天钺",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_YUE_WELLBEING
+  },
+  {
+    palaceName: "福德宫",
+    starName: "陀罗",
+    interpretationId: INTERPRETATION_IDS.STAR_TUO_LUO_WELLBEING
   },
   {
     palaceName: "财帛宫",
@@ -115,7 +153,7 @@ const INTERPRETATIONS = [
     topic: "palace-role",
     palaceName: "命宫",
     riskLevel: "low",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "命宫优先用于观察命主的基础气质、主观倾向和命盘分析的中心点。"
   },
   {
@@ -124,8 +162,16 @@ const INTERPRETATIONS = [
     topic: "palace-role",
     palaceName: "夫妻宫",
     riskLevel: "low",
-    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "夫妻宫用于观察关系模式、伴侣互动和婚恋议题的结构线索；它不是单独判定婚姻结果的充分依据。"
+  },
+  {
+    id: INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
+    title: "夫妻宫三方四正结构观察",
+    topic: "spouse-triad",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "婚姻感情报告不应只看夫妻宫单点；夫妻宫先看关系互动本宫，再合看迁移宫的外部互动、官禄宫的现实承担、福德宫的内在感受与情绪底色。"
   },
   {
     id: INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY,
@@ -134,7 +180,7 @@ const INTERPRETATIONS = [
     palaceName: "夫妻宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前夫妻宫专题只使用本命盘静态宫位和星曜，适合描述关系互动倾向；尚未接入大限四化、流年和合参规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
+    text: "当前婚姻专题只使用本命盘静态宫位和星曜，适合描述关系互动倾向与结构参照；尚未接入大限四化、流年和触发规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
   },
   {
     id: INTERPRETATION_IDS.STAR_WU_QU_SPOUSE,
@@ -170,12 +216,87 @@ const INTERPRETATIONS = [
     text: "夫妻宫见铃星时，可作为互动中存在敏感张力、急促反应或情绪触发点的提醒；它只能提示需要管理的关系压力，不能单独定吉凶。"
   },
   {
+    id: INTERPRETATION_IDS.PALACE_ROLE_WELLBEING,
+    title: "福德宫的分析角色",
+    topic: "palace-role",
+    palaceName: "福德宫",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
+    text: "福德宫在婚姻感情专题中用于观察内在感受、精神满足、情绪恢复力和关系中的心理底色。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_ZI_WEI_WELLBEING,
+    title: "紫微在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "紫微",
+    synthesis: "内在秩序和自我调节需求",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见紫微时，可把关系中的心理底色理解为重视内在秩序、自尊和自我调节；不宜直接推成情感优劣。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_PO_JUN_WELLBEING,
+    title: "破军在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "破军",
+    synthesis: "内在变化感和重整需求",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见破军时，可提示内在感受中有变化、重整或不易长期停在单一状态的倾向；需要合看辅星和限运，不能直接断关系破裂。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_ZUO_FU_WELLBEING,
+    title: "左辅在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "左辅",
+    synthesis: "情绪支持和自我修复资源",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见左辅时，可作为内在恢复力、旁人支持或自我调适资源的线索；仍需与主星和煞曜同看。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_YOU_BI_WELLBEING,
+    title: "右弼在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "右弼",
+    synthesis: "关系缓冲和辅助支持",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见右弼时，可作为关系压力中存在缓冲、辅助或调和资源的线索；不能单独扩大为必然稳定。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_YUE_WELLBEING,
+    title: "天钺在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "天钺",
+    synthesis: "精神层面的助力和认可需求",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见天钺时，可提示精神层面有助力、认可需求或较重视关系中的尊重感；仍不能直接断定感情结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TUO_LUO_WELLBEING,
+    title: "陀罗在福德宫的保守解释",
+    topic: "star-role",
+    palaceName: "福德宫",
+    starName: "陀罗",
+    synthesis: "内在迟滞和反复消化压力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "福德宫见陀罗时，可提示内在感受里有迟滞、牵挂或反复消化压力的可能；它是心理层面的压力线索，不应单独写成婚姻灾断。"
+  },
+  {
     id: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
     title: "财帛宫的分析角色",
     topic: "palace-role",
     palaceName: "财帛宫",
     riskLevel: "low",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "财帛宫用于观察资源经营、财务态度和现实层面的取用方式。"
   },
   {
@@ -184,7 +305,7 @@ const INTERPRETATIONS = [
     topic: "palace-role",
     palaceName: "官禄宫",
     riskLevel: "low",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "官禄宫用于观察事业路径、职责承担和社会角色的展开方式。"
   },
   {
@@ -193,7 +314,7 @@ const INTERPRETATIONS = [
     topic: "palace-role",
     palaceName: "迁移宫",
     riskLevel: "low",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "迁移宫用于观察外部环境、出行变动和命主面对外界时的表现。"
   },
   {
@@ -204,7 +325,7 @@ const INTERPRETATIONS = [
     starName: "天相",
     synthesis: "资源秩序与协调",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见天相时，可把资源经营理解为偏重秩序、协调与制度感；但仍需结合同宫煞曜、四化和限运，不能直接断定财富结果。"
   },
   {
@@ -215,7 +336,7 @@ const INTERPRETATIONS = [
     starName: "天魁",
     synthesis: "资源助力或提携",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见天魁时，可先作为资源获取中存在助力、提携或规则性支持的线索；当前不应扩大为必然得财。"
   },
   {
@@ -226,7 +347,7 @@ const INTERPRETATIONS = [
     starName: "火星",
     synthesis: "资源波动与压力",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见火星时，可提示资源使用上可能有急促、波动或压力；需要观察是否有稳定星曜调和，目前只能作为风险提醒。"
   },
   {
@@ -237,7 +358,7 @@ const INTERPRETATIONS = [
     starName: "天府",
     synthesis: "管理守成与资源整合",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "官禄宫见天府时，可把事业承担理解为偏重管理、守成、资源整合与稳定职责；具体职位高低仍不能脱离四化和运限判断。"
   },
   {
@@ -248,7 +369,7 @@ const INTERPRETATIONS = [
     starName: "擎羊",
     synthesis: "事业竞争与执行压力",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "官禄宫见擎羊时，可提示事业路径中有竞争、压力、锋芒或阻力；它是需要管理的张力，不宜单独写成失败或灾厄。"
   },
   {
@@ -259,7 +380,7 @@ const INTERPRETATIONS = [
     starName: "廉贞",
     synthesis: "外界规则边界与关系张力",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见廉贞时，可关注命主面对外界时的规则边界、选择判断和关系张力；具体吉凶仍需更多组合证据。"
   },
   {
@@ -270,7 +391,7 @@ const INTERPRETATIONS = [
     starName: "贪狼",
     synthesis: "社交机会与环境变化",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见贪狼时，可关注外部环境中的社交、欲望、机会变化和应酬互动；当前只适合描述外界牵引，不宜断具体事件。"
   },
   {
@@ -281,7 +402,7 @@ const INTERPRETATIONS = [
     starName: "天官",
     synthesis: "名誉或制度性支持",
     riskLevel: "medium",
-    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    sourceRefs: [REFERENCE_IDS.PALACE_ROLE, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见天官时，可作为外部环境中存在名誉、制度性支持或贵人助力的线索；仍需与主星和煞曜同看。"
   },
   {
