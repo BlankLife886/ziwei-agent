@@ -107,12 +107,19 @@ function composeLifeTriadParagraph(section) {
   const emptyLifePalace = section.evidence.some((item) => {
     return item.includes("命宫") && item.includes("无已安星曜");
   });
+  const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   if (emptyLifePalace) {
-    return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE)}`;
+    return `【草稿判断】${joinJudgmentParts([
+      getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE),
+      starRoleSynthesis
+    ])}`;
   }
 
-  return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE)}`;
+  return `【草稿判断】${joinJudgmentParts([
+    getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE),
+    starRoleSynthesis
+  ])}`;
 }
 
 function composeBodyPalaceParagraph(section) {
@@ -143,6 +150,52 @@ function getInterpretationText(section, interpretationId) {
   });
 
   return interpretation?.text ?? "本节缺少对应解释条目，暂只保留证据描述，不扩展判断。";
+}
+
+function composeStarRoleSynthesis(section) {
+  const starRoleInterpretations = section.interpretations?.filter((item) => {
+    return item.topic === "star-role";
+  }) ?? [];
+
+  if (starRoleInterpretations.length === 0) {
+    return "";
+  }
+
+  const groups = groupStarRoleInterpretations(starRoleInterpretations).map(
+    ([palaceName, interpretations]) => {
+      const starNames = interpretations.map((item) => item.starName).join("、");
+      const summaries = interpretations.map((item) => item.synthesis).join("、");
+
+      return `${palaceName}见${starNames}，可先归纳为${summaries}`;
+    }
+  );
+
+  return `${groups.join("；")}。这些线索仍属于本命盘静态结构，需再结合四化、限运和更多组合验证。`;
+}
+
+function groupStarRoleInterpretations(interpretations) {
+  const groupsByPalace = new Map();
+
+  interpretations.forEach((interpretation) => {
+    if (!interpretation.palaceName) {
+      return;
+    }
+
+    const currentGroup = groupsByPalace.get(interpretation.palaceName) ?? [];
+    groupsByPalace.set(interpretation.palaceName, [
+      ...currentGroup,
+      interpretation
+    ]);
+  });
+
+  return [...groupsByPalace.entries()];
+}
+
+function joinJudgmentParts(parts) {
+  return parts
+    .filter((part) => typeof part === "string" && part.length > 0)
+    .map(trimSentenceEnd)
+    .join("；") + "。";
 }
 
 function trimSentenceEnd(text) {

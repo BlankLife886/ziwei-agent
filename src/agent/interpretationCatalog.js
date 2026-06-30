@@ -122,6 +122,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_TIAN_XIANG_WEALTH,
     title: "天相在财帛宫的保守解释",
     topic: "star-role",
+    palaceName: "财帛宫",
+    starName: "天相",
+    synthesis: "资源秩序与协调",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见天相时，可把资源经营理解为偏重秩序、协调与制度感；但仍需结合同宫煞曜、四化和限运，不能直接断定财富结果。"
@@ -130,6 +133,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_TIAN_KUI_WEALTH,
     title: "天魁在财帛宫的保守解释",
     topic: "star-role",
+    palaceName: "财帛宫",
+    starName: "天魁",
+    synthesis: "资源助力或提携",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见天魁时，可先作为资源获取中存在助力、提携或规则性支持的线索；当前不应扩大为必然得财。"
@@ -138,6 +144,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_HUO_XING_WEALTH,
     title: "火星在财帛宫的保守解释",
     topic: "star-role",
+    palaceName: "财帛宫",
+    starName: "火星",
+    synthesis: "资源波动与压力",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "财帛宫见火星时，可提示资源使用上可能有急促、波动或压力；需要观察是否有稳定星曜调和，目前只能作为风险提醒。"
@@ -146,6 +155,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_TIAN_FU_CAREER,
     title: "天府在官禄宫的保守解释",
     topic: "star-role",
+    palaceName: "官禄宫",
+    starName: "天府",
+    synthesis: "管理守成与资源整合",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "官禄宫见天府时，可把事业承担理解为偏重管理、守成、资源整合与稳定职责；具体职位高低仍不能脱离四化和运限判断。"
@@ -154,6 +166,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_QING_YANG_CAREER,
     title: "擎羊在官禄宫的保守解释",
     topic: "star-role",
+    palaceName: "官禄宫",
+    starName: "擎羊",
+    synthesis: "事业竞争与执行压力",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "官禄宫见擎羊时，可提示事业路径中有竞争、压力、锋芒或阻力；它是需要管理的张力，不宜单独写成失败或灾厄。"
@@ -162,6 +177,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_LIAN_ZHEN_TRAVEL,
     title: "廉贞在迁移宫的保守解释",
     topic: "star-role",
+    palaceName: "迁移宫",
+    starName: "廉贞",
+    synthesis: "外界规则边界与关系张力",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见廉贞时，可关注命主面对外界时的规则边界、选择判断和关系张力；具体吉凶仍需更多组合证据。"
@@ -170,6 +188,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_TAN_LANG_TRAVEL,
     title: "贪狼在迁移宫的保守解释",
     topic: "star-role",
+    palaceName: "迁移宫",
+    starName: "贪狼",
+    synthesis: "社交机会与环境变化",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见贪狼时，可关注外部环境中的社交、欲望、机会变化和应酬互动；当前只适合描述外界牵引，不宜断具体事件。"
@@ -178,6 +199,9 @@ const INTERPRETATIONS = [
     id: INTERPRETATION_IDS.STAR_TIAN_GUAN_TRAVEL,
     title: "天官在迁移宫的保守解释",
     topic: "star-role",
+    palaceName: "迁移宫",
+    starName: "天官",
+    synthesis: "名誉或制度性支持",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "迁移宫见天官时，可作为外部环境中存在名誉、制度性支持或贵人助力的线索；仍需与主星和煞曜同看。"

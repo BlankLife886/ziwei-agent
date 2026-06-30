@@ -24,6 +24,30 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
         return paragraph.text.includes("不宜只凭命宫下结论");
       })
   );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("财帛宫见天相、天魁、火星")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("官禄宫见天府、擎羊")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("迁移宫见廉贞、贪狼、天官")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("仍属于本命盘静态结构")
+  );
   assert.deepEqual(
     reportDraft.sections
       .find((section) => section.id === "life-triad")

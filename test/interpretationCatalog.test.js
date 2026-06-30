@@ -60,5 +60,14 @@ test("findStarRoleInterpretationRefs maps palace stars to controlled items", () 
       return interpretation.topic === "star-role";
     })
   );
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.starName),
+    ["天相", "天魁", "火星"]
+  );
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.palaceName),
+    ["财帛宫", "财帛宫", "财帛宫"]
+  );
   assert.ok(interpretations[0].text.includes("不能直接断定财富结果"));
+  assert.ok(interpretations[0].synthesis.includes("资源秩序"));
 });
