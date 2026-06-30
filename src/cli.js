@@ -3,7 +3,7 @@ import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton, summarizeChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
 import { validateBirthProfile } from "./intake.js";
-import { applyZiWeiStar } from "./mainStarCalculator.js";
+import { applyZiWeiStar, applyZiWeiStarGroup } from "./mainStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "./palaceCalculator.js";
 
 async function main() {
@@ -68,6 +68,7 @@ async function main() {
 
   if (chart.fiveElementClass && lunarResult.profile.lunar_day) {
     chart = applyZiWeiStar(chart);
+    chart = applyZiWeiStarGroup(chart);
   }
 
   console.log("");
@@ -87,6 +88,12 @@ async function main() {
     }
     if (chart.starAnchors?.ziWei) {
       console.log(`紫微星：${chart.starAnchors.ziWei.branch}`);
+    }
+    if (chart.starAnchors?.ziWeiGroup) {
+      const ziWeiGroupText = Object.entries(chart.starAnchors.ziWeiGroup)
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`紫微星系：${ziWeiGroupText}`);
     }
     console.log("");
     console.log("计算说明：");

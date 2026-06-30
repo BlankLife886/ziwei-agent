@@ -1,4 +1,6 @@
-// 第六堂实战课：安紫微星。
+import { EARTHLY_BRANCHES } from "./chart.js";
+
+// 第六堂实战课：安紫微星与紫微星系。
 //
 // 十四主星不能凭文字描述随便放。
 // 对程序来说，第一步要先确定“紫微星落在哪个地支”。
@@ -18,6 +20,15 @@ const BRANCHES_FROM_YIN = [
   "亥",
   "子",
   "丑"
+];
+
+const ZI_WEI_GROUP_OFFSETS = [
+  ["紫微", 0],
+  ["天机", -1],
+  ["太阳", -3],
+  ["武曲", -4],
+  ["天同", -5],
+  ["廉贞", -8]
 ];
 
 export function calculateZiWeiBranch({ lunarDay, fiveElementClassNumber }) {
@@ -51,6 +62,26 @@ export function calculateZiWeiBranch({ lunarDay, fiveElementClassNumber }) {
     quotient,
     branchNumber
   };
+}
+
+export function calculateZiWeiStarBranches({ ziWeiBranch }) {
+  const ziWeiIndex = EARTHLY_BRANCHES.indexOf(ziWeiBranch);
+
+  if (ziWeiIndex === -1) {
+    throw new Error("ziWeiBranch must be one of 子丑寅卯辰巳午未申酉戌亥");
+  }
+
+  // 紫微星系口诀：
+  // 紫微天机逆行旁，隔一阳武天同当，又隔二位廉贞地。
+  //
+  // 转成程序语言就是：
+  // 紫微原位，天机逆一，太阳逆三，武曲逆四，天同逆五，廉贞逆八。
+  return Object.fromEntries(
+    ZI_WEI_GROUP_OFFSETS.map(([star, offset]) => {
+      const branch = EARTHLY_BRANCHES[wrapEarthlyBranchIndex(ziWeiIndex + offset)];
+      return [star, branch];
+    })
+  );
 }
 
 export function applyZiWeiStar(chart) {
@@ -99,6 +130,43 @@ export function applyZiWeiStar(chart) {
   };
 }
 
+export function applyZiWeiStarGroup(chart) {
+  const ziWeiBranch = chart.starAnchors?.ziWei?.branch;
+
+  if (!ziWeiBranch) {
+    throw new Error("starAnchors.ziWei.branch is required before placing Zi Wei group");
+  }
+
+  const starBranches = calculateZiWeiStarBranches({ ziWeiBranch });
+  const palaces = chart.palaces.map((palace) => {
+    const starsForPalace = Object.entries(starBranches)
+      .filter(([, branch]) => branch === palace.branch)
+      .map(([star]) => star);
+
+    if (starsForPalace.length === 0) {
+      return palace;
+    }
+
+    return {
+      ...palace,
+      mainStars: starsForPalace.reduce(addUniqueStar, palace.mainStars)
+    };
+  });
+
+  return {
+    ...chart,
+    palaces,
+    starAnchors: {
+      ...chart.starAnchors,
+      ziWeiGroup: starBranches
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以紫微在${ziWeiBranch}为起点，按紫微星系口诀逆布天机、太阳、武曲、天同、廉贞。`
+    ]
+  };
+}
+
 function findSmallestDivisibleAdjustment(day, classNumber) {
   for (let adjustment = 0; adjustment < classNumber; adjustment += 1) {
     if ((day + adjustment) % classNumber === 0) {
@@ -112,6 +180,10 @@ function findSmallestDivisibleAdjustment(day, classNumber) {
 
 function wrapBranchNumber(value) {
   return ((value - 1) % 12 + 12) % 12 + 1;
+}
+
+function wrapEarthlyBranchIndex(index) {
+  return ((index % 12) + 12) % 12;
 }
 
 function addUniqueStar(stars, star) {

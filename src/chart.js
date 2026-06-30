@@ -105,7 +105,8 @@ export function createChartSkeleton(profile) {
     bodyPalace: null,
     fiveElementClass: null,
     starAnchors: {
-      ziWei: null
+      ziWei: null,
+      ziWeiGroup: null
     },
 
     // palaces 是整张命盘最重要的数据容器。
