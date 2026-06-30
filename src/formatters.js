@@ -38,7 +38,7 @@ export function formatAgentBriefing(agentResult) {
     return [
       "Agent 状态：暂不能分析",
       ...agentResult.messages,
-      ...agentResult.nextQuestions.map((question) => `- ${question}`)
+      ...formatQuestionItems(agentResult)
     ];
   }
 
@@ -59,6 +59,24 @@ export function formatAgentBriefing(agentResult) {
     "",
     "当前限制：",
     ...agentResult.limitations.map((item) => `- ${item}`)
+  ];
+}
+
+function formatQuestionItems(agentResult) {
+  if (!agentResult.questionItems || agentResult.questionItems.length === 0) {
+    return agentResult.nextQuestions.map((question) => `- ${question}`);
+  }
+
+  return [
+    "需要追问：",
+    ...agentResult.questionItems.flatMap((question) => {
+      return [
+        `- ${question.prompt}`,
+        `  字段：${question.field}`,
+        `  示例：${question.example}`,
+        `  原因：${question.reason}`
+      ];
+    })
   ];
 }
 

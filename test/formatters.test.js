@@ -51,6 +51,21 @@ test("formatAgentBriefing renders evidence and focus areas", () => {
   assert.ok(lines.includes("当前限制："));
 });
 
+test("formatAgentBriefing renders structured follow-up questions", () => {
+  const profile = createSampleProfile();
+  delete profile.birth_time;
+
+  const agentResult = createZiweiAgentResponse(buildChart(profile));
+  const lines = formatAgentBriefing(agentResult);
+
+  assert.ok(lines.includes("Agent 状态：暂不能分析"));
+  assert.ok(lines.includes("需要追问："));
+  assert.ok(lines.some((line) => line.includes("请提供出生时间")));
+  assert.ok(lines.includes("  字段：birth_time"));
+  assert.ok(lines.includes("  示例：23:30"));
+  assert.ok(lines.some((line) => line.includes("原因：出生时间用于换算时辰")));
+});
+
 test("formatReportPlan renders report sections and guardrails", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()));
   const lines = formatReportPlan(createReportPlan(agentResult));

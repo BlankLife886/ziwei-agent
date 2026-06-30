@@ -9,6 +9,7 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
 
   assert.equal(agentResult.status, "ready");
   assert.equal(agentResult.role, "ziwei-fortune-analyst");
+  assert.deepEqual(agentResult.questionItems, []);
   assert.equal(agentResult.subject.name, "示例命主");
   assert.ok(agentResult.evidence.includes("命宫在巳"));
   assert.ok(agentResult.evidence.includes("五行局为金四局"));
@@ -56,6 +57,10 @@ test("createZiweiAgentResponse asks for missing input before analysis", () => {
 
   assert.equal(agentResult.status, "needs_input");
   assert.deepEqual(agentResult.nextQuestions, ["请补充 birth_time"]);
+  assert.equal(agentResult.questionItems.length, 1);
+  assert.equal(agentResult.questionItems[0].field, "birth_time");
+  assert.ok(agentResult.questionItems[0].prompt.includes("出生时间"));
+  assert.ok(agentResult.questionItems[0].reason.includes("命宫"));
   assert.deepEqual(agentResult.focusAreas, []);
   assert.deepEqual(agentResult.evidenceItems, []);
 });
@@ -69,6 +74,7 @@ test("createZiweiAgentResponse blocks invalid input", () => {
 
   assert.equal(agentResult.status, "invalid_input");
   assert.deepEqual(agentResult.messages, ["出生资料格式不正确，暂不能排盘。"]);
+  assert.deepEqual(agentResult.questionItems, []);
 });
 
 function createSampleProfile() {

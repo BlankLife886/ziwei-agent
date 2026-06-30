@@ -1,3 +1,4 @@
+import { buildInputQuestions } from "./inputQuestionnaire.js";
 import { REFERENCE_IDS } from "./referenceCatalog.js";
 
 // 命理师 agent 外壳。
@@ -24,6 +25,7 @@ export function createZiweiAgentResponse(buildResult) {
       role: "ziwei-fortune-analyst",
       messages: ["出生资料格式不正确，暂不能排盘。"],
       nextQuestions: [],
+      questionItems: [],
       evidence: [],
       evidenceItems: [],
       focusAreas: [],
@@ -32,6 +34,8 @@ export function createZiweiAgentResponse(buildResult) {
   }
 
   if (buildResult.status === "incomplete") {
+    const questionItems = buildInputQuestions(buildResult.validation.missingFields);
+
     return {
       status: "needs_input",
       role: "ziwei-fortune-analyst",
@@ -39,6 +43,7 @@ export function createZiweiAgentResponse(buildResult) {
       nextQuestions: buildResult.validation.missingFields.map((field) => {
         return `请补充 ${field}`;
       }),
+      questionItems,
       evidence: [],
       evidenceItems: [],
       focusAreas: [],
@@ -58,6 +63,7 @@ export function createZiweiAgentResponse(buildResult) {
       "当前 agent 会先基于命盘证据组织分析重点，避免在规则未实现时过度断言。"
     ],
     nextQuestions: [],
+    questionItems: [],
     subject: buildSubjectSummary(buildResult),
     evidence: evidenceItems.map(formatEvidenceText),
     evidenceItems,
