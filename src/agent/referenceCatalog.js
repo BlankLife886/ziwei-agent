@@ -9,6 +9,7 @@ export const REFERENCE_IDS = {
   FIVE_ELEMENT_CLASS: "rule.five-element-class",
   STAR_PLACEMENT: "rule.star-placement",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
+  MAJOR_PERIODS: "rule.major-periods",
   LIFE_TRIAD: "framework.life-triad",
   BODY_PALACE: "framework.body-palace",
   STAR_BALANCE: "framework.star-balance"
@@ -38,6 +39,12 @@ const REFERENCES = [
     title: "生年四化计算规则",
     type: "implemented-rule",
     note: "根据出生年干查表取得化禄、化权、化科、化忌，并挂回已安星曜所在宫位。"
+  },
+  {
+    id: REFERENCE_IDS.MAJOR_PERIODS,
+    title: "大限年龄段计算规则",
+    type: "implemented-rule",
+    note: "根据五行局数确定起限年龄，并按阳男阴女顺行、阴男阳女逆行排布十二宫大限。"
   },
   {
     id: REFERENCE_IDS.LIFE_TRIAD,

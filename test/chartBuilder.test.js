@@ -37,6 +37,37 @@ test("buildChart creates a complete chart from a solar birth profile", () => {
     化科: "太阴",
     化忌: "天同"
   });
+  assert.deepEqual(result.chart.majorPeriods.slice(0, 3).map((period) => {
+    return {
+      palaceName: period.palaceName,
+      branch: period.branch,
+      startAge: period.startAge,
+      endAge: period.endAge,
+      directionLabel: period.directionLabel
+    };
+  }), [
+    {
+      palaceName: "命宫",
+      branch: "巳",
+      startAge: 4,
+      endAge: 13,
+      directionLabel: "逆行"
+    },
+    {
+      palaceName: "兄弟宫",
+      branch: "辰",
+      startAge: 14,
+      endAge: 23,
+      directionLabel: "逆行"
+    },
+    {
+      palaceName: "夫妻宫",
+      branch: "卯",
+      startAge: 24,
+      endAge: 33,
+      directionLabel: "逆行"
+    }
+  ]);
 
   const palaceByBranch = new Map(
     result.chart.palaces.map((palace) => [palace.branch, palace])

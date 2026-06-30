@@ -22,6 +22,7 @@ export const INTERPRETATION_IDS = {
   STAR_TAN_LANG_TRAVEL: "interpretation.star.tan-lang.travel",
   STAR_TIAN_GUAN_TRAVEL: "interpretation.star.tian-guan.travel",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
+  MAJOR_PERIODS_STRUCTURE_ONLY: "interpretation.major-periods.structure-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -213,7 +214,15 @@ const INTERPRETATIONS = [
     topic: "four-transformations",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
-    text: "生年四化可用于标记本命盘中禄、权、科、忌的牵引位置；当前尚未接入大限、流年与派别配置，因此只能写本命盘结构，不宜推具体年份事件。"
+    text: "生年四化可用于标记本命盘中禄、权、科、忌的牵引位置；当前尚未接入大限四化、流年与派别配置，因此只能写本命盘结构，不宜推具体年份事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY,
+    title: "大限骨架的解释边界",
+    topic: "major-periods",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.MAJOR_PERIODS],
+    text: "当前大限只排出各宫对应的十年年龄段和顺逆方向，适合定位人生阶段落在哪一宫；尚未接入大限四化、流年与事件触发，所以不能据此断具体年份吉凶。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,
@@ -237,7 +246,7 @@ const INTERPRETATIONS = [
     topic: "star-balance",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.STAR_BALANCE],
-    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化；但尚未纳入大限和流年，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
+    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化与大限年龄段；但尚未纳入大限四化和流年，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
   }
 ];
 

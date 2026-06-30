@@ -9,6 +9,7 @@ test("findReferences returns known references in catalog order", () => {
   const references = findReferences([
     REFERENCE_IDS.STAR_BALANCE,
     REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+    REFERENCE_IDS.MAJOR_PERIODS,
     REFERENCE_IDS.LIFE_TRIAD
   ]);
 
@@ -16,6 +17,7 @@ test("findReferences returns known references in catalog order", () => {
     references.map((reference) => reference.id),
     [
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.MAJOR_PERIODS,
       REFERENCE_IDS.LIFE_TRIAD,
       REFERENCE_IDS.STAR_BALANCE
     ]

@@ -21,6 +21,8 @@ test("formatBuildResult renders the complete chart summary for CLI output", () =
   assert.ok(lines.includes("天厨星曜：天厨寅"));
   assert.ok(lines.includes("截空星曜：正空午、副空未"));
   assert.ok(lines.includes("生年四化：化禄太阳、化权武曲、化科太阴、化忌天同"));
+  assert.ok(lines.includes("大限："));
+  assert.ok(lines.includes("- 4-13岁：命宫巳（逆行）"));
   assert.ok(
     lines.includes(
       "02. 兄弟宫：辰｜主星：太阳｜辅星：天姚｜四化：太阳化禄"
@@ -50,7 +52,7 @@ test("formatAgentBriefing renders evidence and focus areas", () => {
   assert.ok(lines.includes("建议分析重点："));
   assert.ok(lines.some((line) => line.includes("命宫与三方四正")));
   assert.ok(lines.includes("当前限制："));
-  assert.ok(lines.some((line) => line.includes("已接入生年四化")));
+  assert.ok(lines.some((line) => line.includes("已接入生年四化与大限年龄段")));
 });
 
 test("formatAgentBriefing renders structured follow-up questions", () => {
@@ -83,6 +85,7 @@ test("formatReportPlan renders report sections and guardrails", () => {
   assert.ok(lines.some((line) => line.includes("[interpretation.life-triad.structure]")));
   assert.ok(lines.some((line) => line.includes("[interpretation.star.tian-fu.career]")));
   assert.ok(lines.some((line) => line.includes("[interpretation.four-transformations.birth-year-static-only]")));
+  assert.ok(lines.some((line) => line.includes("[interpretation.major-periods.structure-only]")));
   assert.ok(lines.includes("写作边界："));
 });
 

@@ -69,8 +69,7 @@ export function createZiweiAgentResponse(buildResult) {
     evidenceItems,
     focusAreas: buildFocusAreas(chart, palaceByName),
     limitations: [
-      "已接入生年四化，但尚未接入大限、流年四化，因此不能推具体年份事件。",
-      "尚未接入大限、流年，因此当前只适合做本命盘静态分析。",
+      "已接入生年四化与大限年龄段，但尚未接入大限四化、流年，因此不能推具体年份事件。",
       "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
     ]
   };
@@ -133,6 +132,12 @@ function buildCoreEvidenceItems(chart, palaceByName) {
       `生年四化：${formatBirthYearFourTransformations(chart)}`,
       "chart.starAnchors.birthYearTransformations",
       [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
+    ),
+    createEvidenceItem(
+      "core.major-periods",
+      `大限：${formatMajorPeriodSummary(chart)}`,
+      "chart.majorPeriods",
+      [REFERENCE_IDS.MAJOR_PERIODS]
     )
   ];
 }
@@ -173,6 +178,12 @@ function buildFocusAreas(chart, palaceByName) {
       title: "生年四化",
       reason: "生年四化标记本命盘中的禄、权、科、忌牵引，是后续细断前必须先确认的结构证据。",
       evidenceItems: buildBirthYearTransformationEvidenceItems(chart)
+    },
+    {
+      id: "major-periods",
+      title: "大限骨架",
+      reason: "大限用于定位人生阶段落在哪一宫；当前先建立年龄段骨架，避免在没有运限结构时直接谈事件。",
+      evidenceItems: buildMajorPeriodEvidenceItems(chart)
     }
   ].map((focusArea) => {
     return {
@@ -235,6 +246,17 @@ function buildBirthYearTransformationEvidenceItems(chart) {
       `生年四化：${formatBirthYearFourTransformations(chart)}`,
       "chart.starAnchors.birthYearTransformations",
       [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
+    )
+  ];
+}
+
+function buildMajorPeriodEvidenceItems(chart) {
+  return [
+    createEvidenceItem(
+      "major-periods.summary",
+      `大限：${formatMajorPeriodSummary(chart)}`,
+      "chart.majorPeriods",
+      [REFERENCE_IDS.MAJOR_PERIODS]
     )
   ];
 }
@@ -344,4 +366,17 @@ function findPalaceContainingStar(chart, starName) {
       palace.voidStars
     ].some((stars) => stars.includes(starName));
   });
+}
+
+function formatMajorPeriodSummary(chart) {
+  if (!chart.majorPeriods || chart.majorPeriods.length === 0) {
+    return "未计算";
+  }
+
+  const direction = chart.majorPeriods[0];
+  const periods = chart.majorPeriods.map((period) => {
+    return `${period.startAge}-${period.endAge}岁${period.palaceName}${period.branch}`;
+  });
+
+  return `${direction.genderLabel}${direction.directionLabel}；${periods.join("；")}`;
 }

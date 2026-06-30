@@ -104,6 +104,10 @@ function composeInterpretationParagraph(section) {
     return composeBirthYearTransformationsParagraph(section);
   }
 
+  if (section.id === "major-periods") {
+    return composeMajorPeriodsParagraph(section);
+  }
+
   return `【草稿判断】本节应围绕“${section.guidingQuestions[0]}”展开，并严格使用本节列出的证据。`;
 }
 
@@ -144,6 +148,18 @@ function composeBirthYearTransformationsParagraph(section) {
   const boundaryText = getInterpretationText(
     section,
     INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY
+  );
+
+  return `【草稿判断】${joinJudgmentParts([
+    section.evidence[0],
+    boundaryText
+  ])}`;
+}
+
+function composeMajorPeriodsParagraph(section) {
+  const boundaryText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY
   );
 
   return `【草稿判断】${joinJudgmentParts([

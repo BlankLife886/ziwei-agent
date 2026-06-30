@@ -12,7 +12,13 @@ test("createReportPlan turns ready agent context into report sections", () => {
   assert.equal(reportPlan.subject.name, "示例命主");
   assert.deepEqual(
     reportPlan.sections.map((section) => section.id),
-    ["life-triad", "body-palace", "star-balance", "birth-year-transformations"]
+    [
+      "life-triad",
+      "body-palace",
+      "star-balance",
+      "birth-year-transformations",
+      "major-periods"
+    ]
   );
   assert.ok(reportPlan.opening.some((line) => line.includes("本命盘")));
   assert.ok(
@@ -102,6 +108,23 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "birth-year-transformations")
       .evidence.some((item) => item.includes("天同化忌在子女宫寅"))
+  );
+  assert.deepEqual(
+    reportPlan.sections
+      .find((section) => section.id === "major-periods")
+      .referenceRefs,
+    ["rule.major-periods"]
+  );
+  assert.deepEqual(
+    reportPlan.sections
+      .find((section) => section.id === "major-periods")
+      .interpretationRefs,
+    ["interpretation.major-periods.structure-only"]
+  );
+  assert.ok(
+    reportPlan.sections
+      .find((section) => section.id === "major-periods")
+      .evidence.some((item) => item.includes("阳女逆行"))
   );
   assert.ok(
     reportPlan.guardrails.some((guardrail) => guardrail.includes("不得伪装"))

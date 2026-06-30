@@ -132,6 +132,10 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
     return [INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY];
   }
 
+  if (focusAreaId === "major-periods") {
+    return [INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY];
+  }
+
   return [];
 }
 
@@ -189,7 +193,12 @@ function getGuidingQuestions(focusAreaId) {
     "birth-year-transformations": [
       "化禄、化权、化科、化忌分别落在哪些星曜和宫位？",
       "这些四化能补充命宫三方四正的哪些结构线索？",
-      "哪些内容仍需等待大限、流年后才能判断？"
+      "哪些内容仍需等待大限四化、流年后才能判断？"
+    ],
+    "major-periods": [
+      "第一大限从几岁开始，落在哪一宫？",
+      "大限顺逆方向是什么？",
+      "当前只排出年龄段，哪些判断必须等大限四化和流年？"
     ]
   };
 
@@ -203,8 +212,9 @@ function getWritingPrompt(focusAreaId) {
   const promptsByArea = {
     "life-triad": "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
     "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
-    "star-balance": "先做星曜类别统计，再提醒读者当前缺少限运，不能过度推演。",
-    "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。"
+    "star-balance": "先做星曜类别统计，再提醒读者当前缺少大限四化和流年，不能过度推演。",
+    "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",
+    "major-periods": "只说明大限年龄段和顺逆方向，不把大限骨架写成具体事件判断。"
   };
 
   return promptsByArea[focusAreaId] ?? "围绕证据写一段保守分析，并明确未知项。";

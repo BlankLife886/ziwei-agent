@@ -305,8 +305,22 @@ function formatStarAnchorLines(chart) {
     anchor: chart.starAnchors?.fireBell,
     excludedKeys: ["yearBranch", "chineseHour"]
   });
+  lines.push(...formatMajorPeriodLines(chart));
 
   return lines;
+}
+
+function formatMajorPeriodLines(chart) {
+  if (!chart.majorPeriods || chart.majorPeriods.length === 0) {
+    return [];
+  }
+
+  return [
+    "大限：",
+    ...chart.majorPeriods.map((period) => {
+      return `- ${period.startAge}-${period.endAge}岁：${period.palaceName}${period.branch}（${period.directionLabel}）`;
+    })
+  ];
 }
 
 function appendAnchorLine(lines, { label, anchor, excludedKeys = [] }) {
