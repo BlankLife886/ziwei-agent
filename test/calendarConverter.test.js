@@ -11,6 +11,7 @@ test("solar date converts to lunar date", () => {
   assert.deepEqual(result, {
     year: 1990,
     yearStem: "庚",
+    yearBranch: "午",
     month: 4,
     day: 24,
     isLeapMonth: false,
@@ -42,4 +43,5 @@ test("lunar input derives lunar month from birth date", () => {
   assert.equal(result.profile.lunar_month, 4);
   assert.equal(result.profile.lunar_day, 24);
   assert.equal(result.profile.lunar_year_stem, "庚");
+  assert.equal(result.profile.lunar_year_branch, "午");
 });

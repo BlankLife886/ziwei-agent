@@ -12,6 +12,7 @@ import {
   applyZiWeiStar,
   applyZiWeiStarGroup
 } from "./mainStarCalculator.js";
+import { applyFireBellStars } from "./maleficStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "./palaceCalculator.js";
 
 async function main() {
@@ -88,6 +89,12 @@ async function main() {
     chart = applyDailyAuxiliaryStars(chart);
   }
 
+  if (lunarResult.profile.lunar_year_branch && result.chineseHour) {
+    chart = applyFireBellStars(chart, {
+      chineseHour: result.chineseHour
+    });
+  }
+
   console.log("");
   console.log("命盘骨架已建立：");
   for (const line of summarizeChartSkeleton(chart)) {
@@ -135,6 +142,13 @@ async function main() {
         .map(([star, branch]) => `${star}${branch}`)
         .join("、");
       console.log(`日系辅星：${dailyAuxiliaryText}`);
+    }
+    if (chart.starAnchors?.fireBell) {
+      const fireBellText = Object.entries(chart.starAnchors.fireBell)
+        .filter(([key]) => key !== "yearBranch" && key !== "chineseHour")
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`火铃煞曜：${fireBellText}`);
     }
     console.log("");
     console.log("计算说明：");

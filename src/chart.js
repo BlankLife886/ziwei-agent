@@ -90,6 +90,7 @@ export function createChartSkeleton(profile) {
       birthDate: profile.birth_date,
       lunarYear: profile.lunar_year ?? null,
       lunarYearStem: profile.lunar_year_stem ?? null,
+      lunarYearBranch: profile.lunar_year_branch ?? null,
       lunarMonth: profile.lunar_month ?? null,
       lunarDay: profile.lunar_day ?? null,
       birthTime: profile.birth_time,
@@ -110,7 +111,8 @@ export function createChartSkeleton(profile) {
       tianFu: null,
       tianFuGroup: null,
       monthlyAuxiliaries: null,
-      dailyAuxiliaries: null
+      dailyAuxiliaries: null,
+      fireBell: null
     },
 
     // palaces 是整张命盘最重要的数据容器。
@@ -166,6 +168,10 @@ export function summarizeChartSkeleton(chart) {
       palace.auxiliaryStars.length > 0
         ? `｜辅星：${palace.auxiliaryStars.join("、")}`
         : "";
-    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}`;
+    const maleficStars =
+      palace.maleficStars.length > 0
+        ? `｜煞曜：${palace.maleficStars.join("、")}`
+        : "";
+    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}${maleficStars}`;
   });
 }

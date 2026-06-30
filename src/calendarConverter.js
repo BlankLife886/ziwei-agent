@@ -1,5 +1,5 @@
 import { Solar } from "lunar-javascript";
-import { HEAVENLY_STEMS } from "./chart.js";
+import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from "./chart.js";
 
 // 第四堂实战课：公历转农历。
 //
@@ -16,6 +16,7 @@ export function resolveLunarProfile(profile) {
         ...profile,
         lunar_year: lunar.year,
         lunar_year_stem: lunar.yearStem,
+        lunar_year_branch: lunar.yearBranch,
         lunar_month: lunar.month,
         lunar_day: lunar.day,
         is_leap_month: lunar.isLeapMonth
@@ -34,18 +35,21 @@ export function resolveLunarProfile(profile) {
   const lunarDate = parseIsoDate(profile.birth_date);
   const lunarMonth = profile.lunar_month ?? lunarDate.month;
   const lunarYearStem = calculateYearStem(lunarDate.year);
+  const lunarYearBranch = calculateYearBranch(lunarDate.year);
 
   return {
     profile: {
       ...profile,
       lunar_year: lunarDate.year,
       lunar_year_stem: lunarYearStem,
+      lunar_year_branch: lunarYearBranch,
       lunar_month: lunarMonth,
       lunar_day: lunarDate.day
     },
     lunar: {
       year: lunarDate.year,
       yearStem: lunarYearStem,
+      yearBranch: lunarYearBranch,
       month: lunarMonth,
       day: lunarDate.day,
       isLeapMonth: Boolean(profile.is_leap_month),
@@ -67,6 +71,7 @@ export function convertSolarDateToLunar(birthDate) {
   return {
     year: lunar.getYear(),
     yearStem: lunar.getYearGan(),
+    yearBranch: lunar.getYearZhi(),
     month: Math.abs(rawMonth),
     day: lunar.getDay(),
     isLeapMonth: rawMonth < 0,
@@ -104,4 +109,10 @@ function calculateYearStem(year) {
   // 所以只要把年份减 4，再对十天干取余，就能得到该年的天干。
   const stemIndex = ((year - 4) % 10 + 10) % 10;
   return HEAVENLY_STEMS[stemIndex];
+}
+
+function calculateYearBranch(year) {
+  // 干支纪年中，公元 4 年为甲子年；地支也从子开始同步取余。
+  const branchIndex = ((year - 4) % 12 + 12) % 12;
+  return EARTHLY_BRANCHES[branchIndex];
 }
