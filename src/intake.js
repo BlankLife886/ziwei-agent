@@ -1,4 +1,4 @@
-const REQUIRED_FIELDS = [
+export const REQUIRED_FIELDS = [
   "name",
   "gender",
   "calendar",
@@ -6,6 +6,13 @@ const REQUIRED_FIELDS = [
   "birth_time",
   "birth_place",
   "timezone"
+];
+
+export const BIRTH_PROFILE_FIELDS = [
+  ...REQUIRED_FIELDS,
+  "lunar_month",
+  "use_true_solar_time",
+  "is_leap_month"
 ];
 
 const VALID_GENDERS = new Set(["male", "female"]);
