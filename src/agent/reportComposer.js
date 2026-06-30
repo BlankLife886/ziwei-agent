@@ -102,6 +102,10 @@ function composeInterpretationParagraph(section) {
     return composeBodyPalaceParagraph(section);
   }
 
+  if (section.id === "spouse-palace") {
+    return composeSpousePalaceParagraph(section);
+  }
+
   if (section.id === "star-balance") {
     return composeStarBalanceParagraph(section);
   }
@@ -149,6 +153,13 @@ function composeBodyPalaceParagraph(section) {
   }
 
   return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.BODY_PALACE_DIFFERENT_FROM_LIFE)}`;
+}
+
+function composeSpousePalaceParagraph(section) {
+  return `【草稿判断】${joinJudgmentParts([
+    getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY),
+    composeStarRoleSynthesis(section)
+  ])}`;
 }
 
 function composeStarBalanceParagraph(section) {

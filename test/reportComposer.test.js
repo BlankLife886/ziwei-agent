@@ -18,6 +18,7 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections.map((section) => section.id),
     [
       "life-triad",
+      "spouse-palace",
       "body-palace",
       "star-balance",
       "birth-year-transformations",
@@ -133,6 +134,43 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .text.includes("不能据此断具体年份吉凶")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
+});
+
+test("createReportDraft writes spouse palace as conservative marriage draft", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()), {
+      queryIntent: parseQueryIntentFromText("我想看婚姻感情。")
+    })
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const section = reportDraft.sections[0];
+  const paragraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation";
+  });
+  const basisParagraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation-basis";
+  });
+
+  assert.equal(section.id, "spouse-palace");
+  assert.equal(section.title, "婚姻专题：夫妻宫");
+  assert.ok(paragraph.text.includes("关系互动倾向"));
+  assert.ok(paragraph.text.includes("不能推结婚时间"));
+  assert.ok(paragraph.text.includes("夫妻宫见武曲、七杀、铃星"));
+  assert.ok(paragraph.text.includes("关系中的现实责任和边界感"));
+  assert.ok(basisParagraph.text.includes("夫妻宫的分析角色"));
+  assert.ok(basisParagraph.text.includes("武曲在夫妻宫的保守解释"));
+  assert.deepEqual(paragraph.evidenceRefs, ["spouse-palace.spouse-palace"]);
+  assert.deepEqual(paragraph.referenceRefs, [
+    "framework.spouse-palace",
+    "rule.star-placement"
+  ]);
+  assert.deepEqual(paragraph.interpretationRefs, [
+    "interpretation.palace-role.spouse",
+    "interpretation.spouse-palace.static-only",
+    "interpretation.star.wu-qu.spouse",
+    "interpretation.star.qi-sha.spouse",
+    "interpretation.star.ling-xing.spouse"
+  ]);
 });
 
 test("createReportDraft stays blocked when the report plan is blocked", () => {

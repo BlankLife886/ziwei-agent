@@ -10,9 +10,14 @@ export const INTERPRETATION_IDS = {
   LIFE_TRIAD_STRUCTURE: "interpretation.life-triad.structure",
   LIFE_TRIAD_EMPTY_LIFE_PALACE: "interpretation.life-triad.empty-life-palace",
   PALACE_ROLE_LIFE: "interpretation.palace-role.life",
+  PALACE_ROLE_SPOUSE: "interpretation.palace-role.spouse",
   PALACE_ROLE_WEALTH: "interpretation.palace-role.wealth",
   PALACE_ROLE_CAREER: "interpretation.palace-role.career",
   PALACE_ROLE_TRAVEL: "interpretation.palace-role.travel",
+  SPOUSE_PALACE_STATIC_ONLY: "interpretation.spouse-palace.static-only",
+  STAR_WU_QU_SPOUSE: "interpretation.star.wu-qu.spouse",
+  STAR_QI_SHA_SPOUSE: "interpretation.star.qi-sha.spouse",
+  STAR_LING_XING_SPOUSE: "interpretation.star.ling-xing.spouse",
   STAR_TIAN_XIANG_WEALTH: "interpretation.star.tian-xiang.wealth",
   STAR_TIAN_KUI_WEALTH: "interpretation.star.tian-kui.wealth",
   STAR_HUO_XING_WEALTH: "interpretation.star.huo-xing.wealth",
@@ -30,6 +35,21 @@ export const INTERPRETATION_IDS = {
 };
 
 const STAR_ROLE_INTERPRETATION_RULES = [
+  {
+    palaceName: "夫妻宫",
+    starName: "武曲",
+    interpretationId: INTERPRETATION_IDS.STAR_WU_QU_SPOUSE
+  },
+  {
+    palaceName: "夫妻宫",
+    starName: "七杀",
+    interpretationId: INTERPRETATION_IDS.STAR_QI_SHA_SPOUSE
+  },
+  {
+    palaceName: "夫妻宫",
+    starName: "铃星",
+    interpretationId: INTERPRETATION_IDS.STAR_LING_XING_SPOUSE
+  },
   {
     palaceName: "财帛宫",
     starName: "天相",
@@ -97,6 +117,57 @@ const INTERPRETATIONS = [
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
     text: "命宫优先用于观察命主的基础气质、主观倾向和命盘分析的中心点。"
+  },
+  {
+    id: INTERPRETATION_IDS.PALACE_ROLE_SPOUSE,
+    title: "夫妻宫的分析角色",
+    topic: "palace-role",
+    palaceName: "夫妻宫",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    text: "夫妻宫用于观察关系模式、伴侣互动和婚恋议题的结构线索；它不是单独判定婚姻结果的充分依据。"
+  },
+  {
+    id: INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY,
+    title: "夫妻宫静态解释边界",
+    topic: "spouse-palace",
+    palaceName: "夫妻宫",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "当前夫妻宫专题只使用本命盘静态宫位和星曜，适合描述关系互动倾向；尚未接入大限四化、流年和合参规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_WU_QU_SPOUSE,
+    title: "武曲在夫妻宫的保守解释",
+    topic: "star-role",
+    palaceName: "夫妻宫",
+    starName: "武曲",
+    synthesis: "关系中的现实责任和边界感",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "夫妻宫见武曲时，可先关注关系中的现实责任、边界感、资源安排和原则性；不宜直接断定感情冷淡或婚姻结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_QI_SHA_SPOUSE,
+    title: "七杀在夫妻宫的保守解释",
+    topic: "star-role",
+    palaceName: "夫妻宫",
+    starName: "七杀",
+    synthesis: "关系节奏中的决断和变化压力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "夫妻宫见七杀时，可提示关系互动里有决断、变化、强度或压力，需要结合辅煞、四化和限运判断，不应单独写成分离结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_LING_XING_SPOUSE,
+    title: "铃星在夫妻宫的保守解释",
+    topic: "star-role",
+    palaceName: "夫妻宫",
+    starName: "铃星",
+    synthesis: "互动中的敏感张力和情绪触发",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "夫妻宫见铃星时，可作为互动中存在敏感张力、急促反应或情绪触发点的提醒；它只能提示需要管理的关系压力，不能单独定吉凶。"
   },
   {
     id: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,

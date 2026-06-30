@@ -15,6 +15,7 @@ import { REFERENCE_IDS } from "./referenceCatalog.js";
 const LIFE_TRIAD_PALACE_NAMES = ["命宫", "财帛宫", "官禄宫", "迁移宫"];
 const PALACE_EVIDENCE_IDS = {
   命宫: "life-palace",
+  夫妻宫: "spouse-palace",
   财帛宫: "wealth-palace",
   官禄宫: "career-palace",
   迁移宫: "travel-palace"
@@ -179,6 +180,17 @@ function buildFocusAreas(chart, palaceByName) {
       evidenceItems: lifeTriadPalaces.map((palace) => {
         return createPalaceEvidenceItem("life-triad", palace);
       })
+    },
+    {
+      id: "spouse-palace",
+      title: "夫妻宫",
+      reason: "夫妻宫用于建立婚姻感情报告的静态关系线索；当前只看已排出的宫位和星曜，不推具体婚恋事件。",
+      evidenceItems: [
+        createPalaceEvidenceItem(
+          "spouse-palace",
+          palaceByName.get("夫妻宫")
+        )
+      ]
     },
     {
       id: "body-palace",
@@ -391,6 +403,10 @@ function createEvidenceItem(id, text, source, referenceRefs = [], metadata) {
 function getPalaceEvidenceReferenceRefs(scope) {
   if (scope === "life-triad") {
     return [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  if (scope === "spouse-palace") {
+    return [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT];
   }
 
   if (scope === "body-palace") {

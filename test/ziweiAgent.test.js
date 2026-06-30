@@ -28,6 +28,7 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
     agentResult.focusAreas.map((area) => area.id),
     [
       "life-triad",
+      "spouse-palace",
       "body-palace",
       "star-balance",
       "birth-year-transformations",
@@ -49,6 +50,17 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
       .find((area) => area.id === "life-triad")
       .evidenceItems.find((item) => item.id === "life-triad.wealth-palace")
       .referenceRefs.includes("framework.life-triad")
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "spouse-palace")
+      .evidence.some((item) => item.includes("夫妻宫卯"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "spouse-palace")
+      .evidenceItems.find((item) => item.id === "spouse-palace.spouse-palace")
+      .referenceRefs.includes("framework.spouse-palace")
   );
   assert.ok(
     agentResult.focusAreas
@@ -168,7 +180,10 @@ test("createZiweiAgentResponse exposes final report domains and planned limits",
     agentResult.reportDomains.map((domain) => domain.title),
     ["婚姻感情报告", "因果主题报告", "前世今生主题报告"]
   );
-  assert.deepEqual(agentResult.focusAreas, []);
+  assert.deepEqual(
+    agentResult.focusAreas.map((area) => area.id),
+    ["spouse-palace"]
+  );
   assert.ok(
     agentResult.limitations.some((item) => {
       return item.includes("最终报告目标：婚姻感情报告、因果主题报告、前世今生主题报告");
@@ -176,7 +191,7 @@ test("createZiweiAgentResponse exposes final report domains and planned limits",
   );
   assert.ok(
     agentResult.limitations.some((item) => {
-      return item.includes("只完成目标登记，尚不能输出深入断语");
+      return item.includes("只完成目标登记，尚不能输出深入断语：因果主题报告、前世今生主题报告");
     })
   );
 });

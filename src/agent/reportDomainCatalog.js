@@ -58,12 +58,12 @@ const REPORT_DOMAINS = [
     id: REPORT_DOMAIN_IDS.MARRIAGE,
     title: "婚姻感情报告",
     outputGoal: "围绕夫妻宫、命宫三方四正和运限结构，分析关系模式、伴侣互动、婚恋压力与阶段性变化。",
-    currentSupport: "planned",
-    supportedFocusAreaIds: [],
+    currentSupport: "partial",
+    supportedFocusAreaIds: ["spouse-palace"],
     missingCapabilities: [
-      "夫妻宫专题 focusArea",
-      "夫妻宫星曜解释目录",
       "四化与运限触发规则",
+      "流年婚恋触发规则",
+      "夫妻宫三方四正合参",
       "关系议题的安全表达边界"
     ]
   },

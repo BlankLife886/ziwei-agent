@@ -80,3 +80,27 @@ test("findStarRoleInterpretationRefs maps palace stars to controlled items", () 
   assert.ok(interpretations[0].text.includes("不能直接断定财富结果"));
   assert.ok(interpretations[0].synthesis.includes("资源秩序"));
 });
+
+test("findStarRoleInterpretationRefs maps spouse palace stars", () => {
+  const interpretationRefs = findStarRoleInterpretationRefs("夫妻宫", {
+    mainStars: ["武曲", "七杀"],
+    auxiliaryStars: [],
+    maleficStars: ["铃星"],
+    voidStars: []
+  });
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.STAR_WU_QU_SPOUSE,
+    INTERPRETATION_IDS.STAR_QI_SHA_SPOUSE,
+    INTERPRETATION_IDS.STAR_LING_XING_SPOUSE
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.starName),
+    ["武曲", "七杀", "铃星"]
+  );
+  assert.ok(interpretations[0].text.includes("不宜直接断定"));
+  assert.ok(interpretations[1].text.includes("不应单独写成分离结论"));
+});

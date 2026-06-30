@@ -53,12 +53,12 @@ test("parseQueryIntentFromText does not treat generic development as migration",
   assert.deepEqual(result.primaryPalaceNames, ["官禄宫"]);
 });
 
-test("parseQueryIntentFromText records planned final report domains", () => {
+test("parseQueryIntentFromText maps marriage and records planned report domains", () => {
   const result = parseQueryIntentFromText("我想看婚姻、因果和前世今生。");
 
   assert.equal(result.status, "matched");
   assert.equal(result.hasIntent, true);
-  assert.deepEqual(result.focusAreaIds, []);
+  assert.deepEqual(result.focusAreaIds, ["spouse-palace"]);
   assert.deepEqual(result.reportDomainIds, [
     "marriage",
     "karma",

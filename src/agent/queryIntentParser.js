@@ -9,6 +9,7 @@ import { REPORT_DOMAIN_IDS } from "./reportDomainCatalog.js";
 
 export const QUERY_FOCUS_IDS = {
   LIFE_TRIAD: "life-triad",
+  SPOUSE_PALACE: "spouse-palace",
   BODY_PALACE: "body-palace",
   STAR_BALANCE: "star-balance",
   BIRTH_YEAR_TRANSFORMATIONS: "birth-year-transformations",
@@ -87,12 +88,12 @@ const QUERY_RULES = [
     patterns: [/性格|个性|人格|脾气|处事风格|行为模式/u]
   },
   {
-    focusAreaId: null,
+    focusAreaId: QUERY_FOCUS_IDS.SPOUSE_PALACE,
     topicId: "marriage",
     reportDomainId: REPORT_DOMAIN_IDS.MARRIAGE,
     topic: "婚姻",
     palaceNames: ["夫妻宫"],
-    reason: "用户询问婚姻或感情，最终应生成婚姻感情报告；当前夫妻宫专题尚未实现。",
+    reason: "用户询问婚姻或感情，需要先从夫妻宫建立关系模式的静态证据底稿。",
     patterns: [/婚姻|感情|恋爱|伴侣|配偶|夫妻|结婚|离婚/u]
   },
   {
@@ -150,6 +151,7 @@ const QUERY_RULES = [
 
 const TOPICS_BY_FOCUS_AREA_ID = {
   [QUERY_FOCUS_IDS.LIFE_TRIAD]: "命宫三方四正",
+  [QUERY_FOCUS_IDS.SPOUSE_PALACE]: "夫妻宫",
   [QUERY_FOCUS_IDS.BODY_PALACE]: "身宫落点",
   [QUERY_FOCUS_IDS.STAR_BALANCE]: "星曜类别",
   [QUERY_FOCUS_IDS.BIRTH_YEAR_TRANSFORMATIONS]: "生年四化",

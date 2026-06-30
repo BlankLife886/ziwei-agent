@@ -12,6 +12,7 @@ export const REFERENCE_IDS = {
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   LIFE_TRIAD: "framework.life-triad",
+  SPOUSE_PALACE: "framework.spouse-palace",
   BODY_PALACE: "framework.body-palace",
   STAR_BALANCE: "framework.star-balance"
 };
@@ -58,6 +59,12 @@ const REFERENCES = [
     title: "命宫与三方四正分析框架",
     type: "analysis-framework",
     note: "先看命宫，再合看财帛、官禄、迁移以建立基础格局。"
+  },
+  {
+    id: REFERENCE_IDS.SPOUSE_PALACE,
+    title: "夫妻宫分析框架",
+    type: "analysis-framework",
+    note: "先以夫妻宫观察关系模式和伴侣互动线索，再等待四化、限运和合参规则补足细断。"
   },
   {
     id: REFERENCE_IDS.BODY_PALACE,

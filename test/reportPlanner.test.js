@@ -15,6 +15,7 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections.map((section) => section.id),
     [
       "life-triad",
+      "spouse-palace",
       "body-palace",
       "star-balance",
       "birth-year-transformations",
@@ -94,6 +95,27 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .references.some((reference) => reference.title.includes("三方四正"))
   );
   assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "spouse-palace")
+      .referenceRefs,
+    ["framework.spouse-palace", "rule.star-placement"]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "spouse-palace")
+      .interpretationRefs,
+    [
+      "interpretation.palace-role.spouse",
+      "interpretation.spouse-palace.static-only",
+      "interpretation.star.wu-qu.spouse",
+      "interpretation.star.qi-sha.spouse",
+      "interpretation.star.ling-xing.spouse"
+    ]
+  );
+  assert.ok(
+    reportPlan.sections
+      .find((section) => section.id === "spouse-palace")
+      .evidence.some((item) => item.includes("夫妻宫卯"))
+  );
+  assert.deepEqual(
     reportPlan.sections
       .find((section) => section.id === "birth-year-transformations")
       .referenceRefs,
@@ -146,7 +168,7 @@ test("createReportPlan blocks report sections until required input exists", () =
 
 test("createReportPlan blocks report-only domains without supported sections", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
-    queryIntent: parseQueryIntentFromText("我想看婚姻、因果和前世今生。")
+    queryIntent: parseQueryIntentFromText("我想看因果和前世今生。")
   });
   const reportPlan = createReportPlan(agentResult);
 
@@ -162,6 +184,25 @@ test("createReportPlan blocks report-only domains without supported sections", (
       return blocker.includes("只完成目标登记");
     })
   );
+});
+
+test("createReportPlan creates spouse palace section for marriage intent", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
+    queryIntent: parseQueryIntentFromText("我想看婚姻感情。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+  const section = reportPlan.sections[0];
+
+  assert.equal(reportPlan.status, "planned");
+  assert.deepEqual(
+    reportPlan.sections.map((item) => item.id),
+    ["spouse-palace"]
+  );
+  assert.equal(section.title, "婚姻专题：夫妻宫");
+  assert.ok(section.purpose.includes("夫妻宫"));
+  assert.deepEqual(section.queryContext.primaryPalaceNames, ["夫妻宫"]);
+  assert.ok(section.writingPrompt.includes("不推结婚时间"));
+  assert.ok(section.guidingQuestions[0].includes("夫妻宫"));
 });
 
 test("createReportPlan includes current major period section when available", () => {
