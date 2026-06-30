@@ -112,6 +112,7 @@ export function createChartSkeleton(profile) {
       tianFuGroup: null,
       monthlyAuxiliaries: null,
       dailyAuxiliaries: null,
+      luYangTuo: null,
       fireBell: null
     },
 
