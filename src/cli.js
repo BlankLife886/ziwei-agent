@@ -1,10 +1,12 @@
 import { readFile } from "node:fs/promises";
+import { createReportDraft } from "./agent/reportComposer.js";
 import { createReportPlan } from "./agent/reportPlanner.js";
 import { createZiweiAgentResponse } from "./agent/ziweiAgent.js";
 import { buildChart } from "./chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatReportDraft,
   formatReportPlan
 } from "./formatters.js";
 
@@ -20,12 +22,15 @@ async function main() {
   const buildResult = buildChart(profile);
   const agentResult = createZiweiAgentResponse(buildResult);
   const reportPlan = createReportPlan(agentResult);
+  const reportDraft = createReportDraft(reportPlan);
   const lines = [
     ...formatBuildResult(buildResult),
     "",
     ...formatAgentBriefing(agentResult),
     "",
-    ...formatReportPlan(reportPlan)
+    ...formatReportPlan(reportPlan),
+    "",
+    ...formatReportDraft(reportDraft)
   ];
 
   for (const line of lines) {

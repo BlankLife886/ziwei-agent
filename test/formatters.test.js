@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createReportDraft } from "../src/agent/reportComposer.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
 import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
 import { buildChart } from "../src/chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatReportDraft,
   formatReportPlan
 } from "../src/formatters.js";
 
@@ -58,6 +60,18 @@ test("formatReportPlan renders report sections and guardrails", () => {
   assert.ok(lines.some((line) => line.includes("写作提示")));
   assert.ok(lines.some((line) => line.includes("关键问题")));
   assert.ok(lines.includes("写作边界："));
+});
+
+test("formatReportDraft renders readable draft paragraphs", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()));
+  const reportPlan = createReportPlan(agentResult);
+  const lines = formatReportDraft(createReportDraft(reportPlan));
+
+  assert.ok(lines.includes("Agent 报告正文草稿："));
+  assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
+  assert.ok(lines.includes("开篇："));
+  assert.ok(lines.some((line) => line.includes("【草稿判断】")));
+  assert.ok(lines.includes("收束："));
 });
 
 function createSampleProfile() {

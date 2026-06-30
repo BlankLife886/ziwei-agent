@@ -91,6 +91,33 @@ export function formatReportPlan(reportPlan) {
   ];
 }
 
+export function formatReportDraft(reportDraft) {
+  if (reportDraft.status !== "drafted") {
+    return [
+      "Agent 报告正文：暂不能生成",
+      ...reportDraft.messages
+    ];
+  }
+
+  return [
+    "Agent 报告正文草稿：",
+    reportDraft.title,
+    "",
+    "开篇：",
+    ...reportDraft.introduction.map((line) => `- ${line}`),
+    "",
+    ...reportDraft.sections.flatMap((section) => {
+      return [
+        section.title,
+        ...section.paragraphs.map((paragraph) => `- ${paragraph}`),
+        ""
+      ];
+    }),
+    "收束：",
+    ...reportDraft.closing.map((line) => `- ${line}`)
+  ];
+}
+
 function formatProfileSummary(buildResult) {
   const profile = buildResult.validation.profile;
 
