@@ -114,6 +114,7 @@ export function createChartSkeleton(profile) {
       dailyAuxiliaries: null,
       luYangTuo: null,
       kuiYue: null,
+      tianGuanFu: null,
       fireBell: null
     },
 

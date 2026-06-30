@@ -3,8 +3,10 @@ import test from "node:test";
 import {
   applyKuiYueStars,
   applyLuYangTuoStars,
+  applyTianGuanFuStars,
   calculateKuiYueBranches,
-  calculateLuYangTuoBranches
+  calculateLuYangTuoBranches,
+  calculateTianGuanFuBranches
 } from "../src/yearStemStarCalculator.js";
 import { createChartSkeleton } from "../src/chart.js";
 import { applyLifeAndBodyPalaces } from "../src/palaceCalculator.js";
@@ -119,4 +121,59 @@ test("tian kui and tian yue are placed as auxiliary stars", () => {
   });
   assert.deepEqual(palaceByBranch.get("丑").auxiliaryStars, ["天魁"]);
   assert.deepEqual(palaceByBranch.get("未").auxiliaryStars, ["天钺"]);
+});
+
+test("tian guan and tian fu match the ten-stem reference table", () => {
+  const table = {
+    甲: { 天官: "未", 天福: "酉" },
+    乙: { 天官: "辰", 天福: "申" },
+    丙: { 天官: "巳", 天福: "子" },
+    丁: { 天官: "寅", 天福: "亥" },
+    戊: { 天官: "卯", 天福: "卯" },
+    己: { 天官: "酉", 天福: "寅" },
+    庚: { 天官: "亥", 天福: "午" },
+    辛: { 天官: "酉", 天福: "巳" },
+    壬: { 天官: "戌", 天福: "午" },
+    癸: { 天官: "午", 天福: "巳" }
+  };
+
+  for (const [yearStem, expected] of Object.entries(table)) {
+    assert.deepEqual(calculateTianGuanFuBranches({ yearStem }), expected);
+  }
+});
+
+test("tian guan and tian fu are placed as auxiliary stars", () => {
+  const chart = createChartSkeleton({
+    name: "示例命主",
+    gender: "female",
+    calendar: "solar",
+    birth_date: "1990-05-18",
+    lunar_year: 1990,
+    lunar_year_stem: "庚",
+    lunar_year_branch: "午",
+    lunar_month: 4,
+    lunar_day: 24,
+    birth_time: "23:30",
+    birth_place: "Shanghai, China",
+    timezone: "Asia/Shanghai",
+    use_true_solar_time: false,
+    is_leap_month: false
+  });
+  const chartWithPalaces = applyLifeAndBodyPalaces(chart, {
+    lunarMonth: 4,
+    chineseHour: "子时"
+  });
+  const result = applyTianGuanFuStars(chartWithPalaces);
+
+  const palaceByBranch = new Map(
+    result.palaces.map((palace) => [palace.branch, palace])
+  );
+
+  assert.deepEqual(result.starAnchors.tianGuanFu, {
+    yearStem: "庚",
+    天官: "亥",
+    天福: "午"
+  });
+  assert.deepEqual(palaceByBranch.get("亥").auxiliaryStars, ["天官"]);
+  assert.deepEqual(palaceByBranch.get("午").auxiliaryStars, ["天福"]);
 });

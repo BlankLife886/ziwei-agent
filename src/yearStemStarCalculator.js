@@ -2,10 +2,11 @@ import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from "./chart.js";
 
 // 第十堂实战课：安生年干系星曜。
 //
-// 这一课先做禄存、擎羊、陀罗，再扩展天魁、天钺。
+// 这一课先做禄存、擎羊、陀罗，再扩展天魁、天钺、天官、天福。
 // 禄存按出生年干定位；擎羊、陀罗跟着禄存走，形成“羊禄陀”三连。
 // 其中禄存偏财禄助力，放入 auxiliaryStars；
 // 擎羊、陀罗属于煞曜，放入 maleficStars。
+// 天魁、天钺、天官、天福都按出生年干定位，属于辅助判断用的年干辅曜。
 
 const LU_CUN_BRANCH_BY_YEAR_STEM = {
   甲: "寅",
@@ -33,7 +34,20 @@ const KUI_YUE_BRANCHES_BY_YEAR_STEM = {
   癸: { 天魁: "卯", 天钺: "巳" }
 };
 
-const AUXILIARY_STARS = new Set(["禄存", "天魁", "天钺"]);
+const TIAN_GUAN_FU_BRANCHES_BY_YEAR_STEM = {
+  甲: { 天官: "未", 天福: "酉" },
+  乙: { 天官: "辰", 天福: "申" },
+  丙: { 天官: "巳", 天福: "子" },
+  丁: { 天官: "寅", 天福: "亥" },
+  戊: { 天官: "卯", 天福: "卯" },
+  己: { 天官: "酉", 天福: "寅" },
+  庚: { 天官: "亥", 天福: "午" },
+  辛: { 天官: "酉", 天福: "巳" },
+  壬: { 天官: "戌", 天福: "午" },
+  癸: { 天官: "午", 天福: "巳" }
+};
+
+const AUXILIARY_STARS = new Set(["禄存", "天魁", "天钺", "天官", "天福"]);
 const MALEFIC_STARS = new Set(["擎羊", "陀罗"]);
 
 export function calculateLuYangTuoBranches({ yearStem }) {
@@ -59,6 +73,11 @@ export function calculateLuYangTuoBranches({ yearStem }) {
 export function calculateKuiYueBranches({ yearStem }) {
   assertValidYearStem(yearStem);
   return KUI_YUE_BRANCHES_BY_YEAR_STEM[yearStem];
+}
+
+export function calculateTianGuanFuBranches({ yearStem }) {
+  assertValidYearStem(yearStem);
+  return TIAN_GUAN_FU_BRANCHES_BY_YEAR_STEM[yearStem];
 }
 
 export function applyLuYangTuoStars(chart) {
@@ -129,6 +148,42 @@ export function applyKuiYueStars(chart) {
     calculationNotes: [
       ...chart.calculationNotes,
       `以生年天干${yearStem}安天魁、天钺：${starText}。`
+    ]
+  };
+}
+
+export function applyTianGuanFuStars(chart) {
+  const yearStem = chart.profileSummary.lunarYearStem;
+  const starBranches = calculateTianGuanFuBranches({ yearStem });
+  const starText = Object.entries(starBranches)
+    .map(([star, branch]) => `${star}${branch}`)
+    .join("，");
+
+  const palaces = chart.palaces.map((palace) => {
+    const starsForPalace = Object.entries(starBranches)
+      .filter(([, branch]) => branch === palace.branch)
+      .map(([star]) => star);
+
+    if (starsForPalace.length === 0) {
+      return palace;
+    }
+
+    return starsForPalace.reduce(placeStarInPalace, palace);
+  });
+
+  return {
+    ...chart,
+    palaces,
+    starAnchors: {
+      ...chart.starAnchors,
+      tianGuanFu: {
+        yearStem,
+        ...starBranches
+      }
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以生年天干${yearStem}安天官、天福：${starText}。`
     ]
   };
 }
