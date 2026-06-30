@@ -1,0 +1,11 @@
+{
+  "name": "示例命主",
+  "gender": "female",
+  "calendar": "solar",
+  "birth_date": "1990-05-18",
+  "birth_time": "23:30",
+  "birth_place": "Shanghai, China",
+  "timezone": "Asia/Shanghai",
+  "use_true_solar_time": false,
+  "is_leap_month": false
+}

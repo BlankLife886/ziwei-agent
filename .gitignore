@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+tmp/
+ziwei-book/
+tests/
+ziwei_agent/

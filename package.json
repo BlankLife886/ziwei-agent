@@ -1,0 +1,16 @@
+{
+  "name": "ziwei-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/cli.js examples/profile.example.json",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "lunar-javascript": "1.7.7"
+  }
+}
