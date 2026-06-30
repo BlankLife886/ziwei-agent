@@ -1,5 +1,8 @@
 import { readFile } from "node:fs/promises";
-import { applyMonthlyAuxiliaryStars } from "./auxiliaryStarCalculator.js";
+import {
+  applyDailyAuxiliaryStars,
+  applyMonthlyAuxiliaryStars
+} from "./auxiliaryStarCalculator.js";
 import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton, summarizeChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
@@ -81,6 +84,10 @@ async function main() {
     chart = applyMonthlyAuxiliaryStars(chart);
   }
 
+  if (lunarResult.profile.lunar_month && lunarResult.profile.lunar_day) {
+    chart = applyDailyAuxiliaryStars(chart);
+  }
+
   console.log("");
   console.log("命盘骨架已建立：");
   for (const line of summarizeChartSkeleton(chart)) {
@@ -119,6 +126,15 @@ async function main() {
         .map(([star, branch]) => `${star}${branch}`)
         .join("、");
       console.log(`月系辅星：${monthlyAuxiliaryText}`);
+    }
+    if (chart.starAnchors?.dailyAuxiliaries) {
+      const dailyAuxiliaryText = Object.entries(
+        chart.starAnchors.dailyAuxiliaries
+      )
+        .filter(([key]) => key !== "lunarMonth" && key !== "lunarDay")
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`日系辅星：${dailyAuxiliaryText}`);
     }
     console.log("");
     console.log("计算说明：");

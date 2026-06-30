@@ -109,7 +109,8 @@ export function createChartSkeleton(profile) {
       ziWeiGroup: null,
       tianFu: null,
       tianFuGroup: null,
-      monthlyAuxiliaries: null
+      monthlyAuxiliaries: null,
+      dailyAuxiliaries: null
     },
 
     // palaces 是整张命盘最重要的数据容器。

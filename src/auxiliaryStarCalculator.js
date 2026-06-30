@@ -96,6 +96,30 @@ export function calculateMonthlyAuxiliaryBranches({ lunarMonth }) {
   };
 }
 
+export function calculateSanTaiBaZuoBranches({ lunarMonth, lunarDay }) {
+  const day = Number(lunarDay);
+  assertValidLunarDay(day);
+
+  const starBranches = calculateZuoFuYouBiBranches({ lunarMonth });
+
+  // 三台：把初一放在左辅宫，顺数至出生日。
+  const sanTaiBranch = walkBranches({
+    startBranch: starBranches.左辅,
+    offset: day - 1
+  });
+
+  // 八座：把初一放在右弼宫，逆数至出生日。
+  const baZuoBranch = walkBranches({
+    startBranch: starBranches.右弼,
+    offset: -(day - 1)
+  });
+
+  return {
+    三台: sanTaiBranch,
+    八座: baZuoBranch
+  };
+}
+
 export function applyZuoFuYouBi(chart) {
   const lunarMonth = chart.profileSummary.lunarMonth;
   const starBranches = calculateZuoFuYouBiBranches({ lunarMonth });
@@ -120,7 +144,46 @@ export function applyMonthlyAuxiliaryStars(chart) {
   });
 }
 
+export function applyDailyAuxiliaryStars(chart) {
+  const lunarMonth = chart.profileSummary.lunarMonth;
+  const lunarDay = chart.profileSummary.lunarDay;
+  const starBranches = calculateSanTaiBaZuoBranches({
+    lunarMonth,
+    lunarDay
+  });
+  const starText = formatStarBranches(starBranches);
+
+  return applyAuxiliaryStarBranches({
+    chart,
+    anchorName: "dailyAuxiliaries",
+    anchor: {
+      lunarMonth,
+      lunarDay
+    },
+    starBranches,
+    note: `以左辅、右弼为起点，按农历${lunarDay}日安日系辅星：${starText}。`
+  });
+}
+
 function applyMonthlyStarBranches({ chart, lunarMonth, starBranches, note }) {
+  return applyAuxiliaryStarBranches({
+    chart,
+    anchorName: "monthlyAuxiliaries",
+    anchor: {
+      lunarMonth
+    },
+    starBranches,
+    note
+  });
+}
+
+function applyAuxiliaryStarBranches({
+  chart,
+  anchorName,
+  anchor,
+  starBranches,
+  note
+}) {
   const palaces = chart.palaces.map((palace) => {
     const starsForPalace = Object.entries(starBranches)
       .filter(([, branch]) => branch === palace.branch)
@@ -141,8 +204,8 @@ function applyMonthlyStarBranches({ chart, lunarMonth, starBranches, note }) {
     palaces,
     starAnchors: {
       ...chart.starAnchors,
-      monthlyAuxiliaries: {
-        lunarMonth,
+      [anchorName]: {
+        ...anchor,
         ...starBranches
       }
     },
@@ -156,6 +219,12 @@ function applyMonthlyStarBranches({ chart, lunarMonth, starBranches, note }) {
 function assertValidLunarMonth(month) {
   if (!Number.isInteger(month) || month < 1 || month > 12) {
     throw new Error("lunarMonth must be an integer from 1 to 12");
+  }
+}
+
+function assertValidLunarDay(day) {
+  if (!Number.isInteger(day) || day < 1 || day > 30) {
+    throw new Error("lunarDay must be an integer from 1 to 30");
   }
 }
 
