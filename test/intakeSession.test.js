@@ -140,6 +140,32 @@ test("createIntakeSessionFromText uses query intent to narrow the drafted report
   );
 });
 
+test("createIntakeSessionFromText drafts current stage for current-year fortune wording", () => {
+  const session = createIntakeSessionFromText(
+    {
+      ...createIncompleteProfile(),
+      birth_time: "23:30"
+    },
+    "我想看今年运势。",
+    {
+      currentDate: "2026-06-30"
+    }
+  );
+
+  assert.equal(session.status, "drafted");
+  assert.equal(session.profileDraft.analysis_date, "2026-06-30");
+  assert.deepEqual(session.queryIntent.focusAreaIds, ["current-stage"]);
+  assert.deepEqual(
+    session.pipelineResult.reportDraft.sections.map((section) => section.id),
+    ["current-stage"]
+  );
+  assert.ok(
+    session.pipelineResult.reportDraft.sections[0].paragraphs
+      .find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不能推今年具体事件")
+  );
+});
+
 function createIncompleteProfile() {
   return {
     name: "示例命主",

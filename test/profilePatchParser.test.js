@@ -64,6 +64,17 @@ test("parseProfilePatchFromText maps relative analysis date from caller supplied
   assert.equal(result.extractedItems[0].source, "现在");
 });
 
+test("parseProfilePatchFromText maps current-year fortune wording to analysis date", () => {
+  const result = parseProfilePatchFromText("我想看今年运势。", {
+    currentDate: "2026-06-30"
+  });
+
+  assert.deepEqual(result.patch, {
+    analysis_date: "2026-06-30"
+  });
+  assert.equal(result.extractedItems[0].source, "今年");
+});
+
 test("parseProfilePatchFromText does not treat analysis-only date as birth date", () => {
   const result = parseProfilePatchFromText("以2026-06-30分析当前大限。");
 

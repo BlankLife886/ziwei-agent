@@ -116,7 +116,7 @@ function extractAnalysisDate(text, currentDate) {
     );
   }
 
-  const relativeMatch = /(今天|现在|当前|目前|此刻)/u.exec(text);
+  const relativeMatch = /(今天|现在|当前|目前|此刻|今年|本年|本年度)/u.exec(text);
   if (!relativeMatch) return null;
 
   return createExtractedItem("analysis_date", currentDate, relativeMatch[0]);
