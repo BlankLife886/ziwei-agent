@@ -10,6 +10,10 @@ import {
   calculatePalaceStem
 } from "../src/fiveElementClassCalculator.js";
 import { validateBirthProfile } from "../src/intake.js";
+import {
+  applyZiWeiStar,
+  calculateZiWeiBranch
+} from "../src/mainStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "../src/palaceCalculator.js";
 
 test("valid profile gets chinese hour", () => {
@@ -206,4 +210,61 @@ test("five element class is calculated from life palace gan zhi na yin", () => {
     palaceGanZhi: "辛巳",
     naYin: "白蜡金"
   });
+});
+
+test("zi wei branch is calculated from lunar day and five element class", () => {
+  assert.equal(
+    calculateZiWeiBranch({
+      lunarDay: 1,
+      fiveElementClassNumber: 4
+    }).branch,
+    "亥"
+  );
+  assert.equal(
+    calculateZiWeiBranch({
+      lunarDay: 16,
+      fiveElementClassNumber: 3
+    }).branch,
+    "酉"
+  );
+  assert.equal(
+    calculateZiWeiBranch({
+      lunarDay: 28,
+      fiveElementClassNumber: 5
+    }).branch,
+    "酉"
+  );
+});
+
+test("zi wei star is placed into the matching palace", () => {
+  const chart = createChartSkeleton({
+    name: "示例命主",
+    gender: "female",
+    calendar: "solar",
+    birth_date: "1990-05-18",
+    lunar_year: 1990,
+    lunar_year_stem: "庚",
+    lunar_month: 4,
+    lunar_day: 24,
+    birth_time: "23:30",
+    birth_place: "Shanghai, China",
+    timezone: "Asia/Shanghai",
+    use_true_solar_time: false,
+    is_leap_month: false
+  });
+
+  const chartWithPalaces = applyLifeAndBodyPalaces(chart, {
+    lunarMonth: 4,
+    chineseHour: "子时"
+  });
+  const chartWithFiveElementClass = applyFiveElementClass(chartWithPalaces, {
+    yearStem: "庚"
+  });
+  const result = applyZiWeiStar(chartWithFiveElementClass);
+  const ziWeiPalace = result.palaces.find((palace) => {
+    return palace.branch === "未";
+  });
+
+  assert.equal(result.starAnchors.ziWei.branch, "未");
+  assert.ok(ziWeiPalace.mainStars.includes("紫微"));
 });

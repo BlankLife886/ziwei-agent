@@ -3,6 +3,7 @@ import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton, summarizeChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
 import { validateBirthProfile } from "./intake.js";
+import { applyZiWeiStar } from "./mainStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "./palaceCalculator.js";
 
 async function main() {
@@ -65,6 +66,10 @@ async function main() {
     });
   }
 
+  if (chart.fiveElementClass && lunarResult.profile.lunar_day) {
+    chart = applyZiWeiStar(chart);
+  }
+
   console.log("");
   console.log("命盘骨架已建立：");
   for (const line of summarizeChartSkeleton(chart)) {
@@ -79,6 +84,9 @@ async function main() {
       console.log(
         `五行局：${chart.fiveElementClass.name}（命宫${chart.fiveElementClass.palaceGanZhi}，纳音${chart.fiveElementClass.naYin}）`
       );
+    }
+    if (chart.starAnchors?.ziWei) {
+      console.log(`紫微星：${chart.starAnchors.ziWei.branch}`);
     }
     console.log("");
     console.log("计算说明：");

@@ -104,6 +104,9 @@ export function createChartSkeleton(profile) {
     lifePalace: null,
     bodyPalace: null,
     fiveElementClass: null,
+    starAnchors: {
+      ziWei: null
+    },
 
     // palaces 是整张命盘最重要的数据容器。
     // 每一个 palace 都是一宫，里面会放地支、主星、辅星、煞曜、四化等信息。
@@ -152,6 +155,8 @@ export function summarizeChartSkeleton(chart) {
   return chart.palaces.map((palace, index) => {
     const number = String(index + 1).padStart(2, "0");
     const branch = palace.branch ?? "待排盘";
-    return `${number}. ${palace.name}：${branch}`;
+    const mainStars =
+      palace.mainStars.length > 0 ? `｜主星：${palace.mainStars.join("、")}` : "";
+    return `${number}. ${palace.name}：${branch}${mainStars}`;
   });
 }
