@@ -8,6 +8,7 @@ export const REFERENCE_IDS = {
   LIFE_BODY_PALACE: "rule.life-body-palace",
   FIVE_ELEMENT_CLASS: "rule.five-element-class",
   STAR_PLACEMENT: "rule.star-placement",
+  BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
   LIFE_TRIAD: "framework.life-triad",
   BODY_PALACE: "framework.body-palace",
   STAR_BALANCE: "framework.star-balance"
@@ -31,6 +32,12 @@ const REFERENCES = [
     title: "已实现星曜安星规则",
     type: "implemented-rule",
     note: "引用当前排盘模块已经完成的主星、辅星、煞曜和空曜安星结果。"
+  },
+  {
+    id: REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+    title: "生年四化计算规则",
+    type: "implemented-rule",
+    note: "根据出生年干查表取得化禄、化权、化科、化忌，并挂回已安星曜所在宫位。"
   },
   {
     id: REFERENCE_IDS.LIFE_TRIAD,

@@ -296,6 +296,11 @@ function formatStarAnchorLines(chart) {
     excludedKeys: ["yearStem"]
   });
   appendAnchorLine(lines, {
+    label: "生年四化",
+    anchor: chart.starAnchors?.birthYearTransformations,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
     label: "火铃煞曜",
     anchor: chart.starAnchors?.fireBell,
     excludedKeys: ["yearBranch", "chineseHour"]

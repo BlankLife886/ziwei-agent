@@ -100,6 +100,10 @@ function composeInterpretationParagraph(section) {
     return composeStarBalanceParagraph(section);
   }
 
+  if (section.id === "birth-year-transformations") {
+    return composeBirthYearTransformationsParagraph(section);
+  }
+
   return `【草稿判断】本节应围绕“${section.guidingQuestions[0]}”展开，并严格使用本节列出的证据。`;
 }
 
@@ -136,6 +140,18 @@ function composeStarBalanceParagraph(section) {
   return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY)}`;
 }
 
+function composeBirthYearTransformationsParagraph(section) {
+  const boundaryText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY
+  );
+
+  return `【草稿判断】${joinJudgmentParts([
+    section.evidence[0],
+    boundaryText
+  ])}`;
+}
+
 function composeClosing(reportPlan) {
   return [
     "以上草稿只使用当前排盘已经生成的证据。",
@@ -170,7 +186,7 @@ function composeStarRoleSynthesis(section) {
     }
   );
 
-  return `${groups.join("；")}。这些线索仍属于本命盘静态结构，需再结合四化、限运和更多组合验证。`;
+  return `${groups.join("；")}。这些线索仍属于本命盘静态结构，需再结合生年四化、限运和更多组合验证。`;
 }
 
 function groupStarRoleInterpretations(interpretations) {

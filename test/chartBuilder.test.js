@@ -30,6 +30,13 @@ test("buildChart creates a complete chart from a solar birth profile", () => {
     正空: "午",
     副空: "未"
   });
+  assert.deepEqual(result.chart.starAnchors.birthYearTransformations, {
+    yearStem: "庚",
+    化禄: "太阳",
+    化权: "武曲",
+    化科: "太阴",
+    化忌: "天同"
+  });
 
   const palaceByBranch = new Map(
     result.chart.palaces.map((palace) => [palace.branch, palace])
@@ -38,6 +45,20 @@ test("buildChart creates a complete chart from a solar birth profile", () => {
   assert.deepEqual(palaceByBranch.get("未").mainStars, ["紫微", "破军"]);
   assert.deepEqual(palaceByBranch.get("未").voidStars, ["截空（副空）"]);
   assert.deepEqual(palaceByBranch.get("午").voidStars, ["截空（正空）"]);
+  assert.deepEqual(palaceByBranch.get("辰").transformations, [
+    {
+      name: "化禄",
+      star: "太阳",
+      source: "birth-year-stem"
+    }
+  ]);
+  assert.deepEqual(palaceByBranch.get("卯").transformations, [
+    {
+      name: "化权",
+      star: "武曲",
+      source: "birth-year-stem"
+    }
+  ]);
 });
 
 test("buildChart returns structured validation failures", () => {

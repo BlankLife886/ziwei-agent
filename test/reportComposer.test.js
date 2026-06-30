@@ -15,7 +15,7 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
   assert.equal(reportDraft.title, "示例命主的紫微斗数本命盘分析草稿");
   assert.deepEqual(
     reportDraft.sections.map((section) => section.id),
-    ["life-triad", "body-palace", "star-balance"]
+    ["life-triad", "body-palace", "star-balance", "birth-year-transformations"]
   );
   assert.ok(
     reportDraft.sections
@@ -100,6 +100,18 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation-basis")
       .text.includes("天相在财帛宫的保守解释")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("太阳化禄在兄弟宫辰")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("只能写本命盘结构")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });

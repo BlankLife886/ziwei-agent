@@ -21,6 +21,7 @@ export const INTERPRETATION_IDS = {
   STAR_LIAN_ZHEN_TRAVEL: "interpretation.star.lian-zhen.travel",
   STAR_TAN_LANG_TRAVEL: "interpretation.star.tan-lang.travel",
   STAR_TIAN_GUAN_TRAVEL: "interpretation.star.tian-guan.travel",
+  BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -207,6 +208,14 @@ const INTERPRETATIONS = [
     text: "迁移宫见天官时，可作为外部环境中存在名誉、制度性支持或贵人助力的线索；仍需与主星和煞曜同看。"
   },
   {
+    id: INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY,
+    title: "生年四化的静态解释边界",
+    topic: "four-transformations",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "生年四化可用于标记本命盘中禄、权、科、忌的牵引位置；当前尚未接入大限、流年与派别配置，因此只能写本命盘结构，不宜推具体年份事件。"
+  },
+  {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,
     title: "身命同宫的观察方式",
     topic: "body-palace",
@@ -228,7 +237,7 @@ const INTERPRETATIONS = [
     topic: "star-balance",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.STAR_BALANCE],
-    text: "当前已能统计主星、辅星、煞曜与空曜的分布，但尚未纳入四化和限运，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
+    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化；但尚未纳入大限和流年，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
   }
 ];
 

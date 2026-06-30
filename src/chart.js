@@ -117,6 +117,7 @@ export function createChartSkeleton(profile) {
       tianGuanFu: null,
       tianChu: null,
       jieKong: null,
+      birthYearTransformations: null,
       fireBell: null
     },
 
@@ -180,6 +181,20 @@ export function summarizeChartSkeleton(chart) {
         : "";
     const voidStars =
       palace.voidStars.length > 0 ? `｜空曜：${palace.voidStars.join("、")}` : "";
-    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}${maleficStars}${voidStars}`;
+    const transformations =
+      palace.transformations.length > 0
+        ? `｜四化：${formatTransformations(palace.transformations)}`
+        : "";
+    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}${maleficStars}${voidStars}${transformations}`;
   });
+}
+
+function formatTransformations(transformations) {
+  return transformations.map((transformation) => {
+    if (typeof transformation === "string") {
+      return transformation;
+    }
+
+    return `${transformation.star}${transformation.name}`;
+  }).join("、");
 }

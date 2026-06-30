@@ -5,6 +5,7 @@ import {
 import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
+import { applyBirthYearFourTransformations } from "./fourTransformationCalculator.js";
 import { validateBirthProfile } from "./intake.js";
 import {
   applyTianFuStarGroup,
@@ -107,6 +108,10 @@ function buildChartFromResolvedProfile({ profile, chineseHour }) {
     chart = applyFireBellStars(chart, {
       chineseHour
     });
+  }
+
+  if (profile.lunar_year_stem) {
+    chart = applyBirthYearFourTransformations(chart);
   }
 
   return chart;

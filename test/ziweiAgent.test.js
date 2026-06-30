@@ -25,7 +25,7 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
   );
   assert.deepEqual(
     agentResult.focusAreas.map((area) => area.id),
-    ["life-triad", "body-palace", "star-balance"]
+    ["life-triad", "body-palace", "star-balance", "birth-year-transformations"]
   );
   assert.ok(
     agentResult.focusAreas
@@ -44,7 +44,17 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
       .referenceRefs.includes("framework.life-triad")
   );
   assert.ok(
-    agentResult.limitations.some((item) => item.includes("尚未接入四化"))
+    agentResult.focusAreas
+      .find((area) => area.id === "birth-year-transformations")
+      .evidence.some((item) => item.includes("太阳化禄在兄弟宫辰"))
+  );
+  assert.ok(
+    agentResult.evidenceItems
+      .find((item) => item.id === "core.birth-year-transformations")
+      .referenceRefs.includes("rule.birth-year-four-transformations")
+  );
+  assert.ok(
+    agentResult.limitations.some((item) => item.includes("已接入生年四化"))
   );
 });
 

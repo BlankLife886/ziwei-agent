@@ -69,7 +69,7 @@ export function createZiweiAgentResponse(buildResult) {
     evidenceItems,
     focusAreas: buildFocusAreas(chart, palaceByName),
     limitations: [
-      "尚未接入四化，因此不能完整判断生年化禄、化权、化科、化忌的牵引。",
+      "已接入生年四化，但尚未接入大限、流年四化，因此不能推具体年份事件。",
       "尚未接入大限、流年，因此当前只适合做本命盘静态分析。",
       "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
     ]
@@ -127,6 +127,12 @@ function buildCoreEvidenceItems(chart, palaceByName) {
       `身宫星曜：${formatPalaceStars(bodyPalace)}`,
       `chart.palaces.${chart.bodyPalace.name}`,
       [REFERENCE_IDS.STAR_PLACEMENT]
+    ),
+    createEvidenceItem(
+      "core.birth-year-transformations",
+      `生年四化：${formatBirthYearFourTransformations(chart)}`,
+      "chart.starAnchors.birthYearTransformations",
+      [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
     )
   ];
 }
@@ -161,6 +167,12 @@ function buildFocusAreas(chart, palaceByName) {
       title: "星曜类别平衡",
       reason: "先区分主星、辅星、煞曜、空曜，避免把助力、冲击和空亡混为一谈。",
       evidenceItems: buildStarBalanceEvidenceItems(chart)
+    },
+    {
+      id: "birth-year-transformations",
+      title: "生年四化",
+      reason: "生年四化标记本命盘中的禄、权、科、忌牵引，是后续细断前必须先确认的结构证据。",
+      evidenceItems: buildBirthYearTransformationEvidenceItems(chart)
     }
   ].map((focusArea) => {
     return {
@@ -212,6 +224,17 @@ function buildStarBalanceEvidenceItems(chart) {
       `空曜 ${totals.voidStars} 颗`,
       "chart.palaces.voidStars",
       [REFERENCE_IDS.STAR_BALANCE]
+    )
+  ];
+}
+
+function buildBirthYearTransformationEvidenceItems(chart) {
+  return [
+    createEvidenceItem(
+      "birth-year-transformations.summary",
+      `生年四化：${formatBirthYearFourTransformations(chart)}`,
+      "chart.starAnchors.birthYearTransformations",
+      [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
     )
   ];
 }
@@ -292,4 +315,33 @@ function formatPalaceStars(palace) {
   }
 
   return groups.join("；");
+}
+
+function formatBirthYearFourTransformations(chart) {
+  const anchor = chart.starAnchors.birthYearTransformations;
+
+  if (!anchor) {
+    return "未计算";
+  }
+
+  return Object.entries(anchor)
+    .filter(([key]) => key !== "yearStem")
+    .map(([name, star]) => {
+      const palace = findPalaceContainingStar(chart, star);
+      const palaceText = palace ? `在${palace.name}${palace.branch}` : "未落入已安星曜宫位";
+
+      return `${star}${name}${palaceText}`;
+    })
+    .join("；");
+}
+
+function findPalaceContainingStar(chart, starName) {
+  return chart.palaces.find((palace) => {
+    return [
+      palace.mainStars,
+      palace.auxiliaryStars,
+      palace.maleficStars,
+      palace.voidStars
+    ].some((stars) => stars.includes(starName));
+  });
 }

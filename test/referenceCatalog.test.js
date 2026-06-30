@@ -8,12 +8,17 @@ import {
 test("findReferences returns known references in catalog order", () => {
   const references = findReferences([
     REFERENCE_IDS.STAR_BALANCE,
+    REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
     REFERENCE_IDS.LIFE_TRIAD
   ]);
 
   assert.deepEqual(
     references.map((reference) => reference.id),
-    [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_BALANCE]
+    [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.LIFE_TRIAD,
+      REFERENCE_IDS.STAR_BALANCE
+    ]
   );
   assert.ok(
     references.every((reference) => {

@@ -128,6 +128,10 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
     return [INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY];
   }
 
+  if (focusAreaId === "birth-year-transformations") {
+    return [INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY];
+  }
+
   return [];
 }
 
@@ -181,6 +185,11 @@ function getGuidingQuestions(focusAreaId) {
       "主星、辅星、煞曜、空曜数量是否均衡？",
       "哪些宫位已经有较强星曜证据，哪些宫位仍然偏空？",
       "当前能说的是结构倾向，还是已经足以形成具体判断？"
+    ],
+    "birth-year-transformations": [
+      "化禄、化权、化科、化忌分别落在哪些星曜和宫位？",
+      "这些四化能补充命宫三方四正的哪些结构线索？",
+      "哪些内容仍需等待大限、流年后才能判断？"
     ]
   };
 
@@ -194,7 +203,8 @@ function getWritingPrompt(focusAreaId) {
   const promptsByArea = {
     "life-triad": "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
     "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
-    "star-balance": "先做星曜类别统计，再提醒读者当前缺少四化和限运，不能过度推演。"
+    "star-balance": "先做星曜类别统计，再提醒读者当前缺少限运，不能过度推演。",
+    "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。"
   };
 
   return promptsByArea[focusAreaId] ?? "围绕证据写一段保守分析，并明确未知项。";
