@@ -62,6 +62,35 @@ export function formatAgentBriefing(agentResult) {
   ];
 }
 
+export function formatReportPlan(reportPlan) {
+  if (reportPlan.status !== "planned") {
+    return [
+      "Agent 报告草稿：暂不能生成",
+      ...reportPlan.messages,
+      ...reportPlan.blockers.map((blocker) => `- ${blocker}`)
+    ];
+  }
+
+  return [
+    "Agent 报告草稿规划：",
+    ...reportPlan.opening.map((line) => `- ${line}`),
+    "",
+    "章节：",
+    ...reportPlan.sections.flatMap((section) => {
+      return [
+        `- ${section.title}：${section.purpose}`,
+        `  写作提示：${section.writingPrompt}`,
+        `  关键问题：${section.guidingQuestions.join(" / ")}`,
+        "  可用证据：",
+        ...section.evidence.map((item) => `    - ${item}`)
+      ];
+    }),
+    "",
+    "写作边界：",
+    ...reportPlan.guardrails.map((item) => `- ${item}`)
+  ];
+}
+
 function formatProfileSummary(buildResult) {
   const profile = buildResult.validation.profile;
 
