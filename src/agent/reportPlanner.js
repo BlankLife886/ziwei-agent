@@ -1,9 +1,14 @@
 import {
-  INTERPRETATION_IDS,
-  findInterpretations,
-  findStarRoleInterpretationRefs
+  findInterpretations
 } from "./interpretationCatalog.js";
 import { findReferences } from "./referenceCatalog.js";
+import {
+  buildSectionGuidingQuestions,
+  buildSectionInterpretationRefs,
+  buildSectionPurpose,
+  buildSectionTitle,
+  buildSectionWritingPrompt
+} from "./reportSectionCatalog.js";
 
 // 命理报告草稿规划器。
 //
@@ -74,17 +79,17 @@ function buildOpening(agentResult) {
 
 function buildSectionFromFocusArea(focusArea, queryIntent) {
   const evidenceItems = normalizeEvidenceItems(focusArea);
-  const interpretationRefs = getInterpretationRefs(focusArea.id, evidenceItems);
+  const interpretationRefs = buildSectionInterpretationRefs(focusArea.id, evidenceItems);
   const interpretations = findInterpretations(interpretationRefs);
   const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
   const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
 
   return {
     id: focusArea.id,
-    title: getSectionTitle(focusArea, queryContext),
-    purpose: getSectionPurpose(focusArea, queryContext),
+    title: buildSectionTitle(focusArea, queryContext),
+    purpose: buildSectionPurpose(focusArea, queryContext),
     queryContext,
-    guidingQuestions: getGuidingQuestions(focusArea.id, queryContext),
+    guidingQuestions: buildSectionGuidingQuestions(focusArea.id, queryContext),
     evidence: evidenceItems.map((item) => item.text),
     evidenceItems,
     evidenceRefs: evidenceItems.map((item) => item.id),
@@ -92,7 +97,7 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
     interpretations,
     referenceRefs,
     references: findReferences(referenceRefs),
-    writingPrompt: getWritingPrompt(focusArea.id, queryContext)
+    writingPrompt: buildSectionWritingPrompt(focusArea.id, queryContext)
   };
 }
 
@@ -120,102 +125,6 @@ function collectReferenceRefs(evidenceItems, interpretations) {
   });
 
   return [...new Set([...referenceRefs, ...interpretationSourceRefs])];
-}
-
-function getInterpretationRefs(focusAreaId, evidenceItems) {
-  if (focusAreaId === "life-triad") {
-    const refs = [
-      INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE,
-      ...getPalaceRoleInterpretationRefs(evidenceItems)
-    ];
-    const emptyLifePalace = evidenceItems.some((item) => {
-      return item.text.includes("命宫") && item.text.includes("无已安星曜");
-    });
-
-    if (emptyLifePalace) {
-      refs.push(INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE);
-    }
-
-    return [
-      ...refs,
-      ...getStarRoleInterpretationRefs(evidenceItems)
-    ];
-  }
-
-  if (focusAreaId === "body-palace") {
-    const sameAsLifePalace = evidenceItems.some((item) => {
-      return item.text.startsWith("命宫");
-    });
-
-    return [
-      sameAsLifePalace
-        ? INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE
-        : INTERPRETATION_IDS.BODY_PALACE_DIFFERENT_FROM_LIFE
-    ];
-  }
-
-  if (focusAreaId === "spouse-palace") {
-    return [
-      INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
-      ...getPalaceRoleInterpretationRefs(evidenceItems),
-      INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY,
-      ...getStarRoleInterpretationRefs(evidenceItems)
-    ];
-  }
-
-  if (focusAreaId === "star-balance") {
-    return [INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY];
-  }
-
-  if (focusAreaId === "birth-year-transformations") {
-    return [INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY];
-  }
-
-  if (focusAreaId === "major-periods") {
-    return [INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY];
-  }
-
-  if (focusAreaId === "current-major-period") {
-    return [INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY];
-  }
-
-  return [];
-}
-
-function getPalaceRoleInterpretationRefs(evidenceItems) {
-  const refsByPalaceName = {
-    命宫: INTERPRETATION_IDS.PALACE_ROLE_LIFE,
-    夫妻宫: INTERPRETATION_IDS.PALACE_ROLE_SPOUSE,
-    财帛宫: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
-    官禄宫: INTERPRETATION_IDS.PALACE_ROLE_CAREER,
-    迁移宫: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL,
-    福德宫: INTERPRETATION_IDS.PALACE_ROLE_WELLBEING
-  };
-
-  const refs = evidenceItems.flatMap((item) => {
-    const palaceName = Object.keys(refsByPalaceName).find((name) => {
-      return item.text.startsWith(name);
-    });
-
-    return palaceName ? [refsByPalaceName[palaceName]] : [];
-  });
-
-  return [...new Set(refs)];
-}
-
-function getStarRoleInterpretationRefs(evidenceItems) {
-  const refs = evidenceItems.flatMap((item) => {
-    if (!item.metadata?.palaceName || !item.metadata?.starGroups) {
-      return [];
-    }
-
-    return findStarRoleInterpretationRefs(
-      item.metadata.palaceName,
-      item.metadata.starGroups
-    );
-  });
-
-  return [...new Set(refs)];
 }
 
 function buildSectionQueryContext(focusAreaId, queryIntent) {
@@ -255,101 +164,6 @@ function buildSectionQueryContext(focusAreaId, queryIntent) {
     primaryPalaceNames,
     matchedItems
   };
-}
-
-function getSectionTitle(focusArea, queryContext) {
-  if (focusArea.id === "life-triad" && queryContext.hasIntent) {
-    return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
-  }
-
-  if (focusArea.id === "spouse-palace" && queryContext.hasIntent) {
-    return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
-  }
-
-  return focusArea.title;
-}
-
-function getSectionPurpose(focusArea, queryContext) {
-  if (focusArea.id === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
-    return `本轮按用户问题聚焦${queryContext.topics.join("、")}，在命宫三方四正中优先查看${queryContext.primaryPalaceNames.join("、")}，并保留其余三方四正宫位作为结构参照。`;
-  }
-
-  if (focusArea.id === "spouse-palace" && queryContext.primaryPalaceNames.length > 0) {
-    return `本轮按用户问题聚焦${queryContext.topics.join("、")}，以${queryContext.primaryPalaceNames.join("、")}为本宫，并合看迁移宫、官禄宫、福德宫建立婚姻感情结构底稿。`;
-  }
-
-  return focusArea.reason;
-}
-
-function getGuidingQuestions(focusAreaId, queryContext) {
-  if (focusAreaId === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
-    return [
-      `${queryContext.primaryPalaceNames.join("、")}分别提供了哪些已排出的宫位和星曜证据？`,
-      "命宫与其余三方四正宫位如何作为本轮专题的结构参照？",
-      "当前哪些判断仍需等待大限四化、流年和更多组合规则？"
-    ];
-  }
-
-  const questionsByArea = {
-    "life-triad": [
-      "命宫本身呈现什么样的基础气质？",
-      "财帛宫、官禄宫、迁移宫对命宫形成什么补充？",
-      "三方四正里哪些星曜是当前最明确的证据？"
-    ],
-    "spouse-palace": [
-      "夫妻宫、迁移宫、官禄宫、福德宫分别提供了哪些已排出的宫位和星曜证据？",
-      "这些证据如何分别指向关系互动、外部相处、现实承担和内在感受？",
-      "哪些婚恋判断必须等待四化、限运、流年和合参规则？"
-    ],
-    "body-palace": [
-      "身宫落在哪一宫，提示后天重心偏向哪里？",
-      "身宫与命宫是同宫还是分宫？",
-      "身宫证据是否支持命宫给出的基础判断？"
-    ],
-    "star-balance": [
-      "主星、辅星、煞曜、空曜数量是否均衡？",
-      "哪些宫位已经有较强星曜证据，哪些宫位仍然偏空？",
-      "当前能说的是结构倾向，还是已经足以形成具体判断？"
-    ],
-    "birth-year-transformations": [
-      "化禄、化权、化科、化忌分别落在哪些星曜和宫位？",
-      "这些四化能补充命宫三方四正的哪些结构线索？",
-      "哪些内容仍需等待大限四化、流年后才能判断？"
-    ],
-    "major-periods": [
-      "第一大限从几岁开始，落在哪一宫？",
-      "大限顺逆方向是什么？",
-      "当前只排出年龄段，哪些判断必须等大限四化和流年？"
-    ],
-    "current-major-period": [
-      "分析日期是哪一天？",
-      "按虚岁定位时命主处于哪一个大限？",
-      "这一定位目前只能支持什么层级的判断？"
-    ]
-  };
-
-  return questionsByArea[focusAreaId] ?? [
-    "这一节有哪些可验证的命盘证据？",
-    "这些证据能支持什么层级的分析？"
-  ];
-}
-
-function getWritingPrompt(focusAreaId, queryContext) {
-  if (focusAreaId === "life-triad" && queryContext.primaryPalaceNames.length > 0) {
-    return `围绕用户指定的${queryContext.topics.join("、")}主题写保守分析，优先引用${queryContext.primaryPalaceNames.join("、")}证据，并明确不能推具体事件。`;
-  }
-
-  const promptsByArea = {
-    "life-triad": "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
-    "spouse-palace": "围绕夫妻宫三方四正写婚姻感情的保守结构分析，只描述关系互动、外部相处、现实承担和内在感受，不推结婚时间、分合事件或伴侣具体身份。",
-    "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
-    "star-balance": "先做星曜类别统计，再提醒读者当前缺少大限四化和流年，不能过度推演。",
-    "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",
-    "major-periods": "只说明大限年龄段和顺逆方向，不把大限骨架写成具体事件判断。",
-    "current-major-period": "只说明分析日期对应的当前大限，不把阶段定位写成事件断语。"
-  };
-
-  return promptsByArea[focusAreaId] ?? "围绕证据写一段保守分析，并明确未知项。";
 }
 
 function buildGuardrails(agentResult) {
