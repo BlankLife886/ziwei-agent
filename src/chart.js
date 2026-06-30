@@ -108,7 +108,8 @@ export function createChartSkeleton(profile) {
       ziWei: null,
       ziWeiGroup: null,
       tianFu: null,
-      tianFuGroup: null
+      tianFuGroup: null,
+      monthlyAuxiliaries: null
     },
 
     // palaces 是整张命盘最重要的数据容器。
@@ -160,6 +161,10 @@ export function summarizeChartSkeleton(chart) {
     const branch = palace.branch ?? "待排盘";
     const mainStars =
       palace.mainStars.length > 0 ? `｜主星：${palace.mainStars.join("、")}` : "";
-    return `${number}. ${palace.name}：${branch}${mainStars}`;
+    const auxiliaryStars =
+      palace.auxiliaryStars.length > 0
+        ? `｜辅星：${palace.auxiliaryStars.join("、")}`
+        : "";
+    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}`;
   });
 }
