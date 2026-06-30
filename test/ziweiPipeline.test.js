@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
@@ -12,9 +13,39 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.equal(pipelineResult.reportDraft.status, "drafted");
   assert.deepEqual(
     pipelineResult.steps.map((step) => step.id),
-    ["agent-context", "report-plan", "report-draft"]
+    ["query-intent", "agent-context", "report-plan", "report-draft"]
   );
+  assert.equal(pipelineResult.steps[0].status, "none");
   assert.ok(pipelineResult.nextAction.includes("审阅报告草稿"));
+});
+
+test("runZiweiPipeline narrows report sections by query intent", () => {
+  const queryIntent = parseQueryIntentFromText("现在看当前大限。");
+  const pipelineResult = runZiweiPipeline(
+    buildChart({
+      ...createSampleProfile(),
+      analysis_date: "2026-06-30"
+    }),
+    { queryIntent }
+  );
+
+  assert.equal(pipelineResult.queryIntent.status, "matched");
+  assert.deepEqual(pipelineResult.queryIntent.focusAreaIds, [
+    "current-major-period"
+  ]);
+  assert.deepEqual(
+    pipelineResult.reportPlan.sections.map((section) => section.id),
+    ["current-major-period"]
+  );
+  assert.ok(
+    pipelineResult.reportPlan.opening.some((line) => {
+      return line.includes("聚焦当前大限");
+    })
+  );
+  assert.deepEqual(
+    pipelineResult.reportDraft.sections.map((section) => section.id),
+    ["current-major-period"]
+  );
 });
 
 test("runZiweiPipeline keeps the chain blocked when input is incomplete", () => {

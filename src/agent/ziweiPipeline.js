@@ -1,5 +1,6 @@
 import { createReportDraft } from "./reportComposer.js";
 import { createReportPlan } from "./reportPlanner.js";
+import { normalizeQueryIntent } from "./queryIntentParser.js";
 import { createZiweiAgentResponse } from "./ziweiAgent.js";
 
 // agent 编排层。
@@ -9,19 +10,22 @@ import { createZiweiAgentResponse } from "./ziweiAgent.js";
 // report draft 三层。这样 CLI、未来 API、未来 Web 页面都只需要调用
 // runZiweiPipeline，而不用各自复制一遍 agent 步骤。
 
-export function runZiweiPipeline(buildResult) {
-  const agentResult = createZiweiAgentResponse(buildResult);
+export function runZiweiPipeline(buildResult, options = {}) {
+  const queryIntent = normalizeQueryIntent(options.queryIntent);
+  const agentResult = createZiweiAgentResponse(buildResult, { queryIntent });
   const reportPlan = createReportPlan(agentResult);
   const reportDraft = createReportDraft(reportPlan);
 
   return {
     status: derivePipelineStatus({ agentResult, reportPlan, reportDraft }),
     nextAction: deriveNextAction({ agentResult, reportPlan, reportDraft }),
+    queryIntent,
     buildResult,
     agentResult,
     reportPlan,
     reportDraft,
     steps: [
+      buildStep("query-intent", queryIntent.status),
       buildStep("agent-context", agentResult.status),
       buildStep("report-plan", reportPlan.status),
       buildStep("report-draft", reportDraft.status)

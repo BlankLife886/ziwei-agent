@@ -120,6 +120,38 @@ test("createZiweiAgentResponse includes current major period when analysis date 
   );
 });
 
+test("createZiweiAgentResponse keeps all evidence but filters focus areas by query intent", () => {
+  const buildResult = buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+  const agentResult = createZiweiAgentResponse(buildResult, {
+    queryIntent: {
+      hasIntent: true,
+      focusAreaIds: ["current-major-period"],
+      topics: ["当前大限"]
+    }
+  });
+
+  assert.ok(
+    agentResult.evidenceItems.some((item) => {
+      return item.id === "core.life-palace-branch";
+    })
+  );
+  assert.deepEqual(
+    agentResult.focusAreas.map((area) => area.id),
+    ["current-major-period"]
+  );
+  assert.ok(
+    agentResult.allFocusAreas.some((area) => area.id === "life-triad")
+  );
+  assert.ok(
+    agentResult.limitations.some((item) => {
+      return item.includes("本轮已按查询意图收敛章节");
+    })
+  );
+});
+
 test("createZiweiAgentResponse blocks invalid input", () => {
   const buildResult = buildChart({
     ...createSampleProfile(),

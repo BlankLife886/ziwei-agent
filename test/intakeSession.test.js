@@ -92,6 +92,7 @@ test("createIntakeSessionFromText accepts relative analysis date for current maj
   );
 
   assert.equal(session.status, "drafted");
+  assert.deepEqual(session.queryIntent.focusAreaIds, ["current-major-period"]);
   assert.equal(session.profileDraft.analysis_date, "2026-06-30");
   assert.equal(session.buildResult.chart.currentMajorPeriod.age, 37);
   assert.equal(
@@ -102,6 +103,31 @@ test("createIntakeSessionFromText accepts relative analysis date for current maj
     session.extractedItems.some((item) => {
       return item.field === "analysis_date" && item.source === "现在";
     })
+  );
+});
+
+test("createIntakeSessionFromText uses query intent to narrow the drafted report", () => {
+  const session = createIntakeSessionFromText(
+    {
+      ...createIncompleteProfile(),
+      birth_time: "23:30"
+    },
+    "我想先看事业和财帛。",
+    {
+      currentDate: "2026-06-30"
+    }
+  );
+
+  assert.equal(session.status, "drafted");
+  assert.deepEqual(session.queryIntent.focusAreaIds, ["life-triad"]);
+  assert.deepEqual(
+    session.pipelineResult.reportPlan.sections.map((section) => section.id),
+    ["life-triad"]
+  );
+  assert.ok(
+    session.pipelineResult.reportDraft.sections[0].paragraphs
+      .find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("官禄宫")
   );
 });
 

@@ -1,4 +1,5 @@
 import { buildInputQuestions } from "./inputQuestionnaire.js";
+import { normalizeQueryIntent } from "./queryIntentParser.js";
 import { REFERENCE_IDS } from "./referenceCatalog.js";
 
 // 命理师 agent 外壳。
@@ -18,11 +19,14 @@ const PALACE_EVIDENCE_IDS = {
   迁移宫: "travel-palace"
 };
 
-export function createZiweiAgentResponse(buildResult) {
+export function createZiweiAgentResponse(buildResult, options = {}) {
+  const queryIntent = normalizeQueryIntent(options.queryIntent);
+
   if (buildResult.status === "invalid") {
     return {
       status: "invalid_input",
       role: "ziwei-fortune-analyst",
+      queryIntent,
       messages: ["出生资料格式不正确，暂不能排盘。"],
       nextQuestions: [],
       questionItems: [],
@@ -39,6 +43,7 @@ export function createZiweiAgentResponse(buildResult) {
     return {
       status: "needs_input",
       role: "ziwei-fortune-analyst",
+      queryIntent,
       messages: ["出生资料还不完整，需要先补齐关键字段。"],
       nextQuestions: buildResult.validation.missingFields.map((field) => {
         return `请补充 ${field}`;
@@ -54,10 +59,13 @@ export function createZiweiAgentResponse(buildResult) {
   const chart = buildResult.chart;
   const palaceByName = new Map(chart.palaces.map((palace) => [palace.name, palace]));
   const evidenceItems = buildCoreEvidenceItems(chart, palaceByName);
+  const focusAreas = buildFocusAreas(chart, palaceByName);
+  const selectedFocusAreas = selectFocusAreasByQueryIntent(focusAreas, queryIntent);
 
   return {
     status: "ready",
     role: "ziwei-fortune-analyst",
+    queryIntent,
     messages: [
       "命盘已经建立，可以进入命理分析。",
       "当前 agent 会先基于命盘证据组织分析重点，避免在规则未实现时过度断言。"
@@ -67,8 +75,10 @@ export function createZiweiAgentResponse(buildResult) {
     subject: buildSubjectSummary(buildResult),
     evidence: evidenceItems.map(formatEvidenceText),
     evidenceItems,
-    focusAreas: buildFocusAreas(chart, palaceByName),
-    limitations: buildLimitations(chart)
+    focusAreas: selectedFocusAreas,
+    allFocusAreas: focusAreas,
+    unavailableFocusAreaIds: getUnavailableFocusAreaIds(focusAreas, queryIntent),
+    limitations: buildLimitations(chart, queryIntent)
   };
 }
 
@@ -213,15 +223,37 @@ function buildFocusAreas(chart, palaceByName) {
   });
 }
 
-function buildLimitations(chart) {
+function buildLimitations(chart, queryIntent) {
   const dynamicScope = chart.currentMajorPeriod
     ? "生年四化、大限年龄段与当前大限定位"
     : "生年四化与大限年龄段";
+  const queryScope = queryIntent.hasIntent
+    ? [`本轮已按查询意图收敛章节：${queryIntent.topics.join("、")}。`]
+    : [];
 
   return [
+    ...queryScope,
     `已接入${dynamicScope}，但尚未接入大限四化、流年，因此不能推具体年份事件。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
+}
+
+function selectFocusAreasByQueryIntent(focusAreas, queryIntent) {
+  if (!queryIntent.hasIntent) {
+    return focusAreas;
+  }
+
+  const requestedIds = new Set(queryIntent.focusAreaIds);
+  return focusAreas.filter((focusArea) => requestedIds.has(focusArea.id));
+}
+
+function getUnavailableFocusAreaIds(focusAreas, queryIntent) {
+  if (!queryIntent.hasIntent) {
+    return [];
+  }
+
+  const availableIds = new Set(focusAreas.map((focusArea) => focusArea.id));
+  return queryIntent.focusAreaIds.filter((id) => !availableIds.has(id));
 }
 
 function buildStarBalanceEvidenceItems(chart) {

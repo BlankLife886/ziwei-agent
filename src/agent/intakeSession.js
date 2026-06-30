@@ -1,6 +1,7 @@
 import { buildChart } from "../chartBuilder.js";
 import { BIRTH_PROFILE_FIELDS } from "../intake.js";
 import { parseProfilePatchFromText } from "./profilePatchParser.js";
+import { parseQueryIntentFromText } from "./queryIntentParser.js";
 import { runZiweiPipeline } from "./ziweiPipeline.js";
 
 // 多轮资料采集会反复发生两件事：
@@ -13,13 +14,16 @@ import { runZiweiPipeline } from "./ziweiPipeline.js";
 
 const PROFILE_FIELDS = new Set(BIRTH_PROFILE_FIELDS);
 
-export function createIntakeSession(initialProfile = {}, profilePatch = {}) {
+export function createIntakeSession(initialProfile = {}, profilePatch = {}, options = {}) {
   const profileDraft = mergeProfileDraft(initialProfile, profilePatch);
   const buildResult = buildChart(profileDraft);
-  const pipelineResult = runZiweiPipeline(buildResult);
+  const pipelineResult = runZiweiPipeline(buildResult, {
+    queryIntent: options.queryIntent
+  });
 
   return {
     status: pipelineResult.status,
+    queryIntent: pipelineResult.queryIntent,
     profileDraft,
     buildResult,
     pipelineResult,
@@ -35,11 +39,15 @@ export function createIntakeSessionFromText(
   parserOptions = {}
 ) {
   const parsedPatch = parseProfilePatchFromText(text, parserOptions);
-  const session = createIntakeSession(initialProfile, parsedPatch.patch);
+  const queryIntent = parseQueryIntentFromText(text);
+  const session = createIntakeSession(initialProfile, parsedPatch.patch, {
+    queryIntent
+  });
 
   return {
     ...session,
-    extractedItems: parsedPatch.extractedItems
+    extractedItems: parsedPatch.extractedItems,
+    queryIntent
   };
 }
 

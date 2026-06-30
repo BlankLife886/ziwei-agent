@@ -38,6 +38,13 @@ export function createReportPlan(agentResult) {
 }
 
 function buildOpening(agentResult) {
+  if (agentResult.queryIntent?.hasIntent) {
+    return [
+      `本报告以${agentResult.subject.name}的本命盘为分析对象。`,
+      `本轮按用户查询意图聚焦${agentResult.queryIntent.topics.join("、")}，只展开匹配章节和对应证据。`
+    ];
+  }
+
   return [
     `本报告以${agentResult.subject.name}的本命盘为分析对象。`,
     "先从命宫、身宫和星曜分布建立基础画像，再标注目前不能展开的分析边界。"
