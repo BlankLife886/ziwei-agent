@@ -11,6 +11,7 @@ export const REQUIRED_FIELDS = [
 export const BIRTH_PROFILE_FIELDS = [
   ...REQUIRED_FIELDS,
   "lunar_month",
+  "analysis_date",
   "use_true_solar_time",
   "is_leap_month"
 ];
@@ -33,6 +34,18 @@ export function validateBirthProfile(profile) {
 
   if (normalized.birth_date && !isValidDate(normalized.birth_date)) {
     errors.push("birth_date must use YYYY-MM-DD format");
+  }
+
+  if (normalized.analysis_date && !isValidDate(normalized.analysis_date)) {
+    errors.push("analysis_date must use YYYY-MM-DD format");
+  }
+
+  if (
+    isValidDate(normalized.birth_date) &&
+    isValidDate(normalized.analysis_date) &&
+    dateTimestamp(normalized.analysis_date) < dateTimestamp(normalized.birth_date)
+  ) {
+    errors.push("analysis_date must not be earlier than birth_date");
   }
 
   if (
@@ -69,6 +82,7 @@ export function normalizeProfile(profile) {
     calendar: stringValue(profile?.calendar),
     birth_date: stringValue(profile?.birth_date),
     lunar_month: numberOrNull(profile?.lunar_month),
+    analysis_date: stringValue(profile?.analysis_date),
     birth_time: stringValue(profile?.birth_time),
     birth_place: stringValue(profile?.birth_place),
     timezone: stringValue(profile?.timezone),
@@ -108,6 +122,10 @@ function isValidDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+function dateTimestamp(value) {
+  return new Date(`${value}T00:00:00Z`).getTime();
 }
 
 function parseBirthTime(value) {

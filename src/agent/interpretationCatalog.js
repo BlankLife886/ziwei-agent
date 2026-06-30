@@ -23,6 +23,7 @@ export const INTERPRETATION_IDS = {
   STAR_TIAN_GUAN_TRAVEL: "interpretation.star.tian-guan.travel",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
   MAJOR_PERIODS_STRUCTURE_ONLY: "interpretation.major-periods.structure-only",
+  CURRENT_MAJOR_PERIOD_LOCATOR_ONLY: "interpretation.current-major-period.locator-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -223,6 +224,14 @@ const INTERPRETATIONS = [
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.MAJOR_PERIODS],
     text: "当前大限只排出各宫对应的十年年龄段和顺逆方向，适合定位人生阶段落在哪一宫；尚未接入大限四化、流年与事件触发，所以不能据此断具体年份吉凶。"
+  },
+  {
+    id: INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY,
+    title: "当前大限定位的解释边界",
+    topic: "current-major-period",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.CURRENT_MAJOR_PERIOD, REFERENCE_IDS.MAJOR_PERIODS],
+    text: "当前大限定位只说明分析日期按虚岁落入哪一个十年大限；它还不能代表该阶段的具体吉凶，需要等待大限四化、流年和星曜组合规则。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

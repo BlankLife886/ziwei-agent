@@ -143,6 +143,28 @@ test("createReportPlan blocks report sections until required input exists", () =
   assert.ok(reportPlan.blockers.includes("请补充 birth_time"));
 });
 
+test("createReportPlan includes current major period section when available", () => {
+  const agentResult = createZiweiAgentResponse(buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  }));
+  const reportPlan = createReportPlan(agentResult);
+  const section = reportPlan.sections.find((item) => {
+    return item.id === "current-major-period";
+  });
+
+  assert.ok(section);
+  assert.deepEqual(section.referenceRefs, [
+    "rule.current-major-period",
+    "rule.major-periods"
+  ]);
+  assert.deepEqual(section.interpretationRefs, [
+    "interpretation.current-major-period.locator-only"
+  ]);
+  assert.ok(section.evidence.some((item) => item.includes("虚岁37岁")));
+  assert.ok(section.writingPrompt.includes("不把阶段定位写成事件断语"));
+});
+
 function createSampleProfile() {
   return {
     name: "示例命主",

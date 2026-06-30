@@ -136,6 +136,10 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
     return [INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY];
   }
 
+  if (focusAreaId === "current-major-period") {
+    return [INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY];
+  }
+
   return [];
 }
 
@@ -199,6 +203,11 @@ function getGuidingQuestions(focusAreaId) {
       "第一大限从几岁开始，落在哪一宫？",
       "大限顺逆方向是什么？",
       "当前只排出年龄段，哪些判断必须等大限四化和流年？"
+    ],
+    "current-major-period": [
+      "分析日期是哪一天？",
+      "按虚岁定位时命主处于哪一个大限？",
+      "这一定位目前只能支持什么层级的判断？"
     ]
   };
 
@@ -214,7 +223,8 @@ function getWritingPrompt(focusAreaId) {
     "body-palace": "说明身宫代表后天发力点，不要把身宫单独当成完整结论。",
     "star-balance": "先做星曜类别统计，再提醒读者当前缺少大限四化和流年，不能过度推演。",
     "birth-year-transformations": "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",
-    "major-periods": "只说明大限年龄段和顺逆方向，不把大限骨架写成具体事件判断。"
+    "major-periods": "只说明大限年龄段和顺逆方向，不把大限骨架写成具体事件判断。",
+    "current-major-period": "只说明分析日期对应的当前大限，不把阶段定位写成事件断语。"
   };
 
   return promptsByArea[focusAreaId] ?? "围绕证据写一段保守分析，并明确未知项。";

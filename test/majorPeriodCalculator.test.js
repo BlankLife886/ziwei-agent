@@ -3,8 +3,10 @@ import test from "node:test";
 import { createChartSkeleton } from "../src/chart.js";
 import { applyFiveElementClass } from "../src/fiveElementClassCalculator.js";
 import {
+  applyCurrentMajorPeriod,
   applyMajorPeriods,
   calculateMajorPeriods,
+  calculateNominalAge,
   determineMajorPeriodDirection
 } from "../src/majorPeriodCalculator.js";
 import { applyLifeAndBodyPalaces } from "../src/palaceCalculator.js";
@@ -111,6 +113,47 @@ test("applyMajorPeriods attaches major period skeleton to chart", () => {
   });
   assert.ok(
     result.calculationNotes.some((note) => note.includes("阳女逆行"))
+  );
+});
+
+test("calculateNominalAge uses traditional nominal age for analysis date", () => {
+  assert.equal(calculateNominalAge({
+    birthDate: "1990-05-18",
+    analysisDate: "2026-06-30"
+  }), 37);
+  assert.throws(() => {
+    calculateNominalAge({
+      birthDate: "1990-05-18",
+      analysisDate: "1990-01-01"
+    });
+  }, /analysisDate must not be earlier than birthDate/);
+});
+
+test("applyCurrentMajorPeriod locates the active major period by nominal age", () => {
+  const chart = applyMajorPeriods(createChartWithPalaces({
+    gender: "female",
+    yearStem: "庚"
+  }));
+  const result = applyCurrentMajorPeriod(chart, {
+    analysisDate: "2026-06-30"
+  });
+
+  assert.equal(result.currentMajorPeriod.ageType, "traditional-nominal-age");
+  assert.equal(result.currentMajorPeriod.ageLabel, "虚岁");
+  assert.equal(result.currentMajorPeriod.age, 37);
+  assert.deepEqual(result.currentMajorPeriod.period, {
+    number: 4,
+    palaceName: "子女宫",
+    branch: "寅",
+    palaceStem: "戊",
+    startAge: 34,
+    endAge: 43,
+    direction: "reverse",
+    directionLabel: "逆行",
+    genderLabel: "阳女"
+  });
+  assert.ok(
+    result.calculationNotes.some((note) => note.includes("虚岁37岁定位当前大限"))
   );
 });
 

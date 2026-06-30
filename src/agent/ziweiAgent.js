@@ -68,10 +68,7 @@ export function createZiweiAgentResponse(buildResult) {
     evidence: evidenceItems.map(formatEvidenceText),
     evidenceItems,
     focusAreas: buildFocusAreas(chart, palaceByName),
-    limitations: [
-      "已接入生年四化与大限年龄段，但尚未接入大限四化、流年，因此不能推具体年份事件。",
-      "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
-    ]
+    limitations: buildLimitations(chart)
   };
 }
 
@@ -84,6 +81,7 @@ function buildSubjectSummary(buildResult) {
     gender: profile.gender,
     calendar: profile.calendar,
     birthDate: profile.birth_date,
+    analysisDate: profile.analysis_date || null,
     chineseHour: buildResult.validation.chineseHour,
     lunarYearStem: lunarProfile.lunar_year_stem,
     lunarYearBranch: lunarProfile.lunar_year_branch,
@@ -96,7 +94,7 @@ function buildCoreEvidenceItems(chart, palaceByName) {
   const lifePalace = palaceByName.get("命宫");
   const bodyPalace = palaceByName.get(chart.bodyPalace?.name);
 
-  return [
+  const items = [
     createEvidenceItem(
       "core.life-palace-branch",
       `命宫在${chart.lifePalace.branch}`,
@@ -140,6 +138,17 @@ function buildCoreEvidenceItems(chart, palaceByName) {
       [REFERENCE_IDS.MAJOR_PERIODS]
     )
   ];
+
+  if (chart.currentMajorPeriod) {
+    items.push(createEvidenceItem(
+      "core.current-major-period",
+      `当前大限：${formatCurrentMajorPeriodSummary(chart)}`,
+      "chart.currentMajorPeriod",
+      [REFERENCE_IDS.CURRENT_MAJOR_PERIOD, REFERENCE_IDS.MAJOR_PERIODS]
+    ));
+  }
+
+  return items;
 }
 
 function buildFocusAreas(chart, palaceByName) {
@@ -147,7 +156,7 @@ function buildFocusAreas(chart, palaceByName) {
     return palaceByName.get(name);
   }).filter(Boolean);
 
-  return [
+  const focusAreas = [
     {
       id: "life-triad",
       title: "命宫与三方四正",
@@ -185,12 +194,34 @@ function buildFocusAreas(chart, palaceByName) {
       reason: "大限用于定位人生阶段落在哪一宫；当前先建立年龄段骨架，避免在没有运限结构时直接谈事件。",
       evidenceItems: buildMajorPeriodEvidenceItems(chart)
     }
-  ].map((focusArea) => {
+  ];
+
+  if (chart.currentMajorPeriod) {
+    focusAreas.push({
+      id: "current-major-period",
+      title: "当前大限定位",
+      reason: "按分析日期定位命主当前处于哪一个大限，只用于确认阶段落宫，不直接推事件。",
+      evidenceItems: buildCurrentMajorPeriodEvidenceItems(chart)
+    });
+  }
+
+  return focusAreas.map((focusArea) => {
     return {
       ...focusArea,
       evidence: focusArea.evidenceItems.map(formatEvidenceText)
     };
   });
+}
+
+function buildLimitations(chart) {
+  const dynamicScope = chart.currentMajorPeriod
+    ? "生年四化、大限年龄段与当前大限定位"
+    : "生年四化与大限年龄段";
+
+  return [
+    `已接入${dynamicScope}，但尚未接入大限四化、流年，因此不能推具体年份事件。`,
+    "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
+  ];
 }
 
 function buildStarBalanceEvidenceItems(chart) {
@@ -257,6 +288,17 @@ function buildMajorPeriodEvidenceItems(chart) {
       `大限：${formatMajorPeriodSummary(chart)}`,
       "chart.majorPeriods",
       [REFERENCE_IDS.MAJOR_PERIODS]
+    )
+  ];
+}
+
+function buildCurrentMajorPeriodEvidenceItems(chart) {
+  return [
+    createEvidenceItem(
+      "current-major-period.summary",
+      `当前大限：${formatCurrentMajorPeriodSummary(chart)}`,
+      "chart.currentMajorPeriod",
+      [REFERENCE_IDS.CURRENT_MAJOR_PERIOD, REFERENCE_IDS.MAJOR_PERIODS]
     )
   ];
 }
@@ -379,4 +421,19 @@ function formatMajorPeriodSummary(chart) {
   });
 
   return `${direction.genderLabel}${direction.directionLabel}；${periods.join("；")}`;
+}
+
+function formatCurrentMajorPeriodSummary(chart) {
+  const current = chart.currentMajorPeriod;
+
+  if (!current) {
+    return "未计算";
+  }
+
+  const period = current.period;
+  const periodText = period
+    ? `${period.startAge}-${period.endAge}岁${period.palaceName}${period.branch}`
+    : "未落入已排出的大限年龄段";
+
+  return `${current.analysisDate}按${current.ageLabel}${current.age}岁定位，${periodText}`;
 }

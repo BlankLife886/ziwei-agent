@@ -108,6 +108,10 @@ function composeInterpretationParagraph(section) {
     return composeMajorPeriodsParagraph(section);
   }
 
+  if (section.id === "current-major-period") {
+    return composeCurrentMajorPeriodParagraph(section);
+  }
+
   return `【草稿判断】本节应围绕“${section.guidingQuestions[0]}”展开，并严格使用本节列出的证据。`;
 }
 
@@ -160,6 +164,18 @@ function composeMajorPeriodsParagraph(section) {
   const boundaryText = getInterpretationText(
     section,
     INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY
+  );
+
+  return `【草稿判断】${joinJudgmentParts([
+    section.evidence[0],
+    boundaryText
+  ])}`;
+}
+
+function composeCurrentMajorPeriodParagraph(section) {
+  const boundaryText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY
   );
 
   return `【草稿判断】${joinJudgmentParts([

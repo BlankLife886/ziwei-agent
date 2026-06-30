@@ -10,6 +10,7 @@ test("findReferences returns known references in catalog order", () => {
     REFERENCE_IDS.STAR_BALANCE,
     REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
     REFERENCE_IDS.MAJOR_PERIODS,
+    REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
     REFERENCE_IDS.LIFE_TRIAD
   ]);
 
@@ -18,6 +19,7 @@ test("findReferences returns known references in catalog order", () => {
     [
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.MAJOR_PERIODS,
+      REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
       REFERENCE_IDS.LIFE_TRIAD,
       REFERENCE_IDS.STAR_BALANCE
     ]

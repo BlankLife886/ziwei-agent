@@ -7,7 +7,10 @@ import { createChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
 import { applyBirthYearFourTransformations } from "./fourTransformationCalculator.js";
 import { validateBirthProfile } from "./intake.js";
-import { applyMajorPeriods } from "./majorPeriodCalculator.js";
+import {
+  applyCurrentMajorPeriod,
+  applyMajorPeriods
+} from "./majorPeriodCalculator.js";
 import {
   applyTianFuStarGroup,
   applyZiWeiStar,
@@ -91,6 +94,12 @@ function buildChartFromResolvedProfile({ profile, chineseHour }) {
 
   if (chart.fiveElementClass && profile.lunar_year_stem) {
     chart = applyMajorPeriods(chart);
+  }
+
+  if (chart.majorPeriods.length > 0 && profile.analysis_date) {
+    chart = applyCurrentMajorPeriod(chart, {
+      analysisDate: profile.analysis_date
+    });
   }
 
   if (profile.lunar_month) {

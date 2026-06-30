@@ -68,6 +68,11 @@ test("buildChart creates a complete chart from a solar birth profile", () => {
       directionLabel: "逆行"
     }
   ]);
+  assert.equal(result.chart.profileSummary.analysisDate, "2026-06-30");
+  assert.equal(result.chart.currentMajorPeriod.ageLabel, "虚岁");
+  assert.equal(result.chart.currentMajorPeriod.age, 37);
+  assert.equal(result.chart.currentMajorPeriod.period.palaceName, "子女宫");
+  assert.equal(result.chart.currentMajorPeriod.period.branch, "寅");
 
   const palaceByBranch = new Map(
     result.chart.palaces.map((palace) => [palace.branch, palace])
@@ -124,6 +129,7 @@ function createSampleProfile() {
     gender: "female",
     calendar: "solar",
     birth_date: "1990-05-18",
+    analysis_date: "2026-06-30",
     birth_time: "23:30",
     birth_place: "Shanghai, China",
     timezone: "Asia/Shanghai",

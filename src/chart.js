@@ -88,6 +88,7 @@ export function createChartSkeleton(profile) {
       gender: profile.gender,
       calendar: profile.calendar,
       birthDate: profile.birth_date,
+      analysisDate: profile.analysis_date ?? null,
       lunarYear: profile.lunar_year ?? null,
       lunarYearStem: profile.lunar_year_stem ?? null,
       lunarYearBranch: profile.lunar_year_branch ?? null,
@@ -125,10 +126,11 @@ export function createChartSkeleton(profile) {
     // 每一个 palace 都是一宫，里面会放地支、主星、辅星、煞曜、四化等信息。
     palaces: PALACE_NAMES.map((name) => createEmptyPalace(name)),
 
-    // majorPeriods 用来放大限。
+    // majorPeriods 用来放十二个大限年龄段。
+    // currentMajorPeriod 用来放“分析日期”对应的当前大限定位。
     // annualPeriod 用来放当前流年。
-    // 这两个会在后续课程中实现。
     majorPeriods: [],
+    currentMajorPeriod: null,
     annualPeriod: null,
 
     // calculationNotes 记录关键计算过程。

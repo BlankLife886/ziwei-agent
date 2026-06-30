@@ -10,6 +10,7 @@ export const REFERENCE_IDS = {
   STAR_PLACEMENT: "rule.star-placement",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
   MAJOR_PERIODS: "rule.major-periods",
+  CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   LIFE_TRIAD: "framework.life-triad",
   BODY_PALACE: "framework.body-palace",
   STAR_BALANCE: "framework.star-balance"
@@ -45,6 +46,12 @@ const REFERENCES = [
     title: "大限年龄段计算规则",
     type: "implemented-rule",
     note: "根据五行局数确定起限年龄，并按阳男阴女顺行、阴男阳女逆行排布十二宫大限。"
+  },
+  {
+    id: REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
+    title: "当前大限定位规则",
+    type: "implemented-rule",
+    note: "根据分析日期按虚岁定位当前年龄，再匹配已排出的大限年龄段。"
   },
   {
     id: REFERENCE_IDS.LIFE_TRIAD,

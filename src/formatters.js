@@ -319,7 +319,27 @@ function formatMajorPeriodLines(chart) {
     "大限：",
     ...chart.majorPeriods.map((period) => {
       return `- ${period.startAge}-${period.endAge}岁：${period.palaceName}${period.branch}（${period.directionLabel}）`;
-    })
+    }),
+    ...formatCurrentMajorPeriodLines(chart)
+  ];
+}
+
+function formatCurrentMajorPeriodLines(chart) {
+  if (!chart.currentMajorPeriod) {
+    return [];
+  }
+
+  const current = chart.currentMajorPeriod;
+  const period = current.period;
+  const periodText = period
+    ? `${period.startAge}-${period.endAge}岁：${period.palaceName}${period.branch}（${period.directionLabel}）`
+    : "未落入已排出的大限年龄段";
+
+  return [
+    "当前大限定位：",
+    `- 分析日期：${current.analysisDate}`,
+    `- 年龄口径：${current.ageLabel}${current.age}岁`,
+    `- 所在大限：${periodText}`
   ];
 }
 

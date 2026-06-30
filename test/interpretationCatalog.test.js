@@ -39,6 +39,15 @@ test("findInterpretations includes palace role interpretation items", () => {
   assert.ok(interpretations[0].text.includes("资源经营"));
 });
 
+test("findInterpretations includes current major period boundary item", () => {
+  const interpretations = findInterpretations([
+    INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY
+  ]);
+
+  assert.equal(interpretations[0].topic, "current-major-period");
+  assert.ok(interpretations[0].text.includes("不能代表该阶段的具体吉凶"));
+});
+
 test("findStarRoleInterpretationRefs maps palace stars to controlled items", () => {
   const interpretationRefs = findStarRoleInterpretationRefs("财帛宫", {
     mainStars: ["天相"],

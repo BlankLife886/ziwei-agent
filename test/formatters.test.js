@@ -42,6 +42,18 @@ test("formatBuildResult renders validation errors", () => {
   ]);
 });
 
+test("formatBuildResult renders current major period when analysis date exists", () => {
+  const lines = formatBuildResult(buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  }));
+
+  assert.ok(lines.includes("当前大限定位："));
+  assert.ok(lines.includes("- 分析日期：2026-06-30"));
+  assert.ok(lines.includes("- 年龄口径：虚岁37岁"));
+  assert.ok(lines.includes("- 所在大限：34-43岁：子女宫寅（逆行）"));
+});
+
 test("formatAgentBriefing renders evidence and focus areas", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()));
   const lines = formatAgentBriefing(agentResult);

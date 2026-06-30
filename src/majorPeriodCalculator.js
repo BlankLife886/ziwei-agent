@@ -87,6 +87,74 @@ export function applyMajorPeriods(chart) {
   };
 }
 
+export function calculateNominalAge({ birthDate, analysisDate }) {
+  const birth = parseIsoDate(birthDate, "birthDate");
+  const analysis = parseIsoDate(analysisDate, "analysisDate");
+  const age = analysis.year - birth.year + 1;
+
+  if (analysis.timestamp < birth.timestamp) {
+    throw new Error("analysisDate must not be earlier than birthDate");
+  }
+
+  return age;
+}
+
+export function findMajorPeriodByAge(majorPeriods, age) {
+  return majorPeriods.find((period) => {
+    return age >= period.startAge && age <= period.endAge;
+  }) ?? null;
+}
+
+export function calculateCurrentMajorPeriod({
+  majorPeriods,
+  birthDate,
+  analysisDate
+}) {
+  const nominalAge = calculateNominalAge({
+    birthDate,
+    analysisDate
+  });
+  const period = findMajorPeriodByAge(majorPeriods, nominalAge);
+
+  return {
+    analysisDate,
+    birthDate,
+    ageType: "traditional-nominal-age",
+    ageLabel: "虚岁",
+    age: nominalAge,
+    period
+  };
+}
+
+export function applyCurrentMajorPeriod(chart, { analysisDate }) {
+  if (!analysisDate) {
+    return chart;
+  }
+
+  const currentMajorPeriod = calculateCurrentMajorPeriod({
+    majorPeriods: chart.majorPeriods,
+    birthDate: chart.profileSummary.birthDate,
+    analysisDate
+  });
+  const period = currentMajorPeriod.period;
+  const periodText = period
+    ? `${period.startAge}-${period.endAge}岁${period.palaceName}${period.branch}`
+    : "未落入已排出的大限年龄段";
+
+  return {
+    ...chart,
+    profileSummary: {
+      ...chart.profileSummary,
+      analysisDate
+    },
+    currentMajorPeriod,
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以分析日期${analysisDate}按虚岁${currentMajorPeriod.age}岁定位当前大限：${periodText}。`
+    ]
+  };
+}
+
 function wrapPalaceIndex(index, length) {
   return ((index % length) + length) % length;
 }
@@ -95,4 +163,28 @@ function assertValidYearStem(yearStem) {
   if (!HEAVENLY_STEMS.includes(yearStem)) {
     throw new Error("yearStem must be one of 甲乙丙丁戊己庚辛壬癸");
   }
+}
+
+function parseIsoDate(value, fieldName) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`${fieldName} must use YYYY-MM-DD format`);
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error(`${fieldName} must use YYYY-MM-DD format`);
+  }
+
+  return {
+    year,
+    month,
+    day,
+    timestamp: date.getTime()
+  };
 }

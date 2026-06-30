@@ -147,6 +147,29 @@ test("createReportDraft stays blocked when the report plan is blocked", () => {
   assert.deepEqual(reportDraft.sections, []);
 });
 
+test("createReportDraft writes current major period as locator-only", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart({
+      ...createSampleProfile(),
+      analysis_date: "2026-06-30"
+    }))
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const section = reportDraft.sections.find((item) => {
+    return item.id === "current-major-period";
+  });
+  const paragraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation";
+  });
+
+  assert.ok(paragraph.text.includes("2026-06-30按虚岁37岁定位"));
+  assert.ok(paragraph.text.includes("34-43岁子女宫寅"));
+  assert.ok(paragraph.text.includes("还不能代表该阶段的具体吉凶"));
+  assert.deepEqual(paragraph.interpretationRefs, [
+    "interpretation.current-major-period.locator-only"
+  ]);
+});
+
 test("createReportDraft stays conservative when a section has no interpretation item", () => {
   const reportDraft = createReportDraft({
     status: "planned",

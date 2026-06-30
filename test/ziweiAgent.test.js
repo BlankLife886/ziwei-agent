@@ -91,6 +91,35 @@ test("createZiweiAgentResponse asks for missing input before analysis", () => {
   assert.deepEqual(agentResult.evidenceItems, []);
 });
 
+test("createZiweiAgentResponse includes current major period when analysis date exists", () => {
+  const buildResult = buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+  const agentResult = createZiweiAgentResponse(buildResult);
+
+  assert.ok(
+    agentResult.evidenceItems.some((item) => {
+      return item.id === "core.current-major-period" &&
+        item.text.includes("虚岁37岁") &&
+        item.text.includes("34-43岁子女宫寅");
+    })
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-major-period")
+      .evidence.some((item) => item.includes("2026-06-30"))
+  );
+  assert.ok(
+    agentResult.evidenceItems
+      .find((item) => item.id === "core.current-major-period")
+      .referenceRefs.includes("rule.current-major-period")
+  );
+  assert.ok(
+    agentResult.limitations.some((item) => item.includes("当前大限定位"))
+  );
+});
+
 test("createZiweiAgentResponse blocks invalid input", () => {
   const buildResult = buildChart({
     ...createSampleProfile(),
