@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createIntakeSession,
+  createIntakeSessionFromText,
   mergeProfileDraft
 } from "../src/agent/intakeSession.js";
 
@@ -59,6 +60,23 @@ test("createIntakeSession reruns the full pipeline after new input is merged", (
   assert.deepEqual(session.questionItems, []);
   assert.equal(session.buildResult.status, "complete");
   assert.equal(session.pipelineResult.reportDraft.status, "drafted");
+});
+
+test("createIntakeSessionFromText parses text and reruns the full pipeline", () => {
+  const session = createIntakeSessionFromText(
+    createIncompleteProfile(),
+    "晚上11点半，上海出生。"
+  );
+
+  assert.equal(session.status, "drafted");
+  assert.equal(session.profileDraft.birth_time, "23:30");
+  assert.equal(session.profileDraft.birth_place, "上海");
+  assert.deepEqual(session.questionItems, []);
+  assert.ok(
+    session.extractedItems.some((item) => {
+      return item.field === "birth_time" && item.source === "晚上11点半";
+    })
+  );
 });
 
 function createIncompleteProfile() {

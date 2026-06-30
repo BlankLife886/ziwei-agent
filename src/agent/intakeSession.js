@@ -1,5 +1,6 @@
 import { buildChart } from "../chartBuilder.js";
 import { BIRTH_PROFILE_FIELDS } from "../intake.js";
+import { parseProfilePatchFromText } from "./profilePatchParser.js";
 import { runZiweiPipeline } from "./ziweiPipeline.js";
 
 // 多轮资料采集会反复发生两件事：
@@ -25,6 +26,16 @@ export function createIntakeSession(initialProfile = {}, profilePatch = {}) {
     questionItems: pipelineResult.agentResult.questionItems,
     nextQuestions: pipelineResult.agentResult.nextQuestions,
     nextAction: pipelineResult.nextAction
+  };
+}
+
+export function createIntakeSessionFromText(initialProfile = {}, text = "") {
+  const parsedPatch = parseProfilePatchFromText(text);
+  const session = createIntakeSession(initialProfile, parsedPatch.patch);
+
+  return {
+    ...session,
+    extractedItems: parsedPatch.extractedItems
   };
 }
 

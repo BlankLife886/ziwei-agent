@@ -18,6 +18,7 @@ npm start
 - `src/chartBuilder.js`: 编排输入校验、历法转换和各类排盘规则，输出可供 CLI、API 或 agent 使用的结构化命盘。
 - `src/agent/ziweiPipeline.js`: 统一编排 agent 主流程，把排盘结果转换为分析上下文、报告规划和正文草稿。
 - `src/agent/intakeSession.js`: 维护多轮输入中的出生资料草稿，把用户新补充的字段合并后重新调用完整 agent 流程。
+- `src/agent/profilePatchParser.js`: 把用户自然语言补充转换为可审计的结构化资料 patch，并保留字段来源片段。
 - `src/agent/referenceCatalog.js`: 定义本地规则与分析框架引用 id，后续可映射到书籍、PDF、笔记或知识库片段。
 - `src/agent/inputQuestionnaire.js`: 把缺失字段转换为结构化追问，包括字段名、提问话术、示例和追问原因，方便后续接入聊天 UI 或多轮 agent。
 - `src/agent/ziweiAgent.js`: 根据排盘结果生成 agent 分析上下文，包括核心证据、建议分析重点和当前限制；核心证据同时保留文本和结构化 `evidenceItems`。
