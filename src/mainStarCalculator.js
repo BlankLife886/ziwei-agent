@@ -31,6 +31,17 @@ const ZI_WEI_GROUP_OFFSETS = [
   ["廉贞", -8]
 ];
 
+const TIAN_FU_GROUP_OFFSETS = [
+  ["天府", 0],
+  ["太阴", 1],
+  ["贪狼", 2],
+  ["巨门", 3],
+  ["天相", 4],
+  ["天梁", 5],
+  ["七杀", 6],
+  ["破军", 10]
+];
+
 export function calculateZiWeiBranch({ lunarDay, fiveElementClassNumber }) {
   const day = Number(lunarDay);
   const classNumber = Number(fiveElementClassNumber);
@@ -79,6 +90,44 @@ export function calculateZiWeiStarBranches({ ziWeiBranch }) {
   return Object.fromEntries(
     ZI_WEI_GROUP_OFFSETS.map(([star, offset]) => {
       const branch = EARTHLY_BRANCHES[wrapEarthlyBranchIndex(ziWeiIndex + offset)];
+      return [star, branch];
+    })
+  );
+}
+
+export function calculateTianFuBranch({ ziWeiBranch }) {
+  const ziWeiIndex = EARTHLY_BRANCHES.indexOf(ziWeiBranch);
+
+  if (ziWeiIndex === -1) {
+    throw new Error("ziWeiBranch must be one of 子丑寅卯辰巳午未申酉戌亥");
+  }
+
+  // 安天府诀：
+  // 局定生日逆布紫，斜对天府顺流行，唯有寅申同一位，其余丑卯互安星。
+  //
+  // 把十二地支放进程序后，可以化成一个稳定映射：
+  // 紫微在子，天府在辰；紫微在辰，天府在子；
+  // 紫微在寅、申，天府同宫。
+  const tianFuIndex = wrapEarthlyBranchIndex(4 - ziWeiIndex);
+  return EARTHLY_BRANCHES[tianFuIndex];
+}
+
+export function calculateTianFuStarBranches({ tianFuBranch }) {
+  const tianFuIndex = EARTHLY_BRANCHES.indexOf(tianFuBranch);
+
+  if (tianFuIndex === -1) {
+    throw new Error("tianFuBranch must be one of 子丑寅卯辰巳午未申酉戌亥");
+  }
+
+  // 天府星系口诀：
+  // 天府太阴与贪狼，巨门天相及天梁，七杀空三破军位。
+  //
+  // 转成程序语言就是：
+  // 天府原位，太阴顺一，贪狼顺二，巨门顺三，
+  // 天相顺四，天梁顺五，七杀顺六，破军顺十。
+  return Object.fromEntries(
+    TIAN_FU_GROUP_OFFSETS.map(([star, offset]) => {
+      const branch = EARTHLY_BRANCHES[wrapEarthlyBranchIndex(tianFuIndex + offset)];
       return [star, branch];
     })
   );
@@ -163,6 +212,48 @@ export function applyZiWeiStarGroup(chart) {
     calculationNotes: [
       ...chart.calculationNotes,
       `以紫微在${ziWeiBranch}为起点，按紫微星系口诀逆布天机、太阳、武曲、天同、廉贞。`
+    ]
+  };
+}
+
+export function applyTianFuStarGroup(chart) {
+  const ziWeiBranch = chart.starAnchors?.ziWei?.branch;
+
+  if (!ziWeiBranch) {
+    throw new Error("starAnchors.ziWei.branch is required before placing Tian Fu group");
+  }
+
+  const tianFuBranch = calculateTianFuBranch({ ziWeiBranch });
+  const starBranches = calculateTianFuStarBranches({ tianFuBranch });
+  const palaces = chart.palaces.map((palace) => {
+    const starsForPalace = Object.entries(starBranches)
+      .filter(([, branch]) => branch === palace.branch)
+      .map(([star]) => star);
+
+    if (starsForPalace.length === 0) {
+      return palace;
+    }
+
+    return {
+      ...palace,
+      mainStars: starsForPalace.reduce(addUniqueStar, palace.mainStars)
+    };
+  });
+
+  return {
+    ...chart,
+    palaces,
+    starAnchors: {
+      ...chart.starAnchors,
+      tianFu: {
+        branch: tianFuBranch,
+        ziWeiBranch
+      },
+      tianFuGroup: starBranches
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以紫微在${ziWeiBranch}推天府在${tianFuBranch}，再按天府星系口诀顺布太阴、贪狼、巨门、天相、天梁、七杀、破军。`
     ]
   };
 }

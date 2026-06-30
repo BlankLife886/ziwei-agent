@@ -3,7 +3,11 @@ import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton, summarizeChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
 import { validateBirthProfile } from "./intake.js";
-import { applyZiWeiStar, applyZiWeiStarGroup } from "./mainStarCalculator.js";
+import {
+  applyTianFuStarGroup,
+  applyZiWeiStar,
+  applyZiWeiStarGroup
+} from "./mainStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "./palaceCalculator.js";
 
 async function main() {
@@ -69,6 +73,7 @@ async function main() {
   if (chart.fiveElementClass && lunarResult.profile.lunar_day) {
     chart = applyZiWeiStar(chart);
     chart = applyZiWeiStarGroup(chart);
+    chart = applyTianFuStarGroup(chart);
   }
 
   console.log("");
@@ -94,6 +99,12 @@ async function main() {
         .map(([star, branch]) => `${star}${branch}`)
         .join("、");
       console.log(`紫微星系：${ziWeiGroupText}`);
+    }
+    if (chart.starAnchors?.tianFuGroup) {
+      const tianFuGroupText = Object.entries(chart.starAnchors.tianFuGroup)
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`天府星系：${tianFuGroupText}`);
     }
     console.log("");
     console.log("计算说明：");
