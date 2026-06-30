@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { applyZuoFuYouBi } from "./auxiliaryStarCalculator.js";
+import { applyMonthlyAuxiliaryStars } from "./auxiliaryStarCalculator.js";
 import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton, summarizeChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
@@ -78,7 +78,7 @@ async function main() {
   }
 
   if (lunarResult.profile.lunar_month) {
-    chart = applyZuoFuYouBi(chart);
+    chart = applyMonthlyAuxiliaryStars(chart);
   }
 
   console.log("");
@@ -112,9 +112,13 @@ async function main() {
       console.log(`天府星系：${tianFuGroupText}`);
     }
     if (chart.starAnchors?.monthlyAuxiliaries) {
-      console.log(
-        `月系辅星：左辅${chart.starAnchors.monthlyAuxiliaries.左辅}、右弼${chart.starAnchors.monthlyAuxiliaries.右弼}`
-      );
+      const monthlyAuxiliaryText = Object.entries(
+        chart.starAnchors.monthlyAuxiliaries
+      )
+        .filter(([key]) => key !== "lunarMonth")
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`月系辅星：${monthlyAuxiliaryText}`);
     }
     console.log("");
     console.log("计算说明：");
