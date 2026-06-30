@@ -13,9 +13,11 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.equal(pipelineResult.reportDraft.status, "drafted");
   assert.deepEqual(
     pipelineResult.steps.map((step) => step.id),
-    ["query-intent", "agent-context", "report-plan", "report-draft"]
+    ["query-intent", "agent-context", "report-plan", "report-draft", "report-audit"]
   );
   assert.equal(pipelineResult.steps[0].status, "none");
+  assert.equal(pipelineResult.reportAudit.status, "passed");
+  assert.deepEqual(pipelineResult.reportAudit.issues, []);
   assert.ok(pipelineResult.nextAction.includes("审阅报告草稿"));
 });
 
@@ -127,6 +129,7 @@ test("runZiweiPipeline keeps the chain blocked when input is incomplete", () => 
   assert.equal(pipelineResult.agentResult.status, "needs_input");
   assert.equal(pipelineResult.reportPlan.status, "blocked");
   assert.equal(pipelineResult.reportDraft.status, "blocked");
+  assert.equal(pipelineResult.reportAudit.status, "skipped");
   assert.ok(pipelineResult.nextAction.includes("补齐出生资料"));
 });
 

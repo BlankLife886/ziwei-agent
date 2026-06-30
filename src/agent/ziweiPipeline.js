@@ -1,4 +1,5 @@
 import { createReportDraft } from "./reportComposer.js";
+import { auditReportOutput } from "./reportAuditor.js";
 import { createReportPlan } from "./reportPlanner.js";
 import { normalizeQueryIntent } from "./queryIntentParser.js";
 import { createZiweiAgentResponse } from "./ziweiAgent.js";
@@ -15,25 +16,32 @@ export function runZiweiPipeline(buildResult, options = {}) {
   const agentResult = createZiweiAgentResponse(buildResult, { queryIntent });
   const reportPlan = createReportPlan(agentResult);
   const reportDraft = createReportDraft(reportPlan);
+  const reportAudit = auditReportOutput(reportPlan, reportDraft);
 
   return {
-    status: derivePipelineStatus({ agentResult, reportPlan, reportDraft }),
-    nextAction: deriveNextAction({ agentResult, reportPlan, reportDraft }),
+    status: derivePipelineStatus({ agentResult, reportPlan, reportDraft, reportAudit }),
+    nextAction: deriveNextAction({ agentResult, reportPlan, reportDraft, reportAudit }),
     queryIntent,
     buildResult,
     agentResult,
     reportPlan,
     reportDraft,
+    reportAudit,
     steps: [
       buildStep("query-intent", queryIntent.status),
       buildStep("agent-context", agentResult.status),
       buildStep("report-plan", reportPlan.status),
-      buildStep("report-draft", reportDraft.status)
+      buildStep("report-draft", reportDraft.status),
+      buildStep("report-audit", reportAudit.status)
     ]
   };
 }
 
-function derivePipelineStatus({ agentResult, reportPlan, reportDraft }) {
+function derivePipelineStatus({ agentResult, reportPlan, reportDraft, reportAudit }) {
+  if (reportAudit.status === "failed") {
+    return "audit_failed";
+  }
+
   if (reportDraft.status === "drafted") {
     return "drafted";
   }
@@ -49,7 +57,7 @@ function derivePipelineStatus({ agentResult, reportPlan, reportDraft }) {
   return agentResult.status;
 }
 
-function deriveNextAction({ agentResult, reportPlan, reportDraft }) {
+function deriveNextAction({ agentResult, reportPlan, reportDraft, reportAudit }) {
   if (agentResult.status === "invalid_input") {
     return "请先修正出生资料格式，再重新排盘。";
   }
@@ -68,6 +76,10 @@ function deriveNextAction({ agentResult, reportPlan, reportDraft }) {
 
   if (reportDraft.status !== "drafted") {
     return "请先生成报告正文草稿。";
+  }
+
+  if (reportAudit.status === "failed") {
+    return "报告审计未通过，请先修复证据链、引用链或越界断语。";
   }
 
   return "可以审阅报告草稿，或继续接入知识库与更细的命理规则。";

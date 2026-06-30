@@ -34,6 +34,7 @@ birth/profile input
   -> reportPlanner
   -> reportComposer
   -> reportDraft
+  -> reportAuditor
 ```
 
 各层职责如下：
@@ -43,6 +44,7 @@ birth/profile input
 - `ziweiAgent`：把命盘转换为 agent 分析上下文，包括证据、分析重点、限制和追问。
 - `reportPlanner`：把分析上下文转换为报告章节计划。
 - `reportComposer`：用确定性模板生成保守正文草稿。
+- `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 
 这个分层是当前底座最重要的约束：计算层不写报告，报告层不重新排盘，解释层必须通过证据链回指到已计算结果。
 
@@ -94,6 +96,7 @@ birth/profile input
 - 有 agent 分析上下文层。
 - 有报告规划层。
 - 有正文草稿生成层。
+- 有报告审计层。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`interpretationRefs` 三段式追溯链。
 
@@ -104,7 +107,7 @@ birth/profile input
 - 大限四化和流年规则尚未接入。
 - 宫位、星曜、四化、运限的组合解释仍然很少。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
-- 当前报告仍偏底稿，需要后续加入分层章节、摘要、建议、引用说明和风险边界。
+- 当前报告仍偏底稿，需要后续加入分层章节、摘要、建议、引用说明和更细的风险边界。
 
 ## 下一步优先级
 
