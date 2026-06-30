@@ -18,13 +18,15 @@ const CALENDAR_PATTERNS = [
 
 const TIMEZONE_PATTERN = /(Asia\/[A-Za-z_]+|UTC[+-]\d{1,2}|GMT[+-]\d{1,2})/u;
 
-export function parseProfilePatchFromText(text) {
+export function parseProfilePatchFromText(text, options = {}) {
   const sourceText = String(text ?? "").trim();
+  const currentDate = options.currentDate ?? getCurrentIsoDate();
   const extractedItems = [
     extractName(sourceText),
     extractGender(sourceText),
     extractCalendar(sourceText),
     extractBirthDate(sourceText),
+    extractAnalysisDate(sourceText, currentDate),
     extractBirthTime(sourceText),
     extractBirthPlace(sourceText),
     extractTimezone(sourceText)
@@ -70,23 +72,54 @@ function extractCalendar(text) {
 }
 
 function extractBirthDate(text) {
-  const isoMatch = /(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/u.exec(text);
+  const isoMatches = text.matchAll(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/gu);
+  for (const match of isoMatches) {
+    if (!isAnalysisDateContext(text, match.index)) {
+      return createExtractedItem(
+        "birth_date",
+        formatDateParts(match[1], match[2], match[3]),
+        match[0]
+      );
+    }
+  }
+
+  const chineseMatches = text.matchAll(/(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})[日号]?/gu);
+  for (const match of chineseMatches) {
+    if (!isAnalysisDateContext(text, match.index)) {
+      return createExtractedItem(
+        "birth_date",
+        formatDateParts(match[1], match[2], match[3]),
+        match[0]
+      );
+    }
+  }
+
+  return null;
+}
+
+function extractAnalysisDate(text, currentDate) {
+  const isoMatch = /(?:分析日期|分析时间|以|按|截至|截止到|截止|到|看)[:：]?\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/u.exec(text);
   if (isoMatch) {
     return createExtractedItem(
-      "birth_date",
+      "analysis_date",
       formatDateParts(isoMatch[1], isoMatch[2], isoMatch[3]),
       isoMatch[0]
     );
   }
 
-  const chineseMatch = /(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})[日号]?/u.exec(text);
-  if (!chineseMatch) return null;
+  const chineseMatch = /(?:分析日期|分析时间|以|按|截至|截止到|截止|到|看)[:：]?\s*(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})[日号]?/u.exec(text);
+  if (chineseMatch) {
+    return createExtractedItem(
+      "analysis_date",
+      formatDateParts(chineseMatch[1], chineseMatch[2], chineseMatch[3]),
+      chineseMatch[0]
+    );
+  }
 
-  return createExtractedItem(
-    "birth_date",
-    formatDateParts(chineseMatch[1], chineseMatch[2], chineseMatch[3]),
-    chineseMatch[0]
-  );
+  const relativeMatch = /(今天|现在|当前|目前|此刻)/u.exec(text);
+  if (!relativeMatch) return null;
+
+  return createExtractedItem("analysis_date", currentDate, relativeMatch[0]);
 }
 
 function extractBirthTime(text) {
@@ -171,6 +204,16 @@ function createExtractedItem(field, value, source) {
 
 function cleanSource(value) {
   return value.trim().replace(/^[，,\s]+|[，,\s。；;]+$/g, "");
+}
+
+function isAnalysisDateContext(text, index) {
+  const prefix = text.slice(Math.max(0, index - 12), index);
+
+  return /(分析日期|分析时间|以|按|截至|截止到|截止|到|看)\s*[:：]?\s*$/u.test(prefix);
+}
+
+function getCurrentIsoDate() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function pad2(value) {

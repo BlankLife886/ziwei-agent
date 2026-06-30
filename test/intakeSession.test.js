@@ -79,6 +79,32 @@ test("createIntakeSessionFromText parses text and reruns the full pipeline", () 
   );
 });
 
+test("createIntakeSessionFromText accepts relative analysis date for current major period", () => {
+  const session = createIntakeSessionFromText(
+    {
+      ...createIncompleteProfile(),
+      birth_time: "23:30"
+    },
+    "现在看当前大限。",
+    {
+      currentDate: "2026-06-30"
+    }
+  );
+
+  assert.equal(session.status, "drafted");
+  assert.equal(session.profileDraft.analysis_date, "2026-06-30");
+  assert.equal(session.buildResult.chart.currentMajorPeriod.age, 37);
+  assert.equal(
+    session.buildResult.chart.currentMajorPeriod.period.palaceName,
+    "子女宫"
+  );
+  assert.ok(
+    session.extractedItems.some((item) => {
+      return item.field === "analysis_date" && item.source === "现在";
+    })
+  );
+});
+
 function createIncompleteProfile() {
   return {
     name: "示例命主",

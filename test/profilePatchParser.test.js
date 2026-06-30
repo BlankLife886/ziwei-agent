@@ -38,6 +38,39 @@ test("parseProfilePatchFromText handles ISO date and 24-hour time", () => {
   );
 });
 
+test("parseProfilePatchFromText extracts explicit analysis date without replacing birth date", () => {
+  const result = parseProfilePatchFromText(
+    "以 2026-06-30 分析当前大限，命主公历1990-05-18晚上11点半出生。"
+  );
+
+  assert.equal(result.patch.analysis_date, "2026-06-30");
+  assert.equal(result.patch.birth_date, "1990-05-18");
+  assert.equal(result.patch.birth_time, "23:30");
+  assert.ok(
+    result.extractedItems.some((item) => {
+      return item.field === "analysis_date" && item.source === "以 2026-06-30";
+    })
+  );
+});
+
+test("parseProfilePatchFromText maps relative analysis date from caller supplied current date", () => {
+  const result = parseProfilePatchFromText("现在看当前大限。", {
+    currentDate: "2026-06-30"
+  });
+
+  assert.deepEqual(result.patch, {
+    analysis_date: "2026-06-30"
+  });
+  assert.equal(result.extractedItems[0].source, "现在");
+});
+
+test("parseProfilePatchFromText does not treat analysis-only date as birth date", () => {
+  const result = parseProfilePatchFromText("以2026-06-30分析当前大限。");
+
+  assert.equal(result.patch.analysis_date, "2026-06-30");
+  assert.equal(result.patch.birth_date, undefined);
+});
+
 test("parseProfilePatchFromText returns an empty patch for unrelated text", () => {
   const result = parseProfilePatchFromText("我想先看看整体分析风格。");
 

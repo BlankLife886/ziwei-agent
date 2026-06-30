@@ -29,8 +29,12 @@ export function createIntakeSession(initialProfile = {}, profilePatch = {}) {
   };
 }
 
-export function createIntakeSessionFromText(initialProfile = {}, text = "") {
-  const parsedPatch = parseProfilePatchFromText(text);
+export function createIntakeSessionFromText(
+  initialProfile = {},
+  text = "",
+  parserOptions = {}
+) {
+  const parsedPatch = parseProfilePatchFromText(text, parserOptions);
   const session = createIntakeSession(initialProfile, parsedPatch.patch);
 
   return {
