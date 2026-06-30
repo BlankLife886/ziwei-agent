@@ -116,6 +116,7 @@ export function createChartSkeleton(profile) {
       kuiYue: null,
       tianGuanFu: null,
       tianChu: null,
+      jieKong: null,
       fireBell: null
     },
 
@@ -147,11 +148,12 @@ export function createEmptyPalace(name) {
     // 宫干需要通过“五虎遁”从出生年干推出来，因此这里先留空。
     stem: null,
 
-    // 主星、辅星、煞曜分开放。
-    // 这样后续分析时可以明确区分“核心格局”和“加会影响”。
+    // 主星、辅星、煞曜、空曜分开放。
+    // 这样后续分析时可以明确区分“核心格局”“加会助力”“冲击”和“空亡削弱”。
     mainStars: [],
     auxiliaryStars: [],
     maleficStars: [],
+    voidStars: [],
 
     // transformations 存四化，比如某宫有“化忌”。
     transformations: [],
@@ -176,6 +178,8 @@ export function summarizeChartSkeleton(chart) {
       palace.maleficStars.length > 0
         ? `｜煞曜：${palace.maleficStars.join("、")}`
         : "";
-    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}${maleficStars}`;
+    const voidStars =
+      palace.voidStars.length > 0 ? `｜空曜：${palace.voidStars.join("、")}` : "";
+    return `${number}. ${palace.name}：${branch}${mainStars}${auxiliaryStars}${maleficStars}${voidStars}`;
   });
 }

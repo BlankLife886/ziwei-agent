@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  applyJieKongStars,
   applyKuiYueStars,
   applyLuYangTuoStars,
   applyTianChuStar,
   applyTianGuanFuStars,
+  calculateJieKongBranches,
   calculateKuiYueBranches,
   calculateLuYangTuoBranches,
   calculateTianChuBranches,
@@ -231,4 +233,61 @@ test("tian chu is placed as an auxiliary star", () => {
     天厨: "寅"
   });
   assert.deepEqual(palaceByBranch.get("寅").auxiliaryStars, ["天厨"]);
+});
+
+test("jie kong matches the ten-stem reference table with primary and secondary void", () => {
+  const table = {
+    甲: { 正空: "申", 副空: "酉" },
+    乙: { 正空: "未", 副空: "午" },
+    丙: { 正空: "辰", 副空: "巳" },
+    丁: { 正空: "卯", 副空: "寅" },
+    戊: { 正空: "子", 副空: "丑" },
+    己: { 正空: "酉", 副空: "申" },
+    庚: { 正空: "午", 副空: "未" },
+    辛: { 正空: "巳", 副空: "辰" },
+    壬: { 正空: "寅", 副空: "卯" },
+    癸: { 正空: "丑", 副空: "子" }
+  };
+
+  for (const [yearStem, expected] of Object.entries(table)) {
+    assert.deepEqual(calculateJieKongBranches({ yearStem }), expected);
+  }
+});
+
+test("jie kong is placed into the void star slot", () => {
+  const chart = createChartSkeleton({
+    name: "示例命主",
+    gender: "female",
+    calendar: "solar",
+    birth_date: "1990-05-18",
+    lunar_year: 1990,
+    lunar_year_stem: "庚",
+    lunar_year_branch: "午",
+    lunar_month: 4,
+    lunar_day: 24,
+    birth_time: "23:30",
+    birth_place: "Shanghai, China",
+    timezone: "Asia/Shanghai",
+    use_true_solar_time: false,
+    is_leap_month: false
+  });
+  const chartWithPalaces = applyLifeAndBodyPalaces(chart, {
+    lunarMonth: 4,
+    chineseHour: "子时"
+  });
+  const result = applyJieKongStars(chartWithPalaces);
+
+  const palaceByBranch = new Map(
+    result.palaces.map((palace) => [palace.branch, palace])
+  );
+
+  assert.deepEqual(result.starAnchors.jieKong, {
+    yearStem: "庚",
+    正空: "午",
+    副空: "未"
+  });
+  assert.deepEqual(palaceByBranch.get("午").voidStars, ["截空（正空）"]);
+  assert.deepEqual(palaceByBranch.get("未").voidStars, ["截空（副空）"]);
+  assert.deepEqual(palaceByBranch.get("午").auxiliaryStars, []);
+  assert.deepEqual(palaceByBranch.get("午").maleficStars, []);
 });

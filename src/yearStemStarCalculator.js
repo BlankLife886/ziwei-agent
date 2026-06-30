@@ -2,11 +2,12 @@ import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from "./chart.js";
 
 // 第十堂实战课：安生年干系星曜。
 //
-// 这一课先做禄存、擎羊、陀罗，再扩展天魁、天钺、天官、天福、天厨。
+// 这一课先做禄存、擎羊、陀罗，再扩展天魁、天钺、天官、天福、天厨、截空。
 // 禄存按出生年干定位；擎羊、陀罗跟着禄存走，形成“羊禄陀”三连。
 // 其中禄存偏财禄助力，放入 auxiliaryStars；
 // 擎羊、陀罗属于煞曜，放入 maleficStars。
 // 天魁、天钺、天官、天福、天厨都按出生年干定位，属于辅助判断用的年干辅曜。
+// 截空属于空曜，一星占两宫，并分正空、副空，放入 voidStars。
 
 const LU_CUN_BRANCH_BY_YEAR_STEM = {
   甲: "寅",
@@ -60,6 +61,22 @@ const TIAN_CHU_BRANCH_BY_YEAR_STEM = {
   癸: "亥"
 };
 
+const JIE_KONG_BRANCHES_BY_YEAR_STEM = {
+  甲: ["申", "酉"],
+  乙: ["午", "未"],
+  丙: ["辰", "巳"],
+  丁: ["寅", "卯"],
+  戊: ["子", "丑"],
+  己: ["申", "酉"],
+  庚: ["午", "未"],
+  辛: ["辰", "巳"],
+  壬: ["寅", "卯"],
+  癸: ["子", "丑"]
+};
+
+const YANG_STEMS = new Set(["甲", "丙", "戊", "庚", "壬"]);
+const YANG_BRANCHES = new Set(["子", "寅", "辰", "午", "申", "戌"]);
+
 const AUXILIARY_STARS = new Set([
   "禄存",
   "天魁",
@@ -69,6 +86,7 @@ const AUXILIARY_STARS = new Set([
   "天厨"
 ]);
 const MALEFIC_STARS = new Set(["擎羊", "陀罗"]);
+const VOID_STARS = new Set(["截空（正空）", "截空（副空）"]);
 
 export function calculateLuYangTuoBranches({ yearStem }) {
   assertValidYearStem(yearStem);
@@ -104,6 +122,25 @@ export function calculateTianChuBranches({ yearStem }) {
   assertValidYearStem(yearStem);
   return {
     天厨: TIAN_CHU_BRANCH_BY_YEAR_STEM[yearStem]
+  };
+}
+
+export function calculateJieKongBranches({ yearStem }) {
+  assertValidYearStem(yearStem);
+
+  const branches = JIE_KONG_BRANCHES_BY_YEAR_STEM[yearStem];
+  const yearStemIsYang = YANG_STEMS.has(yearStem);
+  const primaryVoidBranch = branches.find((branch) => {
+    const branchIsYang = YANG_BRANCHES.has(branch);
+    return branchIsYang === yearStemIsYang;
+  });
+  const secondaryVoidBranch = branches.find(
+    (branch) => branch !== primaryVoidBranch
+  );
+
+  return {
+    正空: primaryVoidBranch,
+    副空: secondaryVoidBranch
   };
 }
 
@@ -251,6 +288,42 @@ export function applyTianChuStar(chart) {
   };
 }
 
+export function applyJieKongStars(chart) {
+  const yearStem = chart.profileSummary.lunarYearStem;
+  const starBranches = calculateJieKongBranches({ yearStem });
+  const starText = Object.entries(starBranches)
+    .map(([strength, branch]) => `${strength}${branch}`)
+    .join("，");
+
+  const palaces = chart.palaces.map((palace) => {
+    const starsForPalace = Object.entries(starBranches)
+      .filter(([, branch]) => branch === palace.branch)
+      .map(([strength]) => `截空（${strength}）`);
+
+    if (starsForPalace.length === 0) {
+      return palace;
+    }
+
+    return starsForPalace.reduce(placeStarInPalace, palace);
+  });
+
+  return {
+    ...chart,
+    palaces,
+    starAnchors: {
+      ...chart.starAnchors,
+      jieKong: {
+        yearStem,
+        ...starBranches
+      }
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以生年天干${yearStem}安截空：${starText}。`
+    ]
+  };
+}
+
 function placeStarInPalace(palace, star) {
   if (AUXILIARY_STARS.has(star)) {
     return {
@@ -263,6 +336,13 @@ function placeStarInPalace(palace, star) {
     return {
       ...palace,
       maleficStars: addUniqueStar(palace.maleficStars, star)
+    };
+  }
+
+  if (VOID_STARS.has(star)) {
+    return {
+      ...palace,
+      voidStars: addUniqueStar(palace.voidStars, star)
     };
   }
 
