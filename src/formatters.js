@@ -1,0 +1,148 @@
+import { summarizeChartSkeleton } from "./chart.js";
+
+// 展示层：把结构化 buildResult 转成 CLI 文本。
+//
+// 注意这里不做任何排盘计算，也不修改 chart。
+// 未来如果要输出 Markdown、JSON 报告或网页文本，可以在这里扩展不同 formatter。
+
+export function formatBuildResult(buildResult) {
+  if (buildResult.status === "invalid") {
+    return [
+      "资料格式错误：",
+      ...buildResult.validation.errors.map((error) => `- ${error}`)
+    ];
+  }
+
+  if (buildResult.status === "incomplete") {
+    return [
+      "资料不完整，需要补充：",
+      ...buildResult.validation.missingFields.map((field) => `- ${field}`)
+    ];
+  }
+
+  return [
+    ...formatProfileSummary(buildResult),
+    "",
+    "历法转换：",
+    ...buildResult.lunarResult.notes.map((note) => `- ${note}`),
+    "",
+    "命盘骨架已建立：",
+    ...summarizeChartSkeleton(buildResult.chart),
+    "",
+    ...formatChartDetails(buildResult.chart)
+  ];
+}
+
+function formatProfileSummary(buildResult) {
+  const profile = buildResult.validation.profile;
+
+  return [
+    "资料校验通过",
+    `命主：${profile.name}`,
+    `性别：${profile.gender}`,
+    `历法：${profile.calendar}`,
+    `出生日期：${profile.birth_date}`,
+    `出生时间：${profile.birth_time} (${buildResult.validation.chineseHour})`,
+    `出生地：${profile.birth_place}`,
+    `时区：${profile.timezone}`,
+    `真太阳时：${Boolean(profile.use_true_solar_time)}`,
+    `闰月：${Boolean(profile.is_leap_month)}`
+  ];
+}
+
+function formatChartDetails(chart) {
+  if (!chart.lifePalace || !chart.bodyPalace) {
+    return ["暂未计算命宫/身宫：需要提供 lunar_month。"];
+  }
+
+  const lines = [
+    `命宫：${chart.lifePalace.branch}`,
+    `身宫：${chart.bodyPalace.name}（${chart.bodyPalace.branch}）`
+  ];
+
+  if (chart.fiveElementClass) {
+    lines.push(
+      `五行局：${chart.fiveElementClass.name}（命宫${chart.fiveElementClass.palaceGanZhi}，纳音${chart.fiveElementClass.naYin}）`
+    );
+  }
+
+  lines.push(...formatStarAnchorLines(chart));
+  lines.push("");
+  lines.push("计算说明：");
+  lines.push(...chart.calculationNotes.map((note) => `- ${note}`));
+
+  return lines;
+}
+
+function formatStarAnchorLines(chart) {
+  const lines = [];
+
+  if (chart.starAnchors?.ziWei) {
+    lines.push(`紫微星：${chart.starAnchors.ziWei.branch}`);
+  }
+
+  appendAnchorLine(lines, {
+    label: "紫微星系",
+    anchor: chart.starAnchors?.ziWeiGroup
+  });
+  appendAnchorLine(lines, {
+    label: "天府星系",
+    anchor: chart.starAnchors?.tianFuGroup
+  });
+  appendAnchorLine(lines, {
+    label: "月系辅星",
+    anchor: chart.starAnchors?.monthlyAuxiliaries,
+    excludedKeys: ["lunarMonth"]
+  });
+  appendAnchorLine(lines, {
+    label: "日系辅星",
+    anchor: chart.starAnchors?.dailyAuxiliaries,
+    excludedKeys: ["lunarMonth", "lunarDay"]
+  });
+  appendAnchorLine(lines, {
+    label: "年干星曜",
+    anchor: chart.starAnchors?.luYangTuo,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
+    label: "魁钺星曜",
+    anchor: chart.starAnchors?.kuiYue,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
+    label: "官福星曜",
+    anchor: chart.starAnchors?.tianGuanFu,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
+    label: "天厨星曜",
+    anchor: chart.starAnchors?.tianChu,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
+    label: "截空星曜",
+    anchor: chart.starAnchors?.jieKong,
+    excludedKeys: ["yearStem"]
+  });
+  appendAnchorLine(lines, {
+    label: "火铃煞曜",
+    anchor: chart.starAnchors?.fireBell,
+    excludedKeys: ["yearBranch", "chineseHour"]
+  });
+
+  return lines;
+}
+
+function appendAnchorLine(lines, { label, anchor, excludedKeys = [] }) {
+  if (!anchor) {
+    return;
+  }
+
+  const excludedKeySet = new Set(excludedKeys);
+  const text = Object.entries(anchor)
+    .filter(([key]) => !excludedKeySet.has(key))
+    .map(([star, branch]) => `${star}${branch}`)
+    .join("、");
+
+  lines.push(`${label}：${text}`);
+}
