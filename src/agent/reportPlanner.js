@@ -73,7 +73,7 @@ function buildOpening(agentResult) {
 
   return [
     `本报告以${agentResult.subject.name}的本命盘为分析对象。`,
-    "先从命宫、身宫和星曜分布建立基础画像，再标注目前不能展开的分析边界。"
+    "先从命宫、事业、财富、婚姻、身宫和星曜分布建立基础画像，再标注目前不能展开的分析边界。"
   ];
 }
 

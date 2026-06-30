@@ -13,6 +13,8 @@ export const REFERENCE_IDS = {
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
+  CAREER_PALACE: "framework.career-palace",
+  WEALTH_PALACE: "framework.wealth-palace",
   SPOUSE_PALACE: "framework.spouse-palace",
   BODY_PALACE: "framework.body-palace",
   STAR_BALANCE: "framework.star-balance"
@@ -66,6 +68,18 @@ const REFERENCES = [
     title: "命宫与三方四正分析框架",
     type: "analysis-framework",
     note: "先看命宫，再合看财帛、官禄、迁移以建立基础格局。"
+  },
+  {
+    id: REFERENCE_IDS.CAREER_PALACE,
+    title: "官禄宫三方四正分析框架",
+    type: "analysis-framework",
+    note: "以官禄宫为本宫，合看命宫、财帛宫、夫妻宫作为事业发展的静态结构参照，再等待四化、限运、流年和职业知识库补足细断。"
+  },
+  {
+    id: REFERENCE_IDS.WEALTH_PALACE,
+    title: "财帛宫三方四正分析框架",
+    type: "analysis-framework",
+    note: "以财帛宫为本宫，合看命宫、官禄宫、福德宫作为财富资源的静态结构参照，再等待四化、限运、流年和风险规则补足细断。"
   },
   {
     id: REFERENCE_IDS.SPOUSE_PALACE,

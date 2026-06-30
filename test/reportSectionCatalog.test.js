@@ -76,6 +76,112 @@ test("report section catalog defines the reusable marriage triad contract", () =
   ]);
 });
 
+test("report section catalog defines dedicated career and wealth contracts", () => {
+  const careerFocusArea = {
+    id: "career-palace",
+    title: "官禄宫三方四正",
+    reason: "默认事业分析说明"
+  };
+  const wealthFocusArea = {
+    id: "wealth-palace",
+    title: "财帛宫三方四正",
+    reason: "默认财富分析说明"
+  };
+  const careerContext = {
+    hasIntent: true,
+    topics: ["事业"],
+    primaryPalaceNames: ["官禄宫"]
+  };
+  const wealthContext = {
+    hasIntent: true,
+    topics: ["财帛"],
+    primaryPalaceNames: ["财帛宫"]
+  };
+  const careerEvidenceItems = [
+    createPalaceEvidence("官禄宫", {
+      mainStars: ["天府"],
+      auxiliaryStars: [],
+      maleficStars: ["擎羊"],
+      voidStars: []
+    }),
+    createPalaceEvidence("命宫", {
+      mainStars: [],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createPalaceEvidence("财帛宫", {
+      mainStars: ["天相"],
+      auxiliaryStars: ["天魁"],
+      maleficStars: ["火星"],
+      voidStars: []
+    }),
+    createPalaceEvidence("夫妻宫", {
+      mainStars: ["武曲", "七杀"],
+      auxiliaryStars: [],
+      maleficStars: ["铃星"],
+      voidStars: []
+    })
+  ];
+  const wealthEvidenceItems = [
+    createPalaceEvidence("财帛宫", {
+      mainStars: ["天相"],
+      auxiliaryStars: ["天魁"],
+      maleficStars: ["火星"],
+      voidStars: []
+    }),
+    createPalaceEvidence("命宫", {
+      mainStars: [],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createPalaceEvidence("官禄宫", {
+      mainStars: ["天府"],
+      auxiliaryStars: [],
+      maleficStars: ["擎羊"],
+      voidStars: []
+    }),
+    createPalaceEvidence("福德宫", {
+      mainStars: ["紫微", "破军"],
+      auxiliaryStars: ["左辅", "右弼", "天钺"],
+      maleficStars: ["陀罗"],
+      voidStars: []
+    })
+  ];
+
+  assert.equal(buildSectionTitle(careerFocusArea, careerContext), "事业专题：官禄宫三方四正");
+  assert.equal(buildSectionTitle(wealthFocusArea, wealthContext), "财帛专题：财帛宫三方四正");
+  assert.ok(buildSectionWritingPrompt("career-palace", careerContext).includes("不推职位高低"));
+  assert.ok(buildSectionWritingPrompt("wealth-palace", wealthContext).includes("不推具体金额"));
+  assert.deepEqual(buildSectionInterpretationRefs("career-palace", careerEvidenceItems), [
+    "interpretation.career-triad.structure",
+    "interpretation.palace-role.career",
+    "interpretation.palace-role.life",
+    "interpretation.palace-role.wealth",
+    "interpretation.palace-role.spouse",
+    "interpretation.career-palace.static-only",
+    "interpretation.star.tian-fu.career",
+    "interpretation.star.qing-yang.career",
+    "interpretation.star.tian-xiang.wealth",
+    "interpretation.star.tian-kui.wealth",
+    "interpretation.star.huo-xing.wealth"
+  ]);
+  assert.deepEqual(buildSectionInterpretationRefs("wealth-palace", wealthEvidenceItems), [
+    "interpretation.wealth-triad.structure",
+    "interpretation.palace-role.wealth",
+    "interpretation.palace-role.life",
+    "interpretation.palace-role.career",
+    "interpretation.palace-role.wellbeing",
+    "interpretation.wealth-palace.static-only",
+    "interpretation.star.tian-xiang.wealth",
+    "interpretation.star.tian-kui.wealth",
+    "interpretation.star.huo-xing.wealth",
+    "interpretation.star.tian-fu.career",
+    "interpretation.star.qing-yang.career"
+  ]);
+});
+
 test("report section catalog keeps unknown sections conservative", () => {
   const focusArea = {
     id: "unknown-section",

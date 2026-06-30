@@ -13,6 +13,8 @@ import { REFERENCE_IDS } from "./referenceCatalog.js";
 // 4. 哪些能力尚未实现，不能过度断言。
 
 const LIFE_TRIAD_PALACE_NAMES = ["命宫", "财帛宫", "官禄宫", "迁移宫"];
+const CAREER_TRIAD_PALACE_NAMES = ["官禄宫", "命宫", "财帛宫", "夫妻宫"];
+const WEALTH_TRIAD_PALACE_NAMES = ["财帛宫", "命宫", "官禄宫", "福德宫"];
 const SPOUSE_TRIAD_PALACE_NAMES = ["夫妻宫", "迁移宫", "官禄宫", "福德宫"];
 const PALACE_EVIDENCE_IDS = {
   命宫: "life-palace",
@@ -173,6 +175,12 @@ function buildFocusAreas(chart, palaceByName) {
   const lifeTriadPalaces = LIFE_TRIAD_PALACE_NAMES.map((name) => {
     return palaceByName.get(name);
   }).filter(Boolean);
+  const careerTriadPalaces = CAREER_TRIAD_PALACE_NAMES.map((name) => {
+    return palaceByName.get(name);
+  }).filter(Boolean);
+  const wealthTriadPalaces = WEALTH_TRIAD_PALACE_NAMES.map((name) => {
+    return palaceByName.get(name);
+  }).filter(Boolean);
   const spouseTriadPalaces = SPOUSE_TRIAD_PALACE_NAMES.map((name) => {
     return palaceByName.get(name);
   }).filter(Boolean);
@@ -184,6 +192,22 @@ function buildFocusAreas(chart, palaceByName) {
       reason: "先看命宫，再合看财帛、官禄、迁移，建立命主核心格局。",
       evidenceItems: lifeTriadPalaces.map((palace) => {
         return createPalaceEvidenceItem("life-triad", palace);
+      })
+    },
+    {
+      id: "career-palace",
+      title: "官禄宫三方四正",
+      reason: "官禄宫用于建立事业发展报告的静态职业线索；当前合看官禄、命宫、财帛、夫妻四宫，不推职位高低或升迁时间。",
+      evidenceItems: careerTriadPalaces.map((palace) => {
+        return createPalaceEvidenceItem("career-palace", palace);
+      })
+    },
+    {
+      id: "wealth-palace",
+      title: "财帛宫三方四正",
+      reason: "财帛宫用于建立财富资源报告的静态资源线索；当前合看财帛、命宫、官禄、福德四宫，不推具体金额或投资结果。",
+      evidenceItems: wealthTriadPalaces.map((palace) => {
+        return createPalaceEvidenceItem("wealth-palace", palace);
       })
     },
     {
@@ -405,6 +429,14 @@ function createEvidenceItem(id, text, source, referenceRefs = [], metadata) {
 function getPalaceEvidenceReferenceRefs(scope) {
   if (scope === "life-triad") {
     return [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  if (scope === "career-palace") {
+    return [REFERENCE_IDS.CAREER_PALACE, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  if (scope === "wealth-palace") {
+    return [REFERENCE_IDS.WEALTH_PALACE, REFERENCE_IDS.STAR_PLACEMENT];
   }
 
   if (scope === "spouse-palace") {

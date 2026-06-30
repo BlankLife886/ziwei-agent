@@ -35,6 +35,30 @@ const SECTION_DEFINITIONS = {
     writingPrompt: "用谨慎语气说明命宫与三方四正的结构关系，只引用已经排出的宫位和星曜。",
     buildInterpretationRefs: buildLifeTriadInterpretationRefs
   },
+  "career-palace": {
+    titleWhenQueried: ({ focusArea, queryContext }) => {
+      return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
+    },
+    guidingQuestions: [
+      "官禄宫、命宫、财帛宫、夫妻宫分别提供了哪些已排出的宫位和星曜证据？",
+      "这些证据如何分别指向职责承担、主体基础、资源承接和合作牵动？",
+      "哪些事业判断必须等待四化、限运、流年和职业知识库？"
+    ],
+    writingPrompt: "围绕官禄宫三方四正写事业发展的保守结构分析，只描述职责承担、主体基础、资源承接和合作牵动，不推职位高低、升迁时间或具体职业结果。",
+    buildInterpretationRefs: buildCareerTriadInterpretationRefs
+  },
+  "wealth-palace": {
+    titleWhenQueried: ({ focusArea, queryContext }) => {
+      return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
+    },
+    guidingQuestions: [
+      "财帛宫、命宫、官禄宫、福德宫分别提供了哪些已排出的宫位和星曜证据？",
+      "这些证据如何分别指向资源经营、主体基础、事业承接和内在取舍？",
+      "哪些财富判断必须等待四化、限运、流年和风险分级规则？"
+    ],
+    writingPrompt: "围绕财帛宫三方四正写财富资源的保守结构分析，只描述资源经营、主体基础、事业承接和内在取舍，不推具体金额、投资结果或特定年份。",
+    buildInterpretationRefs: buildWealthTriadInterpretationRefs
+  },
   "spouse-palace": {
     titleWhenQueried: ({ focusArea, queryContext }) => {
       return `${queryContext.topics.join("与")}专题：${focusArea.title}`;
@@ -203,6 +227,30 @@ function buildSpouseTriadInterpretationRefs(evidenceItems) {
   ];
 }
 
+function buildCareerTriadInterpretationRefs(evidenceItems) {
+  return [
+    INTERPRETATION_IDS.CAREER_TRIAD_STRUCTURE,
+    ...getPalaceRoleInterpretationRefs(evidenceItems),
+    INTERPRETATION_IDS.CAREER_PALACE_STATIC_ONLY,
+    ...getStarRoleInterpretationRefsForPalaces(evidenceItems, [
+      "官禄宫",
+      "财帛宫"
+    ])
+  ];
+}
+
+function buildWealthTriadInterpretationRefs(evidenceItems) {
+  return [
+    INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE,
+    ...getPalaceRoleInterpretationRefs(evidenceItems),
+    INTERPRETATION_IDS.WEALTH_PALACE_STATIC_ONLY,
+    ...getStarRoleInterpretationRefsForPalaces(evidenceItems, [
+      "财帛宫",
+      "官禄宫"
+    ])
+  ];
+}
+
 function buildBodyPalaceInterpretationRefs(evidenceItems) {
   const sameAsLifePalace = evidenceItems.some((item) => {
     return item.text.startsWith("命宫");
@@ -228,8 +276,17 @@ function getPalaceRoleInterpretationRefs(evidenceItems) {
 }
 
 function getStarRoleInterpretationRefs(evidenceItems) {
+  return getStarRoleInterpretationRefsForPalaces(evidenceItems);
+}
+
+function getStarRoleInterpretationRefsForPalaces(evidenceItems, palaceNames) {
+  const allowedPalaceNames = palaceNames ? new Set(palaceNames) : null;
   const refs = evidenceItems.flatMap((item) => {
     if (!item.metadata?.palaceName || !item.metadata?.starGroups) {
+      return [];
+    }
+
+    if (allowedPalaceNames && !allowedPalaceNames.has(item.metadata.palaceName)) {
       return [];
     }
 

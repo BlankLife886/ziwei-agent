@@ -102,6 +102,14 @@ function composeInterpretationParagraph(section) {
     return composeBodyPalaceParagraph(section);
   }
 
+  if (section.id === "career-palace") {
+    return composeCareerPalaceParagraph(section);
+  }
+
+  if (section.id === "wealth-palace") {
+    return composeWealthPalaceParagraph(section);
+  }
+
   if (section.id === "spouse-palace") {
     return composeSpousePalaceParagraph(section);
   }
@@ -159,6 +167,22 @@ function composeSpousePalaceParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
     getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE),
     getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY),
+    composeStarRoleSynthesis(section)
+  ])}`;
+}
+
+function composeCareerPalaceParagraph(section) {
+  return `【草稿判断】${joinJudgmentParts([
+    getInterpretationText(section, INTERPRETATION_IDS.CAREER_TRIAD_STRUCTURE),
+    getInterpretationText(section, INTERPRETATION_IDS.CAREER_PALACE_STATIC_ONLY),
+    composeStarRoleSynthesis(section)
+  ])}`;
+}
+
+function composeWealthPalaceParagraph(section) {
+  return `【草稿判断】${joinJudgmentParts([
+    getInterpretationText(section, INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE),
+    getInterpretationText(section, INTERPRETATION_IDS.WEALTH_PALACE_STATIC_ONLY),
     composeStarRoleSynthesis(section)
   ])}`;
 }

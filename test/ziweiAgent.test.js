@@ -28,6 +28,8 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
     agentResult.focusAreas.map((area) => area.id),
     [
       "life-triad",
+      "career-palace",
+      "wealth-palace",
       "spouse-palace",
       "body-palace",
       "star-balance",
@@ -50,6 +52,28 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
       .find((area) => area.id === "life-triad")
       .evidenceItems.find((item) => item.id === "life-triad.wealth-palace")
       .referenceRefs.includes("framework.life-triad")
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "career-palace")
+      .evidence.some((item) => item.includes("官禄宫酉"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "career-palace")
+      .evidenceItems.find((item) => item.id === "career-palace.career-palace")
+      .referenceRefs.includes("framework.career-palace")
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "wealth-palace")
+      .evidence.some((item) => item.includes("财帛宫丑"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "wealth-palace")
+      .evidenceItems.find((item) => item.id === "wealth-palace.wealth-palace")
+      .referenceRefs.includes("framework.wealth-palace")
   );
   assert.ok(
     agentResult.focusAreas

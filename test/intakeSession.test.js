@@ -119,16 +119,24 @@ test("createIntakeSessionFromText uses query intent to narrow the drafted report
   );
 
   assert.equal(session.status, "drafted");
-  assert.deepEqual(session.queryIntent.focusAreaIds, ["life-triad"]);
+  assert.deepEqual(session.queryIntent.focusAreaIds, [
+    "career-palace",
+    "wealth-palace"
+  ]);
   assert.deepEqual(session.queryIntent.topics, ["事业", "财帛"]);
   assert.deepEqual(
     session.pipelineResult.reportPlan.sections.map((section) => section.id),
-    ["life-triad"]
+    ["career-palace", "wealth-palace"]
   );
   assert.ok(
     session.pipelineResult.reportDraft.sections[0].paragraphs
       .find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("官禄宫")
+  );
+  assert.ok(
+    session.pipelineResult.reportDraft.sections[1].paragraphs
+      .find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("财帛宫")
   );
 });
 

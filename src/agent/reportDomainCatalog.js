@@ -33,9 +33,9 @@ const REPORT_DOMAINS = [
     title: "事业发展报告",
     outputGoal: "围绕官禄宫、命宫三方四正和运限结构，分析职业倾向、职责承担、发展压力与阶段性机会。",
     currentSupport: "partial",
-    supportedFocusAreaIds: ["life-triad", "major-periods", "current-major-period"],
+    supportedFocusAreaIds: ["career-palace", "major-periods", "current-major-period"],
     missingCapabilities: [
-      "官禄宫专题解释目录",
+      "更多官禄宫组合解释",
       "大限四化",
       "流年规则",
       "行业与职业知识库映射"
@@ -46,9 +46,9 @@ const REPORT_DOMAINS = [
     title: "财富资源报告",
     outputGoal: "围绕财帛宫、命宫三方四正和运限结构，分析资源经营方式、财富压力、助力与风险边界。",
     currentSupport: "partial",
-    supportedFocusAreaIds: ["life-triad", "major-periods", "current-major-period"],
+    supportedFocusAreaIds: ["wealth-palace", "major-periods", "current-major-period"],
     missingCapabilities: [
-      "财帛宫专题解释目录",
+      "更多财帛宫组合解释",
       "大限四化",
       "流年财务触发规则",
       "风险分级表达"

@@ -9,6 +9,8 @@ import { REPORT_DOMAIN_IDS } from "./reportDomainCatalog.js";
 
 export const QUERY_FOCUS_IDS = {
   LIFE_TRIAD: "life-triad",
+  CAREER_PALACE: "career-palace",
+  WEALTH_PALACE: "wealth-palace",
   SPOUSE_PALACE: "spouse-palace",
   BODY_PALACE: "body-palace",
   STAR_BALANCE: "star-balance",
@@ -52,7 +54,7 @@ const QUERY_RULES = [
     ]
   },
   {
-    focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
+    focusAreaId: QUERY_FOCUS_IDS.CAREER_PALACE,
     topicId: "career",
     reportDomainId: REPORT_DOMAIN_IDS.CAREER,
     topic: "事业",
@@ -61,7 +63,7 @@ const QUERY_RULES = [
     patterns: [/事业|工作|职业|官禄/u]
   },
   {
-    focusAreaId: QUERY_FOCUS_IDS.LIFE_TRIAD,
+    focusAreaId: QUERY_FOCUS_IDS.WEALTH_PALACE,
     topicId: "wealth",
     reportDomainId: REPORT_DOMAIN_IDS.WEALTH,
     topic: "财帛",
@@ -151,6 +153,8 @@ const QUERY_RULES = [
 
 const TOPICS_BY_FOCUS_AREA_ID = {
   [QUERY_FOCUS_IDS.LIFE_TRIAD]: "命宫三方四正",
+  [QUERY_FOCUS_IDS.CAREER_PALACE]: "事业专题",
+  [QUERY_FOCUS_IDS.WEALTH_PALACE]: "财富专题",
   [QUERY_FOCUS_IDS.SPOUSE_PALACE]: "夫妻宫",
   [QUERY_FOCUS_IDS.BODY_PALACE]: "身宫落点",
   [QUERY_FOCUS_IDS.STAR_BALANCE]: "星曜类别",

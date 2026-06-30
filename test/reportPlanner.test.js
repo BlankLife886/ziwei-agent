@@ -15,6 +15,8 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections.map((section) => section.id),
     [
       "life-triad",
+      "career-palace",
+      "wealth-palace",
       "spouse-palace",
       "body-palace",
       "star-balance",
@@ -93,6 +95,70 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "life-triad")
       .references.some((reference) => reference.title.includes("三方四正"))
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "career-palace")
+      .referenceRefs,
+    ["framework.career-palace", "rule.star-placement", "framework.palace-role"]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "career-palace")
+      .interpretationRefs,
+    [
+      "interpretation.career-triad.structure",
+      "interpretation.palace-role.career",
+      "interpretation.palace-role.life",
+      "interpretation.palace-role.wealth",
+      "interpretation.palace-role.spouse",
+      "interpretation.career-palace.static-only",
+      "interpretation.star.tian-fu.career",
+      "interpretation.star.qing-yang.career",
+      "interpretation.star.tian-xiang.wealth",
+      "interpretation.star.tian-kui.wealth",
+      "interpretation.star.huo-xing.wealth"
+    ]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "career-palace")
+      .evidenceRefs,
+    [
+      "career-palace.career-palace",
+      "career-palace.life-palace",
+      "career-palace.wealth-palace",
+      "career-palace.spouse-palace"
+    ]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "wealth-palace")
+      .referenceRefs,
+    ["framework.wealth-palace", "rule.star-placement", "framework.palace-role"]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "wealth-palace")
+      .interpretationRefs,
+    [
+      "interpretation.wealth-triad.structure",
+      "interpretation.palace-role.wealth",
+      "interpretation.palace-role.life",
+      "interpretation.palace-role.career",
+      "interpretation.palace-role.wellbeing",
+      "interpretation.wealth-palace.static-only",
+      "interpretation.star.tian-xiang.wealth",
+      "interpretation.star.tian-kui.wealth",
+      "interpretation.star.huo-xing.wealth",
+      "interpretation.star.tian-fu.career",
+      "interpretation.star.qing-yang.career"
+    ]
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "wealth-palace")
+      .evidenceRefs,
+    [
+      "wealth-palace.wealth-palace",
+      "wealth-palace.life-palace",
+      "wealth-palace.career-palace",
+      "wealth-palace.wellbeing-palace"
+    ]
   );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
@@ -252,26 +318,30 @@ test("createReportPlan includes current major period section when available", ()
   assert.ok(section.writingPrompt.includes("不把阶段定位写成事件断语"));
 });
 
-test("createReportPlan specializes life triad section for career and wealth intent", () => {
+test("createReportPlan creates dedicated career and wealth sections for matching intent", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
     queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")
   });
   const reportPlan = createReportPlan(agentResult);
-  const section = reportPlan.sections[0];
+  const careerSection = reportPlan.sections[0];
+  const wealthSection = reportPlan.sections[1];
 
   assert.deepEqual(
     reportPlan.sections.map((item) => item.id),
-    ["life-triad"]
+    ["career-palace", "wealth-palace"]
   );
-  assert.equal(section.title, "事业与财帛专题：命宫与三方四正");
-  assert.ok(section.purpose.includes("官禄宫、财帛宫"));
-  assert.deepEqual(section.queryContext.topicIds, ["career", "wealth"]);
-  assert.deepEqual(section.queryContext.primaryPalaceNames, [
-    "官禄宫",
-    "财帛宫"
-  ]);
-  assert.ok(section.guidingQuestions[0].includes("官禄宫、财帛宫"));
-  assert.ok(section.writingPrompt.includes("事业、财帛"));
+  assert.equal(careerSection.title, "事业专题：官禄宫三方四正");
+  assert.equal(wealthSection.title, "财帛专题：财帛宫三方四正");
+  assert.ok(careerSection.purpose.includes("官禄宫用于建立事业发展报告"));
+  assert.ok(wealthSection.purpose.includes("财帛宫用于建立财富资源报告"));
+  assert.deepEqual(careerSection.queryContext.topicIds, ["career"]);
+  assert.deepEqual(wealthSection.queryContext.topicIds, ["wealth"]);
+  assert.deepEqual(careerSection.queryContext.primaryPalaceNames, ["官禄宫"]);
+  assert.deepEqual(wealthSection.queryContext.primaryPalaceNames, ["财帛宫"]);
+  assert.ok(careerSection.guidingQuestions[0].includes("官禄宫、命宫、财帛宫、夫妻宫"));
+  assert.ok(wealthSection.guidingQuestions[0].includes("财帛宫、命宫、官禄宫、福德宫"));
+  assert.ok(careerSection.writingPrompt.includes("不推职位高低"));
+  assert.ok(wealthSection.writingPrompt.includes("不推具体金额"));
 });
 
 test("createReportPlan accepts external topic context without matched items", () => {

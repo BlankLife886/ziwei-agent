@@ -18,6 +18,8 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections.map((section) => section.id),
     [
       "life-triad",
+      "career-palace",
+      "wealth-palace",
       "spouse-palace",
       "body-palace",
       "star-balance",
@@ -108,6 +110,30 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation-basis")
       .text.includes("天相在财帛宫的保守解释")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "career-palace")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不应只看官禄宫单点")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "career-palace")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不能推职位高低")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "wealth-palace")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不应只看财帛宫单点")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "wealth-palace")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不能推具体金额")
   );
   assert.ok(
     reportDraft.sections
@@ -238,37 +264,42 @@ test("createReportDraft writes current major period as locator-only", () => {
   ]);
 });
 
-test("createReportDraft keeps life triad synthesis focused on requested topics", () => {
+test("createReportDraft writes dedicated career and wealth drafts for requested topics", () => {
   const reportPlan = createReportPlan(
     createZiweiAgentResponse(buildChart(createSampleProfile()), {
       queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")
     })
   );
   const reportDraft = createReportDraft(reportPlan);
-  const section = reportDraft.sections[0];
-  const paragraph = section.paragraphs.find((item) => {
+  const careerSection = reportDraft.sections[0];
+  const wealthSection = reportDraft.sections[1];
+  const careerParagraph = careerSection.paragraphs.find((item) => {
     return item.kind === "interpretation";
   });
-  const basisParagraph = section.paragraphs.find((item) => {
+  const wealthParagraph = wealthSection.paragraphs.find((item) => {
+    return item.kind === "interpretation";
+  });
+  const careerBasisParagraph = careerSection.paragraphs.find((item) => {
     return item.kind === "interpretation-basis";
   });
 
-  assert.equal(section.title, "事业与财帛专题：命宫与三方四正");
-  assert.ok(paragraph.text.includes("优先查看官禄宫、财帛宫"));
-  assert.ok(paragraph.text.includes("财帛宫见天相、天魁、火星"));
-  assert.ok(paragraph.text.includes("官禄宫见天府、擎羊"));
-  assert.ok(!paragraph.text.includes("迁移宫见廉贞"));
-  assert.ok(basisParagraph.text.includes("财帛宫的分析角色"));
-  assert.ok(basisParagraph.text.includes("官禄宫的分析角色"));
-  assert.ok(!basisParagraph.text.includes("迁移宫的分析角色"));
-  assert.ok(!basisParagraph.text.includes("廉贞在迁移宫"));
-  assert.ok(!paragraph.interpretationRefs.includes(
+  assert.equal(careerSection.title, "事业专题：官禄宫三方四正");
+  assert.equal(wealthSection.title, "财帛专题：财帛宫三方四正");
+  assert.ok(careerParagraph.text.includes("官禄宫见天府、擎羊"));
+  assert.ok(careerParagraph.text.includes("财帛宫见天相、天魁、火星"));
+  assert.ok(careerParagraph.text.includes("不能推职位高低"));
+  assert.ok(wealthParagraph.text.includes("财帛宫见天相、天魁、火星"));
+  assert.ok(wealthParagraph.text.includes("官禄宫见天府、擎羊"));
+  assert.ok(wealthParagraph.text.includes("不能推具体金额"));
+  assert.ok(!careerParagraph.text.includes("迁移宫见廉贞"));
+  assert.ok(!wealthParagraph.text.includes("夫妻宫见武曲"));
+  assert.ok(careerBasisParagraph.text.includes("官禄宫的分析角色"));
+  assert.ok(!careerBasisParagraph.text.includes("廉贞在迁移宫"));
+  assert.ok(!careerParagraph.interpretationRefs.includes(
     "interpretation.star.lian-zhen.travel"
   ));
-  assert.deepEqual(section.queryContext.primaryPalaceNames, [
-    "官禄宫",
-    "财帛宫"
-  ]);
+  assert.deepEqual(careerSection.queryContext.primaryPalaceNames, ["官禄宫"]);
+  assert.deepEqual(wealthSection.queryContext.primaryPalaceNames, ["财帛宫"]);
 });
 
 test("createReportDraft stays conservative when a section has no interpretation item", () => {

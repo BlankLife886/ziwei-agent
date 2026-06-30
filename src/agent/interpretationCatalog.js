@@ -15,6 +15,10 @@ export const INTERPRETATION_IDS = {
   PALACE_ROLE_CAREER: "interpretation.palace-role.career",
   PALACE_ROLE_TRAVEL: "interpretation.palace-role.travel",
   PALACE_ROLE_WELLBEING: "interpretation.palace-role.wellbeing",
+  CAREER_TRIAD_STRUCTURE: "interpretation.career-triad.structure",
+  CAREER_PALACE_STATIC_ONLY: "interpretation.career-palace.static-only",
+  WEALTH_TRIAD_STRUCTURE: "interpretation.wealth-triad.structure",
+  WEALTH_PALACE_STATIC_ONLY: "interpretation.wealth-palace.static-only",
   SPOUSE_TRIAD_STRUCTURE: "interpretation.spouse-triad.structure",
   SPOUSE_PALACE_STATIC_ONLY: "interpretation.spouse-palace.static-only",
   STAR_WU_QU_SPOUSE: "interpretation.star.wu-qu.spouse",
@@ -163,7 +167,41 @@ const INTERPRETATIONS = [
     palaceName: "夫妻宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
-    text: "夫妻宫用于观察关系模式、伴侣互动和婚恋议题的结构线索；它不是单独判定婚姻结果的充分依据。"
+    text: "夫妻宫用于观察关系模式、伴侣互动和合作牵动；在婚恋专题中可作为关系线索，在事业专题中也只能作为关系与合作参照，不能单独判定结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.CAREER_TRIAD_STRUCTURE,
+    title: "官禄宫三方四正结构观察",
+    topic: "career-triad",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "事业发展报告不应只看官禄宫单点；官禄宫先看职责承担与职业路径，再合看命宫的主体基础、财帛宫的资源承接、夫妻宫的合作与关系牵动。"
+  },
+  {
+    id: INTERPRETATION_IDS.CAREER_PALACE_STATIC_ONLY,
+    title: "官禄宫静态解释边界",
+    topic: "career-palace",
+    palaceName: "官禄宫",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "当前事业专题只使用本命盘静态宫位和星曜，适合描述职业结构、职责压力、资源配合与合作参照；尚未接入大限四化、流年和职业知识库，因此不能推职位高低、升迁时间或具体职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE,
+    title: "财帛宫三方四正结构观察",
+    topic: "wealth-triad",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "财富资源报告不应只看财帛宫单点；财帛宫先看资源经营与取用方式，再合看命宫的主体基础、官禄宫的事业承接、福德宫的内在满足与承压方式。"
+  },
+  {
+    id: INTERPRETATION_IDS.WEALTH_PALACE_STATIC_ONLY,
+    title: "财帛宫静态解释边界",
+    topic: "wealth-palace",
+    palaceName: "财帛宫",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "当前财富专题只使用本命盘静态宫位和星曜，适合描述资源经营方式、助力、压力与内在取舍；尚未接入大限四化、流年和风险分级规则，因此不能推具体金额、投资结果或特定年份。"
   },
   {
     id: INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
@@ -222,7 +260,7 @@ const INTERPRETATIONS = [
     palaceName: "福德宫",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
-    text: "福德宫在婚姻感情专题中用于观察内在感受、精神满足、情绪恢复力和关系中的心理底色。"
+    text: "福德宫用于观察内在感受、精神满足、情绪恢复力和承压方式；放入不同专题时，只能作为心理与取舍层面的参照。"
   },
   {
     id: INTERPRETATION_IDS.STAR_ZI_WEI_WELLBEING,
