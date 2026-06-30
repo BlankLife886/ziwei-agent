@@ -35,6 +35,21 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .referenceRefs,
     ["framework.life-triad", "rule.star-placement"]
   );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .interpretationRefs,
+    [
+      "interpretation.life-triad.structure",
+      "interpretation.life-triad.empty-life-palace"
+    ]
+  );
+  assert.ok(
+    reportPlan.sections
+      .find((section) => section.id === "life-triad")
+      .interpretations.some((interpretation) => {
+        return interpretation.title.includes("命宫无已安星曜");
+      })
+  );
   assert.ok(
     reportPlan.sections
       .find((section) => section.id === "life-triad")

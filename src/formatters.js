@@ -101,7 +101,8 @@ export function formatReportPlan(reportPlan) {
         `  关键问题：${section.guidingQuestions.join(" / ")}`,
         "  可用证据：",
         ...formatEvidenceItems(section),
-        ...formatReferences(section)
+        ...formatReferences(section),
+        ...formatInterpretations(section)
       ];
     }),
     "",
@@ -162,6 +163,19 @@ function formatReferences(section) {
   ];
 }
 
+function formatInterpretations(section) {
+  if (!section.interpretations || section.interpretations.length === 0) {
+    return [];
+  }
+
+  return [
+    "  解释条目：",
+    ...section.interpretations.map((interpretation) => {
+      return `    - [${interpretation.id}] ${interpretation.title}（风险：${interpretation.riskLevel}）`;
+    })
+  ];
+}
+
 function formatParagraph(paragraph) {
   if (typeof paragraph === "string") {
     return paragraph;
@@ -177,6 +191,10 @@ function formatParagraph(paragraph) {
 
   if (referenceRefs.length > 0) {
     notes.push(`参考：${referenceRefs.join("、")}`);
+  }
+
+  if (paragraph.interpretationRefs?.length > 0) {
+    notes.push(`解释：${paragraph.interpretationRefs.join("、")}`);
   }
 
   if (notes.length === 0) {

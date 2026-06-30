@@ -1,3 +1,5 @@
+import { INTERPRETATION_IDS } from "./interpretationCatalog.js";
+
 // 命理报告草稿生成器。
 //
 // reportPlanner 负责“应该写哪些章节”，这里负责把章节计划写成可读草稿。
@@ -30,6 +32,8 @@ function composeSectionDraft(section) {
   return {
     id: section.id,
     title: section.title,
+    interpretationRefs: section.interpretationRefs,
+    interpretations: section.interpretations,
     referenceRefs: section.referenceRefs,
     references: section.references,
     paragraphs: [
@@ -49,7 +53,8 @@ function composeSectionDraft(section) {
         "interpretation",
         composeInterpretationParagraph(section),
         section.evidenceRefs,
-        section.referenceRefs
+        section.referenceRefs,
+        section.interpretationRefs
       )
     ]
   };
@@ -85,24 +90,24 @@ function composeLifeTriadParagraph(section) {
   });
 
   if (emptyLifePalace) {
-    return "【草稿判断】命宫本身目前没有已安入的星曜，因此不宜只凭命宫下结论；应把财帛宫、官禄宫、迁移宫作为主要参照，先看三方四正如何补足命宫信息。";
+    return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE)}`;
   }
 
-  return "【草稿判断】命宫已有星曜证据，可以先描述命宫呈现的基础气质，再用财帛宫、官禄宫、迁移宫校正和补充。";
+  return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE)}`;
 }
 
 function composeBodyPalaceParagraph(section) {
   const sameAsLifePalace = section.evidence.some((item) => item.startsWith("命宫"));
 
   if (sameAsLifePalace) {
-    return "【草稿判断】身宫与命宫同宫时，可以把先天气质和后天发力点放在一起观察；但仍需结合三方四正，不能只靠单宫完成判断。";
+    return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE)}`;
   }
 
-  return "【草稿判断】身宫与命宫分宫时，可把身宫视为后天行动重心，再回头检查它是否强化或修正命宫信息。";
+  return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.BODY_PALACE_DIFFERENT_FROM_LIFE)}`;
 }
 
 function composeStarBalanceParagraph(section) {
-  return "【草稿判断】当前已能统计主星、辅星、煞曜与空曜的分布，但尚未纳入四化和限运，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。";
+  return `【草稿判断】${getInterpretationText(section, INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY)}`;
 }
 
 function composeClosing(reportPlan) {
@@ -113,11 +118,20 @@ function composeClosing(reportPlan) {
   ];
 }
 
-function createParagraph(kind, text, evidenceRefs, referenceRefs) {
+function getInterpretationText(section, interpretationId) {
+  const interpretation = section.interpretations?.find((item) => {
+    return item.id === interpretationId;
+  });
+
+  return interpretation?.text ?? "本节缺少对应解释条目，暂只保留证据描述，不扩展判断。";
+}
+
+function createParagraph(kind, text, evidenceRefs, referenceRefs, interpretationRefs = []) {
   return {
     kind,
     text,
     evidenceRefs,
-    referenceRefs
+    referenceRefs,
+    interpretationRefs
   };
 }

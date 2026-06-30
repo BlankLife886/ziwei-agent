@@ -43,6 +43,16 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .referenceRefs,
     ["framework.life-triad", "rule.star-placement"]
   );
+  assert.deepEqual(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .interpretationRefs,
+    [
+      "interpretation.life-triad.structure",
+      "interpretation.life-triad.empty-life-palace"
+    ]
+  );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });
 
@@ -57,6 +67,38 @@ test("createReportDraft stays blocked when the report plan is blocked", () => {
 
   assert.equal(reportDraft.status, "blocked");
   assert.deepEqual(reportDraft.sections, []);
+});
+
+test("createReportDraft stays conservative when a section has no interpretation item", () => {
+  const reportDraft = createReportDraft({
+    status: "planned",
+    subject: {
+      name: "示例命主"
+    },
+    opening: [],
+    guardrails: [],
+    sections: [
+      {
+        id: "star-balance",
+        title: "星曜类别平衡",
+        purpose: "检查星曜类别。",
+        evidence: ["主星 14 颗"],
+        evidenceRefs: ["star-balance.main-stars"],
+        referenceRefs: [],
+        references: [],
+        interpretationRefs: [],
+        interpretations: [],
+        guidingQuestions: ["当前能说什么？"]
+      }
+    ]
+  });
+
+  assert.equal(reportDraft.status, "drafted");
+  assert.ok(
+    reportDraft.sections[0].paragraphs
+      .find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("缺少对应解释条目")
+  );
 });
 
 function createSampleProfile() {

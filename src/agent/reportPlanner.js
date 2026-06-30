@@ -1,3 +1,7 @@
+import {
+  INTERPRETATION_IDS,
+  findInterpretations
+} from "./interpretationCatalog.js";
 import { findReferences } from "./referenceCatalog.js";
 
 // 命理报告草稿规划器。
@@ -41,7 +45,9 @@ function buildOpening(agentResult) {
 
 function buildSectionFromFocusArea(focusArea) {
   const evidenceItems = normalizeEvidenceItems(focusArea);
-  const referenceRefs = collectReferenceRefs(evidenceItems);
+  const interpretationRefs = getInterpretationRefs(focusArea.id, evidenceItems);
+  const interpretations = findInterpretations(interpretationRefs);
+  const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
 
   return {
     id: focusArea.id,
@@ -51,6 +57,8 @@ function buildSectionFromFocusArea(focusArea) {
     evidence: evidenceItems.map((item) => item.text),
     evidenceItems,
     evidenceRefs: evidenceItems.map((item) => item.id),
+    interpretationRefs,
+    interpretations,
     referenceRefs,
     references: findReferences(referenceRefs),
     writingPrompt: getWritingPrompt(focusArea.id)
@@ -72,12 +80,48 @@ function normalizeEvidenceItems(focusArea) {
   });
 }
 
-function collectReferenceRefs(evidenceItems) {
+function collectReferenceRefs(evidenceItems, interpretations) {
   const referenceRefs = evidenceItems.flatMap((item) => {
     return item.referenceRefs ?? [];
   });
+  const interpretationSourceRefs = interpretations.flatMap((interpretation) => {
+    return interpretation.sourceRefs;
+  });
 
-  return [...new Set(referenceRefs)];
+  return [...new Set([...referenceRefs, ...interpretationSourceRefs])];
+}
+
+function getInterpretationRefs(focusAreaId, evidenceItems) {
+  if (focusAreaId === "life-triad") {
+    const refs = [INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE];
+    const emptyLifePalace = evidenceItems.some((item) => {
+      return item.text.includes("命宫") && item.text.includes("无已安星曜");
+    });
+
+    if (emptyLifePalace) {
+      refs.push(INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE);
+    }
+
+    return refs;
+  }
+
+  if (focusAreaId === "body-palace") {
+    const sameAsLifePalace = evidenceItems.some((item) => {
+      return item.text.startsWith("命宫");
+    });
+
+    return [
+      sameAsLifePalace
+        ? INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE
+        : INTERPRETATION_IDS.BODY_PALACE_DIFFERENT_FROM_LIFE
+    ];
+  }
+
+  if (focusAreaId === "star-balance") {
+    return [INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY];
+  }
+
+  return [];
 }
 
 function getGuidingQuestions(focusAreaId) {
