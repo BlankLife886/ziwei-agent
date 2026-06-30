@@ -14,7 +14,10 @@ import {
 } from "./mainStarCalculator.js";
 import { applyFireBellStars } from "./maleficStarCalculator.js";
 import { applyLifeAndBodyPalaces } from "./palaceCalculator.js";
-import { applyLuYangTuoStars } from "./yearStemStarCalculator.js";
+import {
+  applyKuiYueStars,
+  applyLuYangTuoStars
+} from "./yearStemStarCalculator.js";
 
 async function main() {
   const profilePath = process.argv[2];
@@ -92,6 +95,7 @@ async function main() {
 
   if (lunarResult.profile.lunar_year_stem) {
     chart = applyLuYangTuoStars(chart);
+    chart = applyKuiYueStars(chart);
   }
 
   if (lunarResult.profile.lunar_year_branch && result.chineseHour) {
@@ -154,6 +158,13 @@ async function main() {
         .map(([star, branch]) => `${star}${branch}`)
         .join("、");
       console.log(`年干星曜：${luYangTuoText}`);
+    }
+    if (chart.starAnchors?.kuiYue) {
+      const kuiYueText = Object.entries(chart.starAnchors.kuiYue)
+        .filter(([key]) => key !== "yearStem")
+        .map(([star, branch]) => `${star}${branch}`)
+        .join("、");
+      console.log(`魁钺星曜：${kuiYueText}`);
     }
     if (chart.starAnchors?.fireBell) {
       const fireBellText = Object.entries(chart.starAnchors.fireBell)

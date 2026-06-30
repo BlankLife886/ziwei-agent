@@ -2,7 +2,7 @@ import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from "./chart.js";
 
 // 第十堂实战课：安生年干系星曜。
 //
-// 这一课先做禄存、擎羊、陀罗。
+// 这一课先做禄存、擎羊、陀罗，再扩展天魁、天钺。
 // 禄存按出生年干定位；擎羊、陀罗跟着禄存走，形成“羊禄陀”三连。
 // 其中禄存偏财禄助力，放入 auxiliaryStars；
 // 擎羊、陀罗属于煞曜，放入 maleficStars。
@@ -20,7 +20,20 @@ const LU_CUN_BRANCH_BY_YEAR_STEM = {
   癸: "子"
 };
 
-const AUXILIARY_STARS = new Set(["禄存"]);
+const KUI_YUE_BRANCHES_BY_YEAR_STEM = {
+  甲: { 天魁: "丑", 天钺: "未" },
+  乙: { 天魁: "子", 天钺: "申" },
+  丙: { 天魁: "亥", 天钺: "酉" },
+  丁: { 天魁: "亥", 天钺: "酉" },
+  戊: { 天魁: "丑", 天钺: "未" },
+  己: { 天魁: "子", 天钺: "申" },
+  庚: { 天魁: "丑", 天钺: "未" },
+  辛: { 天魁: "午", 天钺: "寅" },
+  壬: { 天魁: "卯", 天钺: "巳" },
+  癸: { 天魁: "卯", 天钺: "巳" }
+};
+
+const AUXILIARY_STARS = new Set(["禄存", "天魁", "天钺"]);
 const MALEFIC_STARS = new Set(["擎羊", "陀罗"]);
 
 export function calculateLuYangTuoBranches({ yearStem }) {
@@ -41,6 +54,11 @@ export function calculateLuYangTuoBranches({ yearStem }) {
       offset: -1
     })
   };
+}
+
+export function calculateKuiYueBranches({ yearStem }) {
+  assertValidYearStem(yearStem);
+  return KUI_YUE_BRANCHES_BY_YEAR_STEM[yearStem];
 }
 
 export function applyLuYangTuoStars(chart) {
@@ -75,6 +93,42 @@ export function applyLuYangTuoStars(chart) {
     calculationNotes: [
       ...chart.calculationNotes,
       `以生年天干${yearStem}安禄存、擎羊、陀罗：${starText}。`
+    ]
+  };
+}
+
+export function applyKuiYueStars(chart) {
+  const yearStem = chart.profileSummary.lunarYearStem;
+  const starBranches = calculateKuiYueBranches({ yearStem });
+  const starText = Object.entries(starBranches)
+    .map(([star, branch]) => `${star}${branch}`)
+    .join("，");
+
+  const palaces = chart.palaces.map((palace) => {
+    const starsForPalace = Object.entries(starBranches)
+      .filter(([, branch]) => branch === palace.branch)
+      .map(([star]) => star);
+
+    if (starsForPalace.length === 0) {
+      return palace;
+    }
+
+    return starsForPalace.reduce(placeStarInPalace, palace);
+  });
+
+  return {
+    ...chart,
+    palaces,
+    starAnchors: {
+      ...chart.starAnchors,
+      kuiYue: {
+        yearStem,
+        ...starBranches
+      }
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `以生年天干${yearStem}安天魁、天钺：${starText}。`
     ]
   };
 }
