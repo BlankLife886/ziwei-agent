@@ -9,6 +9,10 @@ import { REFERENCE_IDS } from "./referenceCatalog.js";
 export const INTERPRETATION_IDS = {
   LIFE_TRIAD_STRUCTURE: "interpretation.life-triad.structure",
   LIFE_TRIAD_EMPTY_LIFE_PALACE: "interpretation.life-triad.empty-life-palace",
+  PALACE_ROLE_LIFE: "interpretation.palace-role.life",
+  PALACE_ROLE_WEALTH: "interpretation.palace-role.wealth",
+  PALACE_ROLE_CAREER: "interpretation.palace-role.career",
+  PALACE_ROLE_TRAVEL: "interpretation.palace-role.travel",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -30,6 +34,38 @@ const INTERPRETATIONS = [
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
     text: "命宫本身目前没有已安入的星曜，因此不宜只凭命宫下结论；应把财帛宫、官禄宫、迁移宫作为主要参照，先看三方四正如何补足命宫信息。"
+  },
+  {
+    id: INTERPRETATION_IDS.PALACE_ROLE_LIFE,
+    title: "命宫的分析角色",
+    topic: "palace-role",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    text: "命宫优先用于观察命主的基础气质、主观倾向和命盘分析的中心点。"
+  },
+  {
+    id: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
+    title: "财帛宫的分析角色",
+    topic: "palace-role",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    text: "财帛宫用于观察资源经营、财务态度和现实层面的取用方式。"
+  },
+  {
+    id: INTERPRETATION_IDS.PALACE_ROLE_CAREER,
+    title: "官禄宫的分析角色",
+    topic: "palace-role",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    text: "官禄宫用于观察事业路径、职责承担和社会角色的展开方式。"
+  },
+  {
+    id: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL,
+    title: "迁移宫的分析角色",
+    topic: "palace-role",
+    riskLevel: "low",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD],
+    text: "迁移宫用于观察外部环境、出行变动和命主面对外界时的表现。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

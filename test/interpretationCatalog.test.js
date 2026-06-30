@@ -24,3 +24,16 @@ test("findInterpretations returns known interpretation items in catalog order", 
     })
   );
 });
+
+test("findInterpretations includes palace role interpretation items", () => {
+  const interpretations = findInterpretations([
+    INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
+    INTERPRETATION_IDS.PALACE_ROLE_CAREER
+  ]);
+
+  assert.deepEqual(
+    interpretations.map((item) => item.title),
+    ["财帛宫的分析角色", "官禄宫的分析角色"]
+  );
+  assert.ok(interpretations[0].text.includes("资源经营"));
+});

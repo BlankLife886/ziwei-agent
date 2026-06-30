@@ -91,6 +91,7 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
   assert.ok(lines.includes("开篇："));
   assert.ok(lines.some((line) => line.includes("【草稿判断】")));
+  assert.ok(lines.some((line) => line.includes("【解释依据】")));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.some((line) => line.includes("参考：framework.life-triad")));
   assert.ok(lines.some((line) => line.includes("解释：interpretation.life-triad.structure")));

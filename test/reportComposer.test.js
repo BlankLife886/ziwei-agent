@@ -50,8 +50,18 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .interpretationRefs,
     [
       "interpretation.life-triad.structure",
+      "interpretation.palace-role.life",
+      "interpretation.palace-role.wealth",
+      "interpretation.palace-role.career",
+      "interpretation.palace-role.travel",
       "interpretation.life-triad.empty-life-palace"
     ]
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation-basis")
+      .text.includes("财帛宫的分析角色")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });

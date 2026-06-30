@@ -93,7 +93,10 @@ function collectReferenceRefs(evidenceItems, interpretations) {
 
 function getInterpretationRefs(focusAreaId, evidenceItems) {
   if (focusAreaId === "life-triad") {
-    const refs = [INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE];
+    const refs = [
+      INTERPRETATION_IDS.LIFE_TRIAD_STRUCTURE,
+      ...getPalaceRoleInterpretationRefs(evidenceItems)
+    ];
     const emptyLifePalace = evidenceItems.some((item) => {
       return item.text.includes("命宫") && item.text.includes("无已安星曜");
     });
@@ -122,6 +125,25 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
   }
 
   return [];
+}
+
+function getPalaceRoleInterpretationRefs(evidenceItems) {
+  const refsByPalaceName = {
+    命宫: INTERPRETATION_IDS.PALACE_ROLE_LIFE,
+    财帛宫: INTERPRETATION_IDS.PALACE_ROLE_WEALTH,
+    官禄宫: INTERPRETATION_IDS.PALACE_ROLE_CAREER,
+    迁移宫: INTERPRETATION_IDS.PALACE_ROLE_TRAVEL
+  };
+
+  const refs = evidenceItems.flatMap((item) => {
+    const palaceName = Object.keys(refsByPalaceName).find((name) => {
+      return item.text.startsWith(name);
+    });
+
+    return palaceName ? [refsByPalaceName[palaceName]] : [];
+  });
+
+  return [...new Set(refs)];
 }
 
 function getGuidingQuestions(focusAreaId) {

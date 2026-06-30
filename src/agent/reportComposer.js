@@ -50,6 +50,13 @@ function composeSectionDraft(section) {
         section.referenceRefs
       ),
       createParagraph(
+        "interpretation-basis",
+        composeInterpretationBasisParagraph(section),
+        [],
+        section.referenceRefs,
+        section.interpretationRefs
+      ),
+      createParagraph(
         "interpretation",
         composeInterpretationParagraph(section),
         section.evidenceRefs,
@@ -66,6 +73,18 @@ function composePurposeParagraph(section) {
 
 function composeEvidenceParagraph(section) {
   return `【可用证据】${section.evidence.join("；")}。`;
+}
+
+function composeInterpretationBasisParagraph(section) {
+  if (!section.interpretations || section.interpretations.length === 0) {
+    return "【解释依据】本节尚未挂接解释条目，只保留证据描述。";
+  }
+
+  const interpretationSummaries = section.interpretations.map((interpretation) => {
+    return `${interpretation.title}：${trimSentenceEnd(interpretation.text)}`;
+  });
+
+  return `【解释依据】${interpretationSummaries.join("；")}。`;
 }
 
 function composeInterpretationParagraph(section) {
@@ -124,6 +143,10 @@ function getInterpretationText(section, interpretationId) {
   });
 
   return interpretation?.text ?? "本节缺少对应解释条目，暂只保留证据描述，不扩展判断。";
+}
+
+function trimSentenceEnd(text) {
+  return text.replace(/[。；;]+$/u, "");
 }
 
 function createParagraph(kind, text, evidenceRefs, referenceRefs, interpretationRefs = []) {

@@ -40,6 +40,10 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .interpretationRefs,
     [
       "interpretation.life-triad.structure",
+      "interpretation.palace-role.life",
+      "interpretation.palace-role.wealth",
+      "interpretation.palace-role.career",
+      "interpretation.palace-role.travel",
       "interpretation.life-triad.empty-life-palace"
     ]
   );
@@ -47,7 +51,7 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "life-triad")
       .interpretations.some((interpretation) => {
-        return interpretation.title.includes("命宫无已安星曜");
+        return interpretation.title.includes("财帛宫的分析角色");
       })
   );
   assert.ok(
