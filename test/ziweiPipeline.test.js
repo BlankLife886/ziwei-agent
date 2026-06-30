@@ -48,6 +48,29 @@ test("runZiweiPipeline narrows report sections by query intent", () => {
   );
 });
 
+test("runZiweiPipeline drafts current stage for fortune intent", () => {
+  const queryIntent = parseQueryIntentFromText("我想看今年运势。");
+  const pipelineResult = runZiweiPipeline(
+    buildChart({
+      ...createSampleProfile(),
+      analysis_date: "2026-06-30"
+    }),
+    { queryIntent }
+  );
+
+  assert.equal(pipelineResult.status, "drafted");
+  assert.deepEqual(pipelineResult.queryIntent.focusAreaIds, ["current-stage"]);
+  assert.deepEqual(
+    pipelineResult.reportPlan.sections.map((section) => section.id),
+    ["current-stage"]
+  );
+  assert.ok(
+    pipelineResult.reportDraft.sections[0].paragraphs
+      .find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不能推今年具体事件")
+  );
+});
+
 test("runZiweiPipeline blocks report-only domains without supported sections", () => {
   const queryIntent = parseQueryIntentFromText("我想看因果和前世今生。");
   const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {

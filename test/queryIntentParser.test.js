@@ -15,6 +15,16 @@ test("parseQueryIntentFromText detects current major period intent", () => {
   assert.ok(result.matchedItems[0].reason.includes("当前所在大限"));
 });
 
+test("parseQueryIntentFromText maps fortune questions to current stage", () => {
+  const result = parseQueryIntentFromText("我想看今年运势和未来走势。");
+
+  assert.equal(result.status, "matched");
+  assert.deepEqual(result.focusAreaIds, ["current-stage"]);
+  assert.deepEqual(result.topics, ["运势"]);
+  assert.deepEqual(result.topicIds, ["fortune"]);
+  assert.deepEqual(result.reportDomainIds, ["fortune"]);
+});
+
 test("parseQueryIntentFromText maps career and wealth questions to dedicated sections", () => {
   const result = parseQueryIntentFromText("我想先看事业和财帛。");
 

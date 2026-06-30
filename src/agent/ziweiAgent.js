@@ -18,11 +18,17 @@ const WEALTH_TRIAD_PALACE_NAMES = ["财帛宫", "命宫", "官禄宫", "福德�
 const SPOUSE_TRIAD_PALACE_NAMES = ["夫妻宫", "迁移宫", "官禄宫", "福德宫"];
 const PALACE_EVIDENCE_IDS = {
   命宫: "life-palace",
+  兄弟宫: "siblings-palace",
   夫妻宫: "spouse-palace",
+  子女宫: "children-palace",
   财帛宫: "wealth-palace",
+  疾厄宫: "health-palace",
+  仆役宫: "friends-palace",
   官禄宫: "career-palace",
+  田宅宫: "property-palace",
   迁移宫: "travel-palace",
-  福德宫: "wellbeing-palace"
+  福德宫: "wellbeing-palace",
+  父母宫: "parents-palace"
 };
 
 export function createZiweiAgentResponse(buildResult, options = {}) {
@@ -255,6 +261,11 @@ function buildFocusAreas(chart, palaceByName) {
       title: "当前大限定位",
       reason: "按分析日期定位命主当前处于哪一个大限，只用于确认阶段落宫，不直接推事件。",
       evidenceItems: buildCurrentMajorPeriodEvidenceItems(chart)
+    }, {
+      id: "current-stage",
+      title: "当前阶段运势底稿",
+      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化和大限骨架放到同一节中合参；当前不推具体年份事件。",
+      evidenceItems: buildCurrentStageEvidenceItems(chart, palaceByName)
     });
   }
 
@@ -389,6 +400,42 @@ function buildCurrentMajorPeriodEvidenceItems(chart) {
   ];
 }
 
+function buildCurrentStageEvidenceItems(chart, palaceByName) {
+  const currentPeriod = chart.currentMajorPeriod?.period;
+  const currentPalace = currentPeriod
+    ? palaceByName.get(currentPeriod.palaceName)
+    : null;
+  const currentPeriodText = currentPeriod
+    ? `${currentPeriod.startAge}-${currentPeriod.endAge}岁${currentPeriod.palaceName}${currentPeriod.branch}`
+    : "未落入已排出的大限年龄段";
+  const items = [
+    createEvidenceItem(
+      "current-stage.current-major-period",
+      `当前阶段定位：${formatCurrentMajorPeriodSummary(chart)}`,
+      "chart.currentMajorPeriod",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.CURRENT_MAJOR_PERIOD, REFERENCE_IDS.MAJOR_PERIODS]
+    ),
+    createEvidenceItem(
+      "current-stage.major-period-anchor",
+      `阶段大限宫位：${currentPeriodText}`,
+      "chart.currentMajorPeriod.period",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MAJOR_PERIODS]
+    ),
+    createEvidenceItem(
+      "current-stage.birth-year-transformations",
+      `生年四化参照：${formatBirthYearFourTransformations(chart)}`,
+      "chart.starAnchors.birthYearTransformations",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
+    )
+  ];
+
+  if (currentPalace) {
+    items.splice(2, 0, createPalaceEvidenceItem("current-stage", currentPalace));
+  }
+
+  return items;
+}
+
 function createPalaceEvidenceItem(scope, palace) {
   const palaceId = PALACE_EVIDENCE_IDS[palace.name] ?? palace.name;
 
@@ -445,6 +492,10 @@ function getPalaceEvidenceReferenceRefs(scope) {
 
   if (scope === "body-palace") {
     return [REFERENCE_IDS.BODY_PALACE, REFERENCE_IDS.STAR_PLACEMENT];
+  }
+
+  if (scope === "current-stage") {
+    return [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.STAR_PLACEMENT];
   }
 
   return [REFERENCE_IDS.STAR_PLACEMENT];

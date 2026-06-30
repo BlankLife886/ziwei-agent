@@ -264,6 +264,31 @@ test("createReportDraft writes current major period as locator-only", () => {
   ]);
 });
 
+test("createReportDraft writes current stage as conservative stage synthesis", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart({
+      ...createSampleProfile(),
+      analysis_date: "2026-06-30"
+    }), {
+      queryIntent: parseQueryIntentFromText("我想看今年运势。")
+    })
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const section = reportDraft.sections[0];
+  const paragraph = section.paragraphs.find((item) => {
+    return item.kind === "interpretation";
+  });
+
+  assert.equal(section.id, "current-stage");
+  assert.ok(paragraph.text.includes("当前阶段定位：2026-06-30按虚岁37岁定位"));
+  assert.ok(paragraph.text.includes("阶段大限宫位：34-43岁子女宫寅"));
+  assert.ok(paragraph.text.includes("生年四化参照"));
+  assert.ok(paragraph.text.includes("不能推今年具体事件"));
+  assert.deepEqual(paragraph.interpretationRefs, [
+    "interpretation.current-stage.static-only"
+  ]);
+});
+
 test("createReportDraft writes dedicated career and wealth drafts for requested topics", () => {
   const reportPlan = createReportPlan(
     createZiweiAgentResponse(buildChart(createSampleProfile()), {

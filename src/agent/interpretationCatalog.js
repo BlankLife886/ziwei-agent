@@ -41,6 +41,7 @@ export const INTERPRETATION_IDS = {
   BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
   MAJOR_PERIODS_STRUCTURE_ONLY: "interpretation.major-periods.structure-only",
   CURRENT_MAJOR_PERIOD_LOCATOR_ONLY: "interpretation.current-major-period.locator-only",
+  CURRENT_STAGE_STATIC_ONLY: "interpretation.current-stage.static-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -466,6 +467,20 @@ const INTERPRETATIONS = [
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.CURRENT_MAJOR_PERIOD, REFERENCE_IDS.MAJOR_PERIODS],
     text: "当前大限定位只说明分析日期按虚岁落入哪一个十年大限；它还不能代表该阶段的具体吉凶，需要等待大限四化、流年和星曜组合规则。"
+  },
+  {
+    id: INTERPRETATION_IDS.CURRENT_STAGE_STATIC_ONLY,
+    title: "当前阶段底稿的解释边界",
+    topic: "current-stage",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.CURRENT_STAGE,
+      REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
+      REFERENCE_IDS.MAJOR_PERIODS,
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ],
+    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜和生年四化放在同一节中观察阶段主题；但尚未接入大限四化、流年盘和事件触发规则，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

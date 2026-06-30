@@ -72,7 +72,7 @@ const REPORT_DOMAINS = [
     title: "阶段运势报告",
     outputGoal: "围绕大限、当前大限、流年和四化，生成阶段性趋势、重点宫位和可验证边界。",
     currentSupport: "partial",
-    supportedFocusAreaIds: ["major-periods", "current-major-period"],
+    supportedFocusAreaIds: ["current-stage", "major-periods", "current-major-period"],
     missingCapabilities: [
       "大限四化",
       "流年命盘",

@@ -16,6 +16,7 @@ export const QUERY_FOCUS_IDS = {
   STAR_BALANCE: "star-balance",
   BIRTH_YEAR_TRANSFORMATIONS: "birth-year-transformations",
   MAJOR_PERIODS: "major-periods",
+  CURRENT_STAGE: "current-stage",
   CURRENT_MAJOR_PERIOD: "current-major-period"
 };
 
@@ -99,12 +100,12 @@ const QUERY_RULES = [
     patterns: [/婚姻|感情|恋爱|伴侣|配偶|夫妻|结婚|离婚/u]
   },
   {
-    focusAreaId: QUERY_FOCUS_IDS.MAJOR_PERIODS,
+    focusAreaId: QUERY_FOCUS_IDS.CURRENT_STAGE,
     topicId: "fortune",
     reportDomainId: REPORT_DOMAIN_IDS.FORTUNE,
     topic: "运势",
     palaceNames: [],
-    reason: "用户询问运势或命运，需要先查看大限骨架，后续再接流年和大限四化。",
+    reason: "用户询问运势或命运，需要先建立当前阶段底稿，后续再接流年和大限四化。",
     patterns: [/运势|命运|走势|运程|流年|今年|明年|未来/u]
   },
   {
@@ -160,6 +161,7 @@ const TOPICS_BY_FOCUS_AREA_ID = {
   [QUERY_FOCUS_IDS.STAR_BALANCE]: "星曜类别",
   [QUERY_FOCUS_IDS.BIRTH_YEAR_TRANSFORMATIONS]: "生年四化",
   [QUERY_FOCUS_IDS.MAJOR_PERIODS]: "大限骨架",
+  [QUERY_FOCUS_IDS.CURRENT_STAGE]: "当前阶段",
   [QUERY_FOCUS_IDS.CURRENT_MAJOR_PERIOD]: "当前大限"
 };
 

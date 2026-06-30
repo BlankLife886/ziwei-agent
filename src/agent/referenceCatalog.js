@@ -11,6 +11,7 @@ export const REFERENCE_IDS = {
   BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
+  CURRENT_STAGE: "framework.current-stage",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
   CAREER_PALACE: "framework.career-palace",
@@ -56,6 +57,12 @@ const REFERENCES = [
     title: "当前大限定位规则",
     type: "implemented-rule",
     note: "根据分析日期按虚岁定位当前年龄，再匹配已排出的大限年龄段。"
+  },
+  {
+    id: REFERENCE_IDS.CURRENT_STAGE,
+    title: "当前阶段分析框架",
+    type: "analysis-framework",
+    note: "把当前大限定位、阶段落宫星曜、生年四化和大限骨架放在同一节中合参；当前仍不含大限四化、流年盘和事件触发规则。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

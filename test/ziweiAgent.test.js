@@ -148,6 +148,16 @@ test("createZiweiAgentResponse includes current major period when analysis date 
       .evidence.some((item) => item.includes("2026-06-30"))
   );
   assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("阶段大限宫位：34-43岁子女宫寅"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("子女宫寅"))
+  );
+  assert.ok(
     agentResult.evidenceItems
       .find((item) => item.id === "core.current-major-period")
       .referenceRefs.includes("rule.current-major-period")
@@ -187,6 +197,38 @@ test("createZiweiAgentResponse keeps all evidence but filters focus areas by que
       return item.includes("本轮已按查询意图收敛章节");
     })
   );
+});
+
+test("createZiweiAgentResponse exposes current stage when fortune intent has analysis date", () => {
+  const buildResult = buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+  const agentResult = createZiweiAgentResponse(buildResult, {
+    queryIntent: parseQueryIntentFromText("我想看今年运势。")
+  });
+
+  assert.deepEqual(
+    agentResult.focusAreas.map((area) => area.id),
+    ["current-stage"]
+  );
+  assert.ok(
+    agentResult.focusAreas[0].evidenceItems.some((item) => {
+      return item.id === "current-stage.children-palace" ||
+        item.text.includes("子女宫寅");
+    })
+  );
+  assert.deepEqual(agentResult.unavailableFocusAreaIds, []);
+});
+
+test("createZiweiAgentResponse marks current stage unavailable without analysis date", () => {
+  const buildResult = buildChart(createSampleProfile());
+  const agentResult = createZiweiAgentResponse(buildResult, {
+    queryIntent: parseQueryIntentFromText("我想看今年运势。")
+  });
+
+  assert.deepEqual(agentResult.focusAreas, []);
+  assert.deepEqual(agentResult.unavailableFocusAreaIds, ["current-stage"]);
 });
 
 test("createZiweiAgentResponse exposes final report domains and planned limits", () => {

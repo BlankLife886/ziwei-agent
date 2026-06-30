@@ -118,6 +118,15 @@ const SECTION_DEFINITIONS = {
     ],
     writingPrompt: "只说明分析日期对应的当前大限，不把阶段定位写成事件断语。",
     interpretationRefs: [INTERPRETATION_IDS.CURRENT_MAJOR_PERIOD_LOCATOR_ONLY]
+  },
+  "current-stage": {
+    guidingQuestions: [
+      "当前分析日期和虚岁把命主定位到哪一个大限？",
+      "当前阶段落宫及其星曜提供了哪些已排出的证据？",
+      "生年四化和大限骨架能提供哪些结构参照，哪些仍需等待大限四化和流年？"
+    ],
+    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜和生年四化参照，不推今年具体事件、应期或吉凶。",
+    buildInterpretationRefs: buildCurrentStageInterpretationRefs
   }
 };
 
@@ -260,6 +269,14 @@ function buildBodyPalaceInterpretationRefs(evidenceItems) {
     sameAsLifePalace
       ? INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE
       : INTERPRETATION_IDS.BODY_PALACE_DIFFERENT_FROM_LIFE
+  ];
+}
+
+function buildCurrentStageInterpretationRefs(evidenceItems) {
+  return [
+    INTERPRETATION_IDS.CURRENT_STAGE_STATIC_ONLY,
+    ...getPalaceRoleInterpretationRefs(evidenceItems),
+    ...getStarRoleInterpretationRefs(evidenceItems)
   ];
 }
 

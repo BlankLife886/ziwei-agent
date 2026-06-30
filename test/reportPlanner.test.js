@@ -318,6 +318,35 @@ test("createReportPlan includes current major period section when available", ()
   assert.ok(section.writingPrompt.includes("不把阶段定位写成事件断语"));
 });
 
+test("createReportPlan includes current stage synthesis when available", () => {
+  const agentResult = createZiweiAgentResponse(buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  }), {
+    queryIntent: parseQueryIntentFromText("我想看今年运势。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+  const section = reportPlan.sections[0];
+
+  assert.equal(reportPlan.status, "planned");
+  assert.deepEqual(reportPlan.sections.map((item) => item.id), ["current-stage"]);
+  assert.equal(section.title, "当前阶段运势底稿");
+  assert.deepEqual(section.referenceRefs, [
+    "framework.current-stage",
+    "rule.current-major-period",
+    "rule.major-periods",
+    "rule.star-placement",
+    "rule.birth-year-four-transformations"
+  ]);
+  assert.deepEqual(section.interpretationRefs, [
+    "interpretation.current-stage.static-only"
+  ]);
+  assert.ok(section.evidence.some((item) => item.includes("当前阶段定位")));
+  assert.ok(section.evidence.some((item) => item.includes("阶段大限宫位：34-43岁子女宫寅")));
+  assert.ok(section.evidence.some((item) => item.includes("子女宫寅")));
+  assert.ok(section.writingPrompt.includes("不推今年具体事件"));
+});
+
 test("createReportPlan creates dedicated career and wealth sections for matching intent", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
     queryIntent: parseQueryIntentFromText("我想先看事业和财帛。")
