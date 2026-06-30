@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
 import { buildChart } from "../src/chartBuilder.js";
-import { formatBuildResult } from "../src/formatters.js";
+import { formatAgentBriefing, formatBuildResult } from "../src/formatters.js";
 
 test("formatBuildResult renders the complete chart summary for CLI output", () => {
   const lines = formatBuildResult(buildChart(createSampleProfile()));
@@ -29,6 +30,18 @@ test("formatBuildResult renders validation errors", () => {
     "资料格式错误：",
     "- gender must be 'male' or 'female'"
   ]);
+});
+
+test("formatAgentBriefing renders evidence and focus areas", () => {
+  const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()));
+  const lines = formatAgentBriefing(agentResult);
+
+  assert.ok(lines.includes("Agent 分析准备："));
+  assert.ok(lines.includes("核心证据："));
+  assert.ok(lines.includes("- 命宫在巳"));
+  assert.ok(lines.includes("建议分析重点："));
+  assert.ok(lines.some((line) => line.includes("命宫与三方四正")));
+  assert.ok(lines.includes("当前限制："));
 });
 
 function createSampleProfile() {

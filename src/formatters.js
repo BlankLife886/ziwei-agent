@@ -33,6 +33,35 @@ export function formatBuildResult(buildResult) {
   ];
 }
 
+export function formatAgentBriefing(agentResult) {
+  if (agentResult.status !== "ready") {
+    return [
+      "Agent 状态：暂不能分析",
+      ...agentResult.messages,
+      ...agentResult.nextQuestions.map((question) => `- ${question}`)
+    ];
+  }
+
+  return [
+    "Agent 分析准备：",
+    ...agentResult.messages.map((message) => `- ${message}`),
+    "",
+    "核心证据：",
+    ...agentResult.evidence.map((item) => `- ${item}`),
+    "",
+    "建议分析重点：",
+    ...agentResult.focusAreas.flatMap((area) => {
+      return [
+        `- ${area.title}：${area.reason}`,
+        ...area.evidence.map((item) => `  - ${item}`)
+      ];
+    }),
+    "",
+    "当前限制：",
+    ...agentResult.limitations.map((item) => `- ${item}`)
+  ];
+}
+
 function formatProfileSummary(buildResult) {
   const profile = buildResult.validation.profile;
 
