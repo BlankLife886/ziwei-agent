@@ -223,16 +223,33 @@ function createPalaceEvidenceItem(scope, palace) {
     `${scope}.${palaceId}`,
     formatPalaceSnapshot(palace),
     `chart.palaces.${palace.name}`,
-    getPalaceEvidenceReferenceRefs(scope)
+    getPalaceEvidenceReferenceRefs(scope),
+    buildPalaceEvidenceMetadata(palace)
   );
 }
 
-function createEvidenceItem(id, text, source, referenceRefs = []) {
+function buildPalaceEvidenceMetadata(palace) {
+  return {
+    palaceName: palace.name,
+    branch: palace.branch,
+    // 保留分组后的星曜，后续解释层可以按“宫位 + 星曜类别”挂接条目，
+    // 不需要再从展示文本里拆字符串。
+    starGroups: {
+      mainStars: [...palace.mainStars],
+      auxiliaryStars: [...palace.auxiliaryStars],
+      maleficStars: [...palace.maleficStars],
+      voidStars: [...palace.voidStars]
+    }
+  };
+}
+
+function createEvidenceItem(id, text, source, referenceRefs = [], metadata) {
   return {
     id,
     text,
     source,
-    referenceRefs
+    referenceRefs,
+    ...(metadata ? { metadata } : {})
   };
 }
 

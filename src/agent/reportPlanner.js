@@ -1,6 +1,7 @@
 import {
   INTERPRETATION_IDS,
-  findInterpretations
+  findInterpretations,
+  findStarRoleInterpretationRefs
 } from "./interpretationCatalog.js";
 import { findReferences } from "./referenceCatalog.js";
 
@@ -105,7 +106,10 @@ function getInterpretationRefs(focusAreaId, evidenceItems) {
       refs.push(INTERPRETATION_IDS.LIFE_TRIAD_EMPTY_LIFE_PALACE);
     }
 
-    return refs;
+    return [
+      ...refs,
+      ...getStarRoleInterpretationRefs(evidenceItems)
+    ];
   }
 
   if (focusAreaId === "body-palace") {
@@ -141,6 +145,21 @@ function getPalaceRoleInterpretationRefs(evidenceItems) {
     });
 
     return palaceName ? [refsByPalaceName[palaceName]] : [];
+  });
+
+  return [...new Set(refs)];
+}
+
+function getStarRoleInterpretationRefs(evidenceItems) {
+  const refs = evidenceItems.flatMap((item) => {
+    if (!item.metadata?.palaceName || !item.metadata?.starGroups) {
+      return [];
+    }
+
+    return findStarRoleInterpretationRefs(
+      item.metadata.palaceName,
+      item.metadata.starGroups
+    );
   });
 
   return [...new Set(refs)];

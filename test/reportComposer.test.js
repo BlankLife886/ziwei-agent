@@ -54,7 +54,15 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       "interpretation.palace-role.wealth",
       "interpretation.palace-role.career",
       "interpretation.palace-role.travel",
-      "interpretation.life-triad.empty-life-palace"
+      "interpretation.life-triad.empty-life-palace",
+      "interpretation.star.tian-xiang.wealth",
+      "interpretation.star.tian-kui.wealth",
+      "interpretation.star.huo-xing.wealth",
+      "interpretation.star.tian-fu.career",
+      "interpretation.star.qing-yang.career",
+      "interpretation.star.lian-zhen.travel",
+      "interpretation.star.tan-lang.travel",
+      "interpretation.star.tian-guan.travel"
     ]
   );
   assert.ok(
@@ -62,6 +70,12 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation-basis")
       .text.includes("财帛宫的分析角色")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation-basis")
+      .text.includes("天相在财帛宫的保守解释")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });

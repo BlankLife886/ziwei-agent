@@ -79,6 +79,7 @@ test("formatReportPlan renders report sections and guardrails", () => {
   assert.ok(lines.some((line) => line.includes("[framework.life-triad]")));
   assert.ok(lines.includes("  解释条目："));
   assert.ok(lines.some((line) => line.includes("[interpretation.life-triad.structure]")));
+  assert.ok(lines.some((line) => line.includes("[interpretation.star.tian-fu.career]")));
   assert.ok(lines.includes("写作边界："));
 });
 
@@ -95,6 +96,7 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.some((line) => line.includes("参考：framework.life-triad")));
   assert.ok(lines.some((line) => line.includes("解释：interpretation.life-triad.structure")));
+  assert.ok(lines.some((line) => line.includes("解释：interpretation.life-triad.structure") && line.includes("interpretation.star.tian-fu.career")));
   assert.ok(lines.includes("收束："));
 });
 

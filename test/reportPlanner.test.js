@@ -44,14 +44,41 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "interpretation.palace-role.wealth",
       "interpretation.palace-role.career",
       "interpretation.palace-role.travel",
-      "interpretation.life-triad.empty-life-palace"
+      "interpretation.life-triad.empty-life-palace",
+      "interpretation.star.tian-xiang.wealth",
+      "interpretation.star.tian-kui.wealth",
+      "interpretation.star.huo-xing.wealth",
+      "interpretation.star.tian-fu.career",
+      "interpretation.star.qing-yang.career",
+      "interpretation.star.lian-zhen.travel",
+      "interpretation.star.tan-lang.travel",
+      "interpretation.star.tian-guan.travel"
     ]
+  );
+  assert.deepEqual(
+    reportPlan.sections
+      .find((section) => section.id === "life-triad")
+      .evidenceItems.find((item) => item.id === "life-triad.wealth-palace")
+      .metadata.starGroups,
+    {
+      mainStars: ["天相"],
+      auxiliaryStars: ["天魁"],
+      maleficStars: ["火星"],
+      voidStars: []
+    }
   );
   assert.ok(
     reportPlan.sections
       .find((section) => section.id === "life-triad")
       .interpretations.some((interpretation) => {
         return interpretation.title.includes("财帛宫的分析角色");
+      })
+  );
+  assert.ok(
+    reportPlan.sections
+      .find((section) => section.id === "life-triad")
+      .interpretations.some((interpretation) => {
+        return interpretation.title.includes("天府在官禄宫");
       })
   );
   assert.ok(
