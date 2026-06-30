@@ -82,7 +82,7 @@ export function formatReportPlan(reportPlan) {
         `  写作提示：${section.writingPrompt}`,
         `  关键问题：${section.guidingQuestions.join(" / ")}`,
         "  可用证据：",
-        ...section.evidence.map((item) => `    - ${item}`)
+        ...formatEvidenceItems(section)
       ];
     }),
     "",
@@ -109,13 +109,39 @@ export function formatReportDraft(reportDraft) {
     ...reportDraft.sections.flatMap((section) => {
       return [
         section.title,
-        ...section.paragraphs.map((paragraph) => `- ${paragraph}`),
+        ...section.paragraphs.map((paragraph) => {
+          return `- ${formatParagraph(paragraph)}`;
+        }),
         ""
       ];
     }),
     "收束：",
     ...reportDraft.closing.map((line) => `- ${line}`)
   ];
+}
+
+function formatEvidenceItems(section) {
+  if (!section.evidenceItems) {
+    return section.evidence.map((item) => `    - ${item}`);
+  }
+
+  return section.evidenceItems.map((item) => {
+    return `    - [${item.id}] ${item.text}`;
+  });
+}
+
+function formatParagraph(paragraph) {
+  if (typeof paragraph === "string") {
+    return paragraph;
+  }
+
+  const evidenceRefs = paragraph.evidenceRefs ?? [];
+
+  if (evidenceRefs.length === 0) {
+    return paragraph.text;
+  }
+
+  return `${paragraph.text}（证据：${evidenceRefs.join("、")}）`;
 }
 
 function formatProfileSummary(buildResult) {

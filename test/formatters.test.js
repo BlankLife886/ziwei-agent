@@ -59,6 +59,7 @@ test("formatReportPlan renders report sections and guardrails", () => {
   assert.ok(lines.includes("章节："));
   assert.ok(lines.some((line) => line.includes("写作提示")));
   assert.ok(lines.some((line) => line.includes("关键问题")));
+  assert.ok(lines.some((line) => line.includes("[life-triad.life-palace]")));
   assert.ok(lines.includes("写作边界："));
 });
 
@@ -71,6 +72,7 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
   assert.ok(lines.includes("开篇："));
   assert.ok(lines.some((line) => line.includes("【草稿判断】")));
+  assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.includes("收束："));
 });
 

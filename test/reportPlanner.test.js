@@ -20,6 +20,16 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .find((section) => section.id === "life-triad")
       .guidingQuestions.some((question) => question.includes("三方四正"))
   );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .evidenceRefs,
+    [
+      "life-triad.life-palace",
+      "life-triad.wealth-palace",
+      "life-triad.career-palace",
+      "life-triad.travel-palace"
+    ]
+  );
   assert.ok(
     reportPlan.guardrails.some((guardrail) => guardrail.includes("不得伪装"))
   );

@@ -17,9 +17,9 @@ npm start
 - `src/chart.js`: 定义命盘数据结构，包括十二宫、主星、辅星、煞曜、空曜、四化和命盘骨架。
 - `src/chartBuilder.js`: 编排输入校验、历法转换和各类排盘规则，输出可供 CLI、API 或 agent 使用的结构化命盘。
 - `src/agent/ziweiPipeline.js`: 统一编排 agent 主流程，把排盘结果转换为分析上下文、报告规划和正文草稿。
-- `src/agent/ziweiAgent.js`: 根据排盘结果生成 agent 分析上下文，包括核心证据、建议分析重点和当前限制。
-- `src/agent/reportPlanner.js`: 把 agent 分析上下文转换为报告草稿章节，包括写作问题、可用证据和写作边界。
-- `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能回指到已有证据。
+- `src/agent/ziweiAgent.js`: 根据排盘结果生成 agent 分析上下文，包括核心证据、建议分析重点和当前限制；核心证据同时保留文本和结构化 `evidenceItems`。
+- `src/agent/reportPlanner.js`: 把 agent 分析上下文转换为报告草稿章节，包括写作问题、可用证据、`evidenceRefs` 和写作边界。
+- `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能通过 `evidenceRefs` 回指到已有证据。
 - `src/formatters.js`: 把结构化排盘结果转换为 CLI 展示文本，避免展示逻辑混入排盘流程。
 - `src/palaceCalculator.js`: 根据农历月份和出生时辰计算命宫、身宫。
 - `src/fiveElementClassCalculator.js`: 根据出生年干、命宫干支和纳音计算五行局。

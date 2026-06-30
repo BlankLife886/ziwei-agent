@@ -12,6 +12,11 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
   assert.equal(agentResult.subject.name, "示例命主");
   assert.ok(agentResult.evidence.includes("命宫在巳"));
   assert.ok(agentResult.evidence.includes("五行局为金四局"));
+  assert.ok(
+    agentResult.evidenceItems.some((item) => {
+      return item.id === "core.life-palace-branch" && item.text === "命宫在巳";
+    })
+  );
   assert.deepEqual(
     agentResult.focusAreas.map((area) => area.id),
     ["life-triad", "body-palace", "star-balance"]
@@ -20,6 +25,11 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
     agentResult.focusAreas
       .find((area) => area.id === "life-triad")
       .evidence.some((item) => item.includes("财帛宫丑"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "life-triad")
+      .evidenceItems.some((item) => item.id === "life-triad.wealth-palace")
   );
   assert.ok(
     agentResult.limitations.some((item) => item.includes("尚未接入四化"))
@@ -36,6 +46,7 @@ test("createZiweiAgentResponse asks for missing input before analysis", () => {
   assert.equal(agentResult.status, "needs_input");
   assert.deepEqual(agentResult.nextQuestions, ["请补充 birth_time"]);
   assert.deepEqual(agentResult.focusAreas, []);
+  assert.deepEqual(agentResult.evidenceItems, []);
 });
 
 test("createZiweiAgentResponse blocks invalid input", () => {

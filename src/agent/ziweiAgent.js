@@ -8,6 +8,12 @@
 // 4. 哪些能力尚未实现，不能过度断言。
 
 const LIFE_TRIAD_PALACE_NAMES = ["命宫", "财帛宫", "官禄宫", "迁移宫"];
+const PALACE_EVIDENCE_IDS = {
+  命宫: "life-palace",
+  财帛宫: "wealth-palace",
+  官禄宫: "career-palace",
+  迁移宫: "travel-palace"
+};
 
 export function createZiweiAgentResponse(buildResult) {
   if (buildResult.status === "invalid") {
@@ -17,6 +23,7 @@ export function createZiweiAgentResponse(buildResult) {
       messages: ["出生资料格式不正确，暂不能排盘。"],
       nextQuestions: [],
       evidence: [],
+      evidenceItems: [],
       focusAreas: [],
       limitations: []
     };
@@ -31,6 +38,7 @@ export function createZiweiAgentResponse(buildResult) {
         return `请补充 ${field}`;
       }),
       evidence: [],
+      evidenceItems: [],
       focusAreas: [],
       limitations: []
     };
@@ -38,6 +46,7 @@ export function createZiweiAgentResponse(buildResult) {
 
   const chart = buildResult.chart;
   const palaceByName = new Map(chart.palaces.map((palace) => [palace.name, palace]));
+  const evidenceItems = buildCoreEvidenceItems(chart, palaceByName);
 
   return {
     status: "ready",
@@ -48,7 +57,8 @@ export function createZiweiAgentResponse(buildResult) {
     ],
     nextQuestions: [],
     subject: buildSubjectSummary(buildResult),
-    evidence: buildCoreEvidence(chart, palaceByName),
+    evidence: evidenceItems.map(formatEvidenceText),
+    evidenceItems,
     focusAreas: buildFocusAreas(chart, palaceByName),
     limitations: [
       "尚未接入四化，因此不能完整判断生年化禄、化权、化科、化忌的牵引。",
@@ -75,16 +85,36 @@ function buildSubjectSummary(buildResult) {
   };
 }
 
-function buildCoreEvidence(chart, palaceByName) {
+function buildCoreEvidenceItems(chart, palaceByName) {
   const lifePalace = palaceByName.get("命宫");
   const bodyPalace = palaceByName.get(chart.bodyPalace?.name);
 
   return [
-    `命宫在${chart.lifePalace.branch}`,
-    `身宫在${chart.bodyPalace.name}（${chart.bodyPalace.branch}）`,
-    `五行局为${chart.fiveElementClass.name}`,
-    `命宫星曜：${formatPalaceStars(lifePalace)}`,
-    `身宫星曜：${formatPalaceStars(bodyPalace)}`
+    createEvidenceItem(
+      "core.life-palace-branch",
+      `命宫在${chart.lifePalace.branch}`,
+      "chart.lifePalace"
+    ),
+    createEvidenceItem(
+      "core.body-palace-location",
+      `身宫在${chart.bodyPalace.name}（${chart.bodyPalace.branch}）`,
+      "chart.bodyPalace"
+    ),
+    createEvidenceItem(
+      "core.five-element-class",
+      `五行局为${chart.fiveElementClass.name}`,
+      "chart.fiveElementClass"
+    ),
+    createEvidenceItem(
+      "core.life-palace-stars",
+      `命宫星曜：${formatPalaceStars(lifePalace)}`,
+      "chart.palaces.命宫"
+    ),
+    createEvidenceItem(
+      "core.body-palace-stars",
+      `身宫星曜：${formatPalaceStars(bodyPalace)}`,
+      `chart.palaces.${chart.bodyPalace.name}`
+    )
   ];
 }
 
@@ -98,24 +128,36 @@ function buildFocusAreas(chart, palaceByName) {
       id: "life-triad",
       title: "命宫与三方四正",
       reason: "先看命宫，再合看财帛、官禄、迁移，建立命主核心格局。",
-      evidence: lifeTriadPalaces.map(formatPalaceSnapshot)
+      evidenceItems: lifeTriadPalaces.map((palace) => {
+        return createPalaceEvidenceItem("life-triad", palace);
+      })
     },
     {
       id: "body-palace",
       title: "身宫落点",
       reason: "身宫提示后天行为重心，适合和命宫一起看人生发力方式。",
-      evidence: [formatPalaceSnapshot(palaceByName.get(chart.bodyPalace.name))]
+      evidenceItems: [
+        createPalaceEvidenceItem(
+          "body-palace",
+          palaceByName.get(chart.bodyPalace.name)
+        )
+      ]
     },
     {
       id: "star-balance",
       title: "星曜类别平衡",
       reason: "先区分主星、辅星、煞曜、空曜，避免把助力、冲击和空亡混为一谈。",
-      evidence: buildStarBalanceEvidence(chart)
+      evidenceItems: buildStarBalanceEvidenceItems(chart)
     }
-  ];
+  ].map((focusArea) => {
+    return {
+      ...focusArea,
+      evidence: focusArea.evidenceItems.map(formatEvidenceText)
+    };
+  });
 }
 
-function buildStarBalanceEvidence(chart) {
+function buildStarBalanceEvidenceItems(chart) {
   const totals = chart.palaces.reduce(
     (sum, palace) => {
       return {
@@ -134,11 +176,49 @@ function buildStarBalanceEvidence(chart) {
   );
 
   return [
-    `主星 ${totals.mainStars} 颗`,
-    `辅星 ${totals.auxiliaryStars} 颗`,
-    `煞曜 ${totals.maleficStars} 颗`,
-    `空曜 ${totals.voidStars} 颗`
+    createEvidenceItem(
+      "star-balance.main-stars",
+      `主星 ${totals.mainStars} 颗`,
+      "chart.palaces.mainStars"
+    ),
+    createEvidenceItem(
+      "star-balance.auxiliary-stars",
+      `辅星 ${totals.auxiliaryStars} 颗`,
+      "chart.palaces.auxiliaryStars"
+    ),
+    createEvidenceItem(
+      "star-balance.malefic-stars",
+      `煞曜 ${totals.maleficStars} 颗`,
+      "chart.palaces.maleficStars"
+    ),
+    createEvidenceItem(
+      "star-balance.void-stars",
+      `空曜 ${totals.voidStars} 颗`,
+      "chart.palaces.voidStars"
+    )
   ];
+}
+
+function createPalaceEvidenceItem(scope, palace) {
+  const palaceId = PALACE_EVIDENCE_IDS[palace.name] ?? palace.name;
+
+  return createEvidenceItem(
+    `${scope}.${palaceId}`,
+    formatPalaceSnapshot(palace),
+    `chart.palaces.${palace.name}`
+  );
+}
+
+function createEvidenceItem(id, text, source) {
+  return {
+    id,
+    text,
+    source
+  };
+}
+
+function formatEvidenceText(evidenceItem) {
+  return evidenceItem.text;
 }
 
 function formatPalaceSnapshot(palace) {

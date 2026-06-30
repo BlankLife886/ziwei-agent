@@ -38,14 +38,32 @@ function buildOpening(agentResult) {
 }
 
 function buildSectionFromFocusArea(focusArea) {
+  const evidenceItems = normalizeEvidenceItems(focusArea);
+
   return {
     id: focusArea.id,
     title: focusArea.title,
     purpose: focusArea.reason,
     guidingQuestions: getGuidingQuestions(focusArea.id),
-    evidence: focusArea.evidence,
+    evidence: evidenceItems.map((item) => item.text),
+    evidenceItems,
+    evidenceRefs: evidenceItems.map((item) => item.id),
     writingPrompt: getWritingPrompt(focusArea.id)
   };
+}
+
+function normalizeEvidenceItems(focusArea) {
+  if (focusArea.evidenceItems) {
+    return focusArea.evidenceItems;
+  }
+
+  return focusArea.evidence.map((text, index) => {
+    return {
+      id: `${focusArea.id}.evidence-${index + 1}`,
+      text,
+      source: "agent.focusArea.evidence"
+    };
+  });
 }
 
 function getGuidingQuestions(focusAreaId) {

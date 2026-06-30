@@ -31,9 +31,17 @@ function composeSectionDraft(section) {
     id: section.id,
     title: section.title,
     paragraphs: [
-      composePurposeParagraph(section),
-      composeEvidenceParagraph(section),
-      composeInterpretationParagraph(section)
+      createParagraph("purpose", composePurposeParagraph(section), []),
+      createParagraph(
+        "evidence",
+        composeEvidenceParagraph(section),
+        section.evidenceRefs
+      ),
+      createParagraph(
+        "interpretation",
+        composeInterpretationParagraph(section),
+        section.evidenceRefs
+      )
     ]
   };
 }
@@ -94,4 +102,12 @@ function composeClosing(reportPlan) {
     "写作时必须遵守以下边界：",
     ...reportPlan.guardrails
   ];
+}
+
+function createParagraph(kind, text, evidenceRefs) {
+  return {
+    kind,
+    text,
+    evidenceRefs
+  };
 }
