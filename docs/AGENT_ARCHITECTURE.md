@@ -39,7 +39,8 @@ birth/profile input
   -> ziweiAgent context
   -> reportPlanner
   -> knowledgeCoverageAudit
-  -> reportComposer
+  -> reportGenerator
+  -> reportComposer/default provider
   -> reportDraft
   -> reportAuditor
   -> reportPublisher
@@ -53,7 +54,8 @@ birth/profile input
 - `ziweiAgent`：把命盘转换为 agent 分析上下文，包括证据、分析重点、限制和追问。
 - `reportPlanner`：把分析上下文转换为报告章节计划。
 - `knowledgeCoverageAuditor`：审计每个报告章节是否已有 verified 外部知识片段，用于判断能否升级为文献/知识库支撑的深入报告；该审计不阻塞当前保守底稿发布。
-- `reportComposer`：用确定性模板生成保守正文草稿。
+- `reportGenerator`：建立报告生成器合同，把章节、证据、引用、知识片段、解释条目和 guardrails 组织成未来可交给大模型的 generation context；当前默认 provider 仍调用确定性模板。
+- `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
 
@@ -118,6 +120,7 @@ birth/profile input
 - 有用户查询意图层。
 - 有 agent 分析上下文层。
 - 有报告规划层。
+- 有报告生成器合同层。
 - 有正文草稿生成层。
 - 有报告审计层。
 - 有报告发布门禁。
@@ -129,7 +132,7 @@ birth/profile input
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 大模型生成尚未接入。
+- 报告生成器合同已建立，但真实外部大模型 provider、API、UI、权限、观测和生产部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架和组合验证底座已接入，但深层组合解释仍然很少。
 - 宫位、星曜、四化、运限的跨宫、跨限运解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
@@ -143,5 +146,5 @@ birth/profile input
 2. 建立知识库引用层：把文档、书籍、PDF 摘录映射为可审计、可检索的 verified snippet。
 3. 扩充组合解释：让组合验证主题进入更细的跨宫、跨限运解释。
 4. 补齐书籍/PDF/OCR 知识片段：把真实资料摘录映射为可审计、可检索的 verified snippet。
-5. 接入大模型报告器：让模型基于 report plan、证据、引用和边界生成完整用户报告。
-6. 建立报告审计器：自动扫描是否存在无证据断言、越权断语和引用缺失。
+5. 接入大模型 provider：让模型基于 report generation context、证据、引用和边界生成完整用户报告。
+6. 扩展报告审计器：继续扫描是否存在无证据断言、越权断语和引用缺失。

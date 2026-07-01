@@ -24,6 +24,7 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
       "agent-context",
       "report-plan",
       "knowledge-coverage",
+      "report-generation",
       "report-draft",
       "report-audit",
       "report-output",
@@ -35,6 +36,8 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.ok(
     pipelineResult.knowledgeCoverageAudit.summary.includes("verified 外部知识片段")
   );
+  assert.equal(pipelineResult.reportGeneration.status, "generated");
+  assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "deterministic-template");
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.equal(pipelineResult.readinessAudit.status, "in_progress");
   assert.ok(pipelineResult.readinessAudit.percent < 100);
@@ -148,6 +151,33 @@ test("runZiweiPipeline blocks report-only domains without supported sections", (
   assert.equal(pipelineResult.reportDraft.status, "blocked");
   assert.ok(pipelineResult.nextAction.includes("没有可用报告章节"));
   assert.deepEqual(pipelineResult.reportPlan.sections, []);
+});
+
+test("runZiweiPipeline blocks custom providers that omit planned sections", () => {
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    reportDraftProvider: ({ reportPlan }) => {
+      return {
+        providerId: "empty-provider",
+        reportDraft: {
+          status: "drafted",
+          title: `${reportPlan.subject.name}的不完整测试草稿`,
+          subject: reportPlan.subject,
+          introduction: reportPlan.opening,
+          sections: [],
+          closing: []
+        }
+      };
+    }
+  });
+
+  assert.equal(pipelineResult.reportGeneration.status, "generated");
+  assert.equal(pipelineResult.reportAudit.status, "failed");
+  assert.equal(pipelineResult.reportOutput.status, "blocked");
+  assert.ok(
+    pipelineResult.reportAudit.issues.some((issue) => {
+      return issue.id === "planned-section-missing";
+    })
+  );
 });
 
 test("runZiweiPipeline drafts a conservative marriage report section", () => {

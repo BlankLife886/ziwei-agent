@@ -64,6 +64,25 @@ test("auditReportOutput detects refs that bypass the planned section contract", 
   );
 });
 
+test("auditReportOutput blocks drafts that omit a planned section", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportDraft = {
+    status: "drafted",
+    sections: []
+  };
+  const audit = auditReportOutput(reportPlan, reportDraft);
+
+  assert.equal(audit.status, "failed");
+  assert.ok(
+    audit.issues.some((issue) => {
+      return issue.id === "planned-section-missing" &&
+        issue.sectionId === "life-triad";
+    })
+  );
+});
+
 test("auditReportOutput warns when risky fortune language is not framed as a boundary", () => {
   const reportPlan = {
     status: "planned",

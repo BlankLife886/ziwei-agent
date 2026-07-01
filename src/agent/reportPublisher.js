@@ -64,6 +64,7 @@ function buildReportMetadata(reportPlan, reportDraft, reportAudit) {
     interpretationRefs: uniqueInOrder(
       sections.flatMap((section) => section.interpretationRefs ?? [])
     ),
+    generation: reportDraft.generation ?? null,
     guardrails: reportPlan.guardrails ?? []
   };
 }

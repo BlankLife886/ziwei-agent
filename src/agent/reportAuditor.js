@@ -65,11 +65,28 @@ export function auditReportOutput(reportPlan, reportDraft) {
     return [section.id, section];
   }));
 
+  auditPlannedSectionsPresent(reportPlan, reportDraft, issues);
   auditDraftSections(reportDraft, sectionsById, issues);
   auditRiskLanguage(reportDraft, warnings);
   auditTimingTriggerFraming(reportDraft, warnings);
 
   return buildAuditResult(issues, warnings);
+}
+
+function auditPlannedSectionsPresent(reportPlan, reportDraft, issues) {
+  const draftSectionIds = new Set(reportDraft.sections.map((section) => section.id));
+
+  reportPlan.sections.forEach((planSection) => {
+    if (draftSectionIds.has(planSection.id)) {
+      return;
+    }
+
+    issues.push(createIssue(
+      "planned-section-missing",
+      `报告草稿缺少 reportPlan 中的章节 ${planSection.id}。`,
+      { sectionId: planSection.id }
+    ));
+  });
 }
 
 function auditDraftSections(reportDraft, sectionsById, issues) {

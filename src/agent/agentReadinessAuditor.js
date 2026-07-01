@@ -174,7 +174,11 @@ const READINESS_ITEMS = [
     id: "llm-and-product",
     title: "大模型报告器与产品化",
     weight: 6,
-    evaluate: () => {
+    evaluate: ({ pipelineResult }) => {
+      if (pipelineResult.reportGeneration?.status === "generated") {
+        return partial("已建立报告生成器合同和确定性 provider，但尚未接入外部大模型、API、UI、权限、观测和生产部署。", 0.25);
+      }
+
       return partial("尚未接入大模型生成器、API、UI、权限、观测和生产部署。", 0);
     }
   }
