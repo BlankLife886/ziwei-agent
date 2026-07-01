@@ -1,5 +1,8 @@
 import { auditAgentReadiness } from "./agentReadinessAuditor.js";
-import { generateReportDraft } from "./reportGenerator.js";
+import {
+  generateReportDraft,
+  generateReportDraftAsync
+} from "./reportGenerator.js";
 import { auditKnowledgeCoverage } from "./knowledgeCoverageAuditor.js";
 import { auditReportOutput } from "./reportAuditor.js";
 import { createReportPlan } from "./reportPlanner.js";
@@ -15,17 +18,61 @@ import { createZiweiAgentResponse } from "./ziweiAgent.js";
 // runZiweiPipeline，而不用各自复制一遍 agent 步骤。
 
 export function runZiweiPipeline(buildResult, options = {}) {
+  const preparedPipeline = preparePipeline(buildResult, options);
+  const reportGeneration = generateReportDraft(preparedPipeline.reportPlan, buildReportGenerationOptions(options));
+
+  return finalizePipeline({
+    ...preparedPipeline,
+    reportGeneration
+  });
+}
+
+export async function runZiweiPipelineAsync(buildResult, options = {}) {
+  const preparedPipeline = preparePipeline(buildResult, options);
+  const reportGeneration = await generateReportDraftAsync(
+    preparedPipeline.reportPlan,
+    buildReportGenerationOptions(options)
+  );
+
+  return finalizePipeline({
+    ...preparedPipeline,
+    reportGeneration
+  });
+}
+
+function preparePipeline(buildResult, options) {
   const queryIntent = normalizeQueryIntent(options.queryIntent);
   const agentResult = createZiweiAgentResponse(buildResult, { queryIntent });
   const reportPlan = createReportPlan(agentResult, {
     knowledgeSnippets: options.knowledgeSnippets
   });
   const knowledgeCoverageAudit = auditKnowledgeCoverage(reportPlan);
-  const reportGeneration = generateReportDraft(reportPlan, {
+
+  return {
+    queryIntent,
+    buildResult,
+    agentResult,
+    reportPlan,
+    knowledgeCoverageAudit
+  };
+}
+
+function buildReportGenerationOptions(options) {
+  return {
     provider: options.reportDraftProvider,
     generatorId: options.reportGeneratorId,
     externalProvider: options.externalReportDraftProvider
-  });
+  };
+}
+
+function finalizePipeline({
+  queryIntent,
+  buildResult,
+  agentResult,
+  reportPlan,
+  knowledgeCoverageAudit,
+  reportGeneration
+}) {
   const reportDraft = reportGeneration.reportDraft;
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
   const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);

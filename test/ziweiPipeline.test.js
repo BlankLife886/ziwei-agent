@@ -8,7 +8,10 @@ import {
 import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { createReportDraft } from "../src/agent/reportComposer.js";
 import { REPORT_GENERATOR_IDS } from "../src/agent/reportGenerator.js";
-import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
+import {
+  runZiweiPipeline,
+  runZiweiPipelineAsync
+} from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
 test("runZiweiPipeline produces the complete agent output chain", () => {
@@ -201,6 +204,23 @@ test("runZiweiPipeline passes a configured external LLM provider through the ful
   assert.equal(pipelineResult.reportGeneration.providerResolution.mode, "external-llm");
   assert.equal(pipelineResult.reportGeneration.generationContext.providerMode, "external-llm");
   assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "pipeline-external-llm");
+  assert.equal(pipelineResult.reportAudit.status, "passed");
+});
+
+test("runZiweiPipelineAsync awaits an async external LLM provider through the full agent chain", async () => {
+  const pipelineResult = await runZiweiPipelineAsync(buildChart(createSampleProfile()), {
+    reportGeneratorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalReportDraftProvider: async ({ reportPlan }) => {
+      return {
+        providerId: "pipeline-async-external-llm",
+        reportDraft: createReportDraft(reportPlan)
+      };
+    }
+  });
+
+  assert.equal(pipelineResult.status, "published");
+  assert.equal(pipelineResult.reportGeneration.status, "generated");
+  assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "pipeline-async-external-llm");
   assert.equal(pipelineResult.reportAudit.status, "passed");
 });
 

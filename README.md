@@ -4,7 +4,7 @@
 
 最终产品目标不是只输出排盘或本命盘草稿，而是让用户输入出生资料和咨询主题后，先得到结构化命盘，再由 agent 按文献、知识库、规则计算和大模型归纳逐层生成用户报告。报告方向包括综合命盘、性格画像、婚姻感情、事业发展、财富资源、阶段运势，以及因果、前世今生等偏象征性和文化诠释的主题。当前代码仍处在底层建设阶段，已支持部分报告领域的证据链底稿；尚未支持的主题会先登记为最终报告目标，并明确标注不能输出深入断语。
 
-当前阶段实现了出生资料采集、历法转换、命宫/身宫计算、五行局计算、十四主星基础落宫，左辅、右弼、天刑、天姚、天月、天巫等月系辅星，三台、八座等日系辅星，禄存、擎羊、陀罗、天魁、天钺、天官、天福、天厨等年干星曜，截空等空曜，火星、铃星等基础煞曜，生年四化，大限年龄段，按分析日期定位当前大限、流年和流月，并能基于大限、流年、流月和四化重叠生成安全触发观察点、组合验证主题、组合主题解释、跨宫跨限运关系和报告专题细分任务单。排盘流程已经抽成可复用的 `chartBuilder` 服务，并加入命理师 agent 外壳，用“分析上下文 -> 报告规划 -> 报告生成器合同 -> provider 选择 -> 正文草稿 -> 报告审计 -> 用户报告发布”的流程组织命盘证据、分析重点、当前能力边界和输出安全检查。事业、财富、婚姻和当前阶段运势已支持结构性底稿，但仍不能推具体年份事件、月份事件、应期、吉凶、婚恋结果、职位结果或财富结果。后续会在此基础上加入资料检索、命理分析和完整报告生成。
+当前阶段实现了出生资料采集、历法转换、命宫/身宫计算、五行局计算、十四主星基础落宫，左辅、右弼、天刑、天姚、天月、天巫等月系辅星，三台、八座等日系辅星，禄存、擎羊、陀罗、天魁、天钺、天官、天福、天厨等年干星曜，截空等空曜，火星、铃星等基础煞曜，生年四化，大限年龄段，按分析日期定位当前大限、流年和流月，并能基于大限、流年、流月和四化重叠生成安全触发观察点、组合验证主题、组合主题解释、跨宫跨限运关系和报告专题细分任务单。排盘流程已经抽成可复用的 `chartBuilder` 服务，并加入命理师 agent 外壳，用“分析上下文 -> 报告规划 -> 报告生成器合同 -> provider 选择 -> 正文草稿 -> 报告审计 -> 用户报告发布”的流程组织命盘证据、分析重点、当前能力边界和输出安全检查。报告生成器已支持同步/异步 provider，并提供通用外部 HTTP 大模型 provider 适配器；外部模型产出的草稿仍必须通过报告审计和发布门禁。事业、财富、婚姻和当前阶段运势已支持结构性底稿，但仍不能推具体年份事件、月份事件、应期、吉凶、婚恋结果、职位结果或财富结果。后续会在此基础上加入资料检索、命理分析和完整报告生成。
 
 ## 架构文档
 
@@ -20,6 +20,18 @@ npm run validate:knowledge
 ```
 
 `npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。这个示例知识库目前是本地审校分析框架样本，不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
+
+如果要让 CLI 走外部大模型报告 provider，可设置以下环境变量：
+
+```bash
+ZIWEI_REPORT_PROVIDER=external-llm \
+ZIWEI_LLM_ENDPOINT=https://example.com/v1/chat/completions \
+ZIWEI_LLM_API_KEY=your-api-key \
+ZIWEI_LLM_MODEL=your-model \
+node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json
+```
+
+外部 provider 缺少配置、请求失败或响应无法解析为 `reportDraft` 时，pipeline 会阻断发布，不会把未审计内容输出为用户报告。
 
 ## 当前模块
 
@@ -49,6 +61,7 @@ npm run validate:knowledge
 - `src/agent/reportPlanner.js`: 把 agent 分析上下文转换为报告草稿章节，包括写作问题、可用证据、`evidenceRefs`、`referenceRefs`、`interpretationRefs` 和写作边界。
 - `src/agent/knowledgeCoverageAuditor.js`: 审计报告章节是否已有 verified 外部知识片段，防止把只有本地规则支撑的保守底稿包装成知识库充分支撑的深入报告。
 - `src/agent/reportGenerator.js`: 定义报告生成器合同层，把 report plan、证据、引用、知识片段、解释条目、专题细分任务单和 guardrails 组织为 generation context；当前默认 provider 使用确定性模板，也支持选择外部大模型 provider。若选择外部大模型但未配置可调用 provider，会在生成前阻断，避免绕过审计链路。
+- `src/agent/externalLLMReportProvider.js`: 把 generation context 包装成外部 HTTP 大模型请求，并把返回结果解析为 `reportDraft`；缺配置、HTTP 失败或解析失败都会阻断后续发布。
 - `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能通过 `evidenceRefs` 回指到已有证据，并通过 `referenceRefs` 回指到规则/分析框架。
 - `src/agent/reportAuditor.js`: 审计报告草稿是否遵守章节引用契约，并扫描未被边界约束的高风险断语。
 - `src/agent/reportPublisher.js`: 作为最终发布门禁，只有审计通过的草稿才会转换成可交付的用户报告。

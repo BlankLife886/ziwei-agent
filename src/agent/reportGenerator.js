@@ -18,16 +18,56 @@ export const REPORT_GENERATOR_IDS = {
 const GENERATION_CONTEXT_VERSION = "report-generation-context.v1";
 
 export function generateReportDraft(reportPlan, options = {}) {
+  const preparedGeneration = prepareReportGeneration(reportPlan, options);
+
+  if (preparedGeneration.blockedResult) {
+    return preparedGeneration.blockedResult;
+  }
+
+  const providerResult = callReportDraftProvider(preparedGeneration.providerResolution.provider, {
+    reportPlan,
+    generationContext: preparedGeneration.generationContext
+  });
+
+  return finalizeReportGeneration({
+    generationContext: preparedGeneration.generationContext,
+    providerResolution: preparedGeneration.providerResolution,
+    providerResult
+  });
+}
+
+export async function generateReportDraftAsync(reportPlan, options = {}) {
+  const preparedGeneration = prepareReportGeneration(reportPlan, options);
+
+  if (preparedGeneration.blockedResult) {
+    return preparedGeneration.blockedResult;
+  }
+
+  const providerResult = await callReportDraftProviderAsync(preparedGeneration.providerResolution.provider, {
+    reportPlan,
+    generationContext: preparedGeneration.generationContext
+  });
+
+  return finalizeReportGeneration({
+    generationContext: preparedGeneration.generationContext,
+    providerResolution: preparedGeneration.providerResolution,
+    providerResult
+  });
+}
+
+function prepareReportGeneration(reportPlan, options) {
   const generationContext = createReportGenerationContext(reportPlan, options);
 
   if (generationContext.status !== "ready") {
     return {
-      status: "blocked",
-      providerId: "none",
-      contextVersion: GENERATION_CONTEXT_VERSION,
-      messages: generationContext.messages,
-      generationContext,
-      reportDraft: createReportDraft(reportPlan)
+      blockedResult: {
+        status: "blocked",
+        providerId: "none",
+        contextVersion: GENERATION_CONTEXT_VERSION,
+        messages: generationContext.messages,
+        generationContext,
+        reportDraft: createReportDraft(reportPlan)
+      }
     };
   }
 
@@ -35,27 +75,34 @@ export function generateReportDraft(reportPlan, options = {}) {
 
   if (providerResolution.status !== "ready") {
     return {
-      status: "blocked",
-      providerId: providerResolution.providerId,
-      contextVersion: generationContext.version,
-      messages: providerResolution.messages,
-      generationContext,
-      providerResolution,
-      reportDraft: {
+      blockedResult: {
         status: "blocked",
+        providerId: providerResolution.providerId,
+        contextVersion: generationContext.version,
         messages: providerResolution.messages,
-        sections: [],
-        closing: []
+        generationContext,
+        providerResolution,
+        reportDraft: {
+          status: "blocked",
+          messages: providerResolution.messages,
+          sections: [],
+          closing: []
+        }
       }
     };
   }
 
-  const provider = providerResolution.provider;
-  const providerResult = callReportDraftProvider(provider, {
-    reportPlan,
-    generationContext
-  });
+  return {
+    generationContext,
+    providerResolution
+  };
+}
 
+function finalizeReportGeneration({
+  generationContext,
+  providerResolution,
+  providerResult
+}) {
   if (!providerResult?.reportDraft) {
     const failureMessages = [
       ...(providerResult?.messages ?? []),
@@ -193,8 +240,24 @@ export function createDeterministicDraftProvider() {
 }
 
 function callReportDraftProvider(provider, input) {
+  if (isAsyncFunction(provider)) {
+    return {
+      providerId: "async-provider",
+      messages: ["报告生成 provider 是 async function；同步 pipeline 已阻断，请使用 generateReportDraftAsync 或 runZiweiPipelineAsync。"]
+    };
+  }
+
   try {
-    return provider(input);
+    const providerResult = provider(input);
+
+    if (isPromiseLike(providerResult)) {
+      return {
+        providerId: "async-provider",
+        messages: ["报告生成 provider 返回 Promise；同步 pipeline 已阻断，请使用 generateReportDraftAsync 或 runZiweiPipelineAsync。"]
+      };
+    }
+
+    return providerResult;
   } catch (error) {
     return {
       providerId: "provider-error",
@@ -203,6 +266,27 @@ function callReportDraftProvider(provider, input) {
       ]
     };
   }
+}
+
+async function callReportDraftProviderAsync(provider, input) {
+  try {
+    return await provider(input);
+  } catch (error) {
+    return {
+      providerId: "provider-error",
+      messages: [
+        `报告生成 provider 执行失败：${error instanceof Error ? error.message : String(error)}`
+      ]
+    };
+  }
+}
+
+function isPromiseLike(value) {
+  return Boolean(value) && typeof value.then === "function";
+}
+
+function isAsyncFunction(value) {
+  return value?.constructor?.name === "AsyncFunction";
 }
 
 function buildGenerationSectionInput(section) {

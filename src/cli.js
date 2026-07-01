@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
+import { createExternalLLMReportProvider } from "./agent/externalLLMReportProvider.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
-import { runZiweiPipeline } from "./agent/ziweiPipeline.js";
+import { REPORT_GENERATOR_IDS } from "./agent/reportGenerator.js";
+import { runZiweiPipelineAsync } from "./agent/ziweiPipeline.js";
 import { buildChart } from "./chartBuilder.js";
 import {
   formatAgentBriefing,
@@ -26,9 +28,10 @@ async function main() {
     ? await loadKnowledgeSnippetStore(knowledgeStorePath)
     : { status: "empty", snippets: [], issues: [] };
   const buildResult = buildChart(profile);
-  const pipelineResult = runZiweiPipeline(buildResult, {
-    knowledgeSnippets: knowledgeStore.snippets
-  });
+  const pipelineResult = await runZiweiPipelineAsync(
+    buildResult,
+    buildPipelineOptions(knowledgeStore.snippets)
+  );
   const lines = [
     ...formatKnowledgeStoreSummary(knowledgeStore),
     "",
@@ -52,6 +55,27 @@ async function main() {
   }
 
   return buildResult.exitCode;
+}
+
+function buildPipelineOptions(knowledgeSnippets) {
+  const options = {
+    knowledgeSnippets
+  };
+
+  if (process.env.ZIWEI_REPORT_PROVIDER !== REPORT_GENERATOR_IDS.EXTERNAL_LLM) {
+    return options;
+  }
+
+  return {
+    ...options,
+    reportGeneratorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalReportDraftProvider: createExternalLLMReportProvider({
+      endpoint: process.env.ZIWEI_LLM_ENDPOINT,
+      apiKey: process.env.ZIWEI_LLM_API_KEY,
+      model: process.env.ZIWEI_LLM_MODEL,
+      providerId: process.env.ZIWEI_LLM_PROVIDER_ID
+    })
+  };
 }
 
 function formatKnowledgeStoreSummary(knowledgeStore) {

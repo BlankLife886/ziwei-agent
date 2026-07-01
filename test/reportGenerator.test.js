@@ -4,6 +4,7 @@ import {
   REPORT_GENERATOR_IDS,
   createReportGenerationContext,
   generateReportDraft,
+  generateReportDraftAsync,
   resolveReportDraftProvider
 } from "../src/agent/reportGenerator.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
@@ -153,6 +154,64 @@ test("generateReportDraft runs a configured external LLM provider inside the rep
     reportGeneration.reportDraft.generation.outputContract.publishGate,
     "reportPublisher"
   );
+});
+
+test("generateReportDraft blocks promise-returning providers on the sync path", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  let asyncProviderCalled = false;
+  const reportGeneration = generateReportDraft(reportPlan, {
+    generatorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalProvider: async ({ reportPlan: plannedReport }) => {
+      asyncProviderCalled = true;
+
+      return {
+        providerId: "async-provider",
+        reportDraft: {
+          status: "drafted",
+          title: `${plannedReport.subject.name}的异步测试草稿`,
+          subject: plannedReport.subject,
+          introduction: plannedReport.opening,
+          sections: [],
+          closing: []
+        }
+      };
+    }
+  });
+
+  assert.equal(reportGeneration.status, "blocked");
+  assert.equal(reportGeneration.providerId, "async-provider");
+  assert.equal(asyncProviderCalled, false);
+  assert.ok(reportGeneration.messages[0].includes("同步 pipeline 已阻断"));
+});
+
+test("generateReportDraftAsync awaits async external providers inside the same contract", async () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportGeneration = await generateReportDraftAsync(reportPlan, {
+    generatorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalProvider: async ({ reportPlan: plannedReport, generationContext }) => {
+      return {
+        providerId: "async-external-llm",
+        messages: [`异步 provider 收到 ${generationContext.sections.length} 个章节。`],
+        reportDraft: {
+          status: "drafted",
+          title: `${plannedReport.subject.name}的异步外部模型测试草稿`,
+          subject: plannedReport.subject,
+          introduction: plannedReport.opening,
+          sections: [],
+          closing: []
+        }
+      };
+    }
+  });
+
+  assert.equal(reportGeneration.status, "generated");
+  assert.equal(reportGeneration.providerId, "async-external-llm");
+  assert.equal(reportGeneration.providerResolution.mode, "external-llm");
+  assert.equal(reportGeneration.reportDraft.generation.providerId, "async-external-llm");
 });
 
 test("generateReportDraft blocks an external LLM generator until an external provider is configured", () => {

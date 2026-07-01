@@ -251,14 +251,14 @@ const READINESS_ITEMS = [
         pipelineResult.reportGeneration?.status === "generated" &&
         providerResolution?.status === "ready"
       ) {
-        return partial("已建立报告生成器合同、provider 选择边界、确定性 provider 和外部 provider 配置入口，但尚未接入真实外部大模型 API、UI、权限、观测和生产部署。", 0.45);
+        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器和 CLI 配置入口，但尚未接入 UI、权限、观测和生产部署。", 0.6);
       }
 
       if (
         pipelineResult.reportGeneration?.status === "blocked" &&
         providerResolution?.mode === "external-llm"
       ) {
-        return partial("已能识别外部大模型 provider 未配置并安全阻断，但尚未接入真实外部大模型 API、UI、权限、观测和生产部署。", 0.35);
+        return partial("已能识别外部大模型 provider 未配置并安全阻断，但尚未接入 UI、权限、观测和生产部署。", 0.45);
       }
 
       return partial("尚未接入大模型生成器、API、UI、权限、观测和生产部署。", 0);
