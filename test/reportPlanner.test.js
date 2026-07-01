@@ -107,6 +107,16 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .sources.some((source) => source.title.includes("本地分析框架"))
   );
   assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .knowledgeSnippetRefs,
+    []
+  );
+  assert.deepEqual(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .knowledgeSnippets,
+    []
+  );
+  assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "career-palace")
       .referenceRefs,
     ["framework.career-palace", "rule.star-placement", "framework.palace-role"]

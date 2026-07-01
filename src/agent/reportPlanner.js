@@ -1,6 +1,7 @@
 import {
   findInterpretations
 } from "./interpretationCatalog.js";
+import { searchKnowledgeSnippets } from "./knowledgeSnippetCatalog.js";
 import { findReferences, findSources } from "./referenceCatalog.js";
 import {
   buildSectionGuidingQuestions,
@@ -90,6 +91,10 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
   const references = findReferences(referenceRefs);
   const sourceRefs = collectSourceRefs(references);
   const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
+  const knowledgeSnippets = searchKnowledgeSnippets({
+    topicIds: queryContext.topicIds,
+    referenceRefs
+  });
 
   return {
     id: focusArea.id,
@@ -106,6 +111,8 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
     references,
     sourceRefs,
     sources: findSources(sourceRefs),
+    knowledgeSnippetRefs: knowledgeSnippets.map((snippet) => snippet.id),
+    knowledgeSnippets,
     writingPrompt: buildSectionWritingPrompt(focusArea.id, queryContext)
   };
 }

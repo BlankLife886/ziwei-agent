@@ -102,6 +102,7 @@ export function formatReportPlan(reportPlan) {
         "  可用证据：",
         ...formatEvidenceItems(section),
         ...formatReferences(section),
+        ...formatKnowledgeSnippets(section),
         ...formatInterpretations(section)
       ];
     }),
@@ -231,6 +232,19 @@ function formatReferences(section) {
     "  参考依据：",
     ...section.references.map((reference) => {
       return `    - [${reference.id}] ${reference.title}`;
+    })
+  ];
+}
+
+function formatKnowledgeSnippets(section) {
+  if (!section.knowledgeSnippets || section.knowledgeSnippets.length === 0) {
+    return [];
+  }
+
+  return [
+    "  知识片段：",
+    ...section.knowledgeSnippets.map((snippet) => {
+      return `    - [${snippet.id}] ${snippet.title}（来源：${snippet.citation}）`;
     })
   ];
 }
