@@ -22,8 +22,8 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
   assert.ok(
     audit.items.some((item) => {
       return item.id === "interpretation-depth" &&
-        item.status === "partial" &&
-        item.message.includes("跨宫跨限运关系解释");
+        item.status === "complete" &&
+        item.message.includes("专题细分任务单");
     })
   );
   assert.ok(
@@ -36,8 +36,8 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
   assert.ok(audit.percent >= 77);
   assert.ok(
     audit.blockers.some((blocker) => {
-      return blocker.includes("文献支撑") &&
-        blocker.includes("专题细分");
+      return blocker.includes("外部知识库覆盖") &&
+        blocker.includes("verified 外部知识片段");
     })
   );
   assert.ok(audit.nextPriorities.length > 0);

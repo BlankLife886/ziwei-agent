@@ -116,6 +116,15 @@ test("createReportPlan turns ready agent context into report sections", () => {
       .knowledgeSnippets,
     []
   );
+  assert.equal(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .topicRefinements[0].title,
+    "命宫三方四正专题细分"
+  );
+  assert.ok(
+    reportPlan.sections.find((section) => section.id === "life-triad")
+      .topicRefinements[0].interpretationRefs.includes("interpretation.topic-refinement.structure-only")
+  );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "career-palace")
       .referenceRefs,

@@ -50,6 +50,7 @@ export const INTERPRETATION_IDS = {
   TIMING_COMBINATION_VERIFIED_ONLY: "interpretation.timing-combination.verified-only",
   TIMING_COMBINATION_THEME_ONLY: "interpretation.timing-combination.theme-only",
   TIMING_CROSS_LAYER_STRUCTURE_ONLY: "interpretation.timing-cross-layer.structure-only",
+  TOPIC_REFINEMENT_STRUCTURE_ONLY: "interpretation.topic-refinement.structure-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -592,6 +593,16 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.MONTHLY_PERIOD
     ],
     text: "跨宫跨限运关系解释只能说明已验证阶段主题与当前大限、流年、流月定位之间的同宫、分宫和层级合参关系；它不能写成实际发生事件、具体应期、吉凶、婚恋结果、财富金额或职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.TOPIC_REFINEMENT_STRUCTURE_ONLY,
+    title: "专题细分解释的安全边界",
+    topic: "topic-refinement",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.TOPIC_REFINEMENT
+    ],
+    text: "专题细分解释只能把用户问题或默认章节拆成可审计的分析角度、证据范围和写作禁区；它不能新增排盘结果、不能补造文献依据，也不能把结构角度写成具体事件或结果。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

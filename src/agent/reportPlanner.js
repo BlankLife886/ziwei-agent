@@ -10,6 +10,7 @@ import {
   buildSectionTitle,
   buildSectionWritingPrompt
 } from "./reportSectionCatalog.js";
+import { interpretTopicRefinements } from "./topicRefinementInterpreter.js";
 
 // 命理报告草稿规划器。
 //
@@ -98,7 +99,7 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
   });
   const sourceRefs = collectSectionSourceRefs(references, knowledgeSnippets);
 
-  return {
+  const section = {
     id: focusArea.id,
     title: buildSectionTitle(focusArea, queryContext),
     purpose: buildSectionPurpose(focusArea, queryContext),
@@ -116,6 +117,11 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
     knowledgeSnippetRefs: knowledgeSnippets.map((snippet) => snippet.id),
     knowledgeSnippets,
     writingPrompt: buildSectionWritingPrompt(focusArea.id, queryContext)
+  };
+
+  return {
+    ...section,
+    topicRefinements: interpretTopicRefinements(section)
   };
 }
 

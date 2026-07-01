@@ -41,6 +41,7 @@ function composeSectionDraft(section) {
     evidenceRefs: section.evidenceRefs,
     interpretationRefs: section.interpretationRefs,
     knowledgeSnippetRefs: section.knowledgeSnippetRefs,
+    topicRefinements: section.topicRefinements ?? [],
     interpretations: section.interpretations,
     referenceRefs: section.referenceRefs,
     references: section.references,
@@ -68,6 +69,13 @@ function composeSectionDraft(section) {
       createParagraph(
         "section-synthesis",
         composeSectionSynthesisParagraph(section),
+        section.evidenceRefs,
+        section.referenceRefs,
+        displayedInterpretationRefs
+      ),
+      createParagraph(
+        "topic-refinement",
+        composeTopicRefinementParagraph(section),
         section.evidenceRefs,
         section.referenceRefs,
         displayedInterpretationRefs
@@ -121,6 +129,20 @@ function composeSectionSynthesisParagraph(section) {
     composeStructuralBoundary(section),
     knowledgeSummary
   ])}`;
+}
+
+function composeTopicRefinementParagraph(section) {
+  const refinements = section.topicRefinements ?? [];
+
+  if (refinements.length === 0) {
+    return "【专题细分】本节尚未生成专题细分任务单，只按章节证据保守写作。";
+  }
+
+  const refinementText = refinements.map((refinement) => {
+    return `${refinement.topicTitle}按${refinement.angles.join("、")}展开，禁区为${refinement.blockedClaims.join("、")}`;
+  }).join("；");
+
+  return `【专题细分】${refinementText}。`;
 }
 
 function composeEvidenceSynthesis(section) {

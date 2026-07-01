@@ -81,6 +81,23 @@ const READINESS_ITEMS = [
       const hasTimingCrossLayerInterpretation = sections.some((section) => {
         return section.interpretationRefs?.includes("interpretation.timing-cross-layer.structure-only");
       });
+      const sectionsWithTopicRefinements = sections.filter((section) => {
+        return section.topicRefinements?.some((refinement) => {
+          return refinement.interpretationRefs?.includes("interpretation.topic-refinement.structure-only");
+        });
+      }).length;
+      const topicRefinementRatio = sections.length > 0
+        ? sectionsWithTopicRefinements / sections.length
+        : 0;
+
+      if (
+        ratio === 1 &&
+        synthesisRatio === 1 &&
+        hasTimingCrossLayerInterpretation &&
+        topicRefinementRatio === 1
+      ) {
+        return completed("当前支持章节已有解释条目、章节级组合归纳、组合主题解释、跨宫跨限运关系解释和专题细分任务单。");
+      }
 
       if (ratio === 1 && synthesisRatio === 1 && hasTimingCrossLayerInterpretation) {
         return partial("所有当前章节已有解释条目、章节级组合归纳、组合主题解释和跨宫跨限运关系解释；后续仍需扩充更多文献支撑与专题细分。", 0.94);

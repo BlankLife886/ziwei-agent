@@ -46,6 +46,7 @@ test("publishReportOutput publishes only audited report drafts", () => {
   assert.ok(reportOutput.sections[0].evidenceRefs.includes("life-triad.life-palace"));
   assert.ok(reportOutput.sections[0].referenceRefs.includes("framework.life-triad"));
   assert.ok(reportOutput.sections[0].sourceRefs.includes("source.local.analysis-frameworks"));
+  assert.equal(reportOutput.sections[0].topicRefinements[0].title, "命宫三方四正专题细分");
   assert.ok(reportOutput.sections[0].paragraphs[0].evidenceRefs);
 });
 

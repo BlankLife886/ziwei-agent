@@ -61,6 +61,17 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
   assert.ok(
     reportDraft.sections
       .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "topic-refinement")
+      .text.includes("基础画像按基础气质、资源取用、事业承接、外部环境展开")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .topicRefinements[0].interpretationRefs.includes("interpretation.topic-refinement.structure-only")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("财帛宫见天相、天魁、火星")
   );
