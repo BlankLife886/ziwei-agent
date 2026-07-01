@@ -14,6 +14,7 @@
 
 ```bash
 npm start
+npm run serve
 node src/cli.js examples/profile.example.json
 node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json
 npm run validate:knowledge
@@ -36,6 +37,25 @@ node src/cli.js examples/profile.example.json data/knowledge-snippets.example.js
 
 外部 provider 缺少配置、请求失败、请求超时、响应过大或响应无法解析为 `reportDraft` 时，pipeline 会阻断发布，不会把未审计内容输出为用户报告。
 
+如果要通过 HTTP API 调用 agent，可启动服务：
+
+```bash
+ZIWEI_API_TOKEN=local-secret \
+ZIWEI_KNOWLEDGE_STORE=data/knowledge-snippets.example.json \
+npm run serve
+```
+
+随后请求：
+
+```bash
+curl -X POST http://localhost:3000/v1/reports \
+  -H "authorization: Bearer local-secret" \
+  -H "content-type: application/json" \
+  -d '{"profile":{"name":"示例命主","gender":"female","calendar":"solar","birth_date":"1990-05-18","birth_time":"23:30","birth_place":"Shanghai, China","timezone":"Asia/Shanghai","use_true_solar_time":false,"is_leap_month":false,"analysis_date":"2026-07-01"},"query":"我想看婚姻和今年运势"}'
+```
+
+API 入口同样只调用统一 agent pipeline；它不会绕过报告规划、报告审计或发布门禁。
+
 ## 当前模块
 
 - `src/intake.js`: 校验用户出生资料，并把出生时间标准化为十二时辰。
@@ -45,6 +65,7 @@ node src/cli.js examples/profile.example.json data/knowledge-snippets.example.js
 - `src/agent/ziweiPipeline.js`: 统一编排 agent 主流程，把排盘结果转换为分析上下文、报告规划、正文草稿、报告审计和用户报告。
 - `src/agent/agentReadinessAuditor.js`: 按工程能力项审计 agent 完整度，输出当前进度、阻塞项和下一步优先级；该进度不是命理准确率。
 - `src/agent/intakeSession.js`: 维护多轮输入中的出生资料草稿，把用户新补充的字段合并后重新调用完整 agent 流程。
+- `src/agent/ziweiApiHandler.js`: 把 HTTP/API 请求转换为统一 agent pipeline 调用，提供请求大小限制、可选 bearer 鉴权、健康检查和基础请求诊断。
 - `src/agent/profilePatchParser.js`: 把用户自然语言补充转换为可审计的结构化资料 patch，支持出生资料和分析日期，并保留字段来源片段。
 - `src/agent/queryIntentParser.js`: 把“看当前大限 / 看事业 / 看财帛 / 看运势 / 看四化”等自然语言问题转换为可审计的查询意图，用于收敛本轮报告章节，并保留事业、财帛、迁移等专题上下文。
 - `src/agent/reportDomainCatalog.js`: 定义最终用户报告领域，包括性格、事业、财富、婚姻、运势、因果、前世今生等，并标注当前支持程度和缺失能力。
@@ -79,6 +100,8 @@ node src/cli.js examples/profile.example.json data/knowledge-snippets.example.js
 - `src/majorPeriodCalculator.js`: 根据五行局与阴阳男女规则计算大限年龄段，并在提供分析日期时按虚岁定位当前大限。
 - `src/monthlyPeriodCalculator.js`: 根据分析日期换算农历月份，并按月建地支定位流月所在本命宫位。
 - `src/cli.js`: 命令行入口，用于实战测试输入资料。
+- `src/server.js`: Node HTTP 服务入口，暴露 `/health` 和 `POST /v1/reports`。
+- `src/runtimeOptions.js`: 统一 CLI 和 API 的外部 provider 运行时配置。
 
 ## 测试
 

@@ -48,10 +48,13 @@ birth/profile input
   -> reportOutput
 ```
 
+CLI 和 HTTP API 都必须进入这条链路。`ziweiApiHandler` 只负责接收 `profile`、`query` 或显式 `queryIntent`，然后调用 `buildChart` 和 `runZiweiPipelineAsync`；它不会直接调用报告 composer，也不会跳过审计发布门禁。
+
 各层职责如下：
 
 - `buildChart`：只负责排盘计算，输出结构化命盘。
 - `queryIntentParser`：把用户问题转换成可审计的专题意图。
+- `ziweiApiHandler`：把 HTTP/API 请求转换为统一 pipeline 调用，负责请求大小限制、可选 bearer 鉴权、健康检查和基础请求诊断，不负责命理解释。
 - `ziweiAgent`：把命盘转换为 agent 分析上下文，包括证据、分析重点、限制和追问。
 - `reportPlanner`：把分析上下文转换为报告章节计划。
 - `topicRefinementInterpreter`：把报告章节整理成专题角度、证据范围和禁止断语，作为确定性报告器和未来大模型的可审计任务单。
@@ -101,6 +104,17 @@ birth/profile input
 - `closing`：报告收束和边界提示。
 - `audit`：发布时使用的审计结果。
 
+HTTP API 的 `POST /v1/reports` 会返回：
+
+- `chart`：本次输入生成的结构化命盘；资料不完整或非法时为 `null`。
+- `report`：经过发布门禁后的用户报告；未通过时为 blocked 状态。
+- `validation`：出生资料校验结果和缺失字段。
+- `queryIntent`：本轮用户问题解析结果。
+- `audits`：知识覆盖、报告审计和完整度审计。
+- `diagnostics`：请求耗时、排盘状态、报告规划状态、生成状态和发布状态。
+
+当设置 `ZIWEI_API_TOKEN` 时，API 只接受 `authorization: Bearer <token>`。该鉴权只保护 API 入口，不改变 agent 内部证据、报告规划和审计逻辑。
+
 ## 当前已支持的报告底稿
 
 当前支持的是“结构性底稿”，不是完整断命：
@@ -142,6 +156,8 @@ birth/profile input
 - 有正文草稿生成层。
 - 有报告审计层。
 - 有报告发布门禁。
+- 有 CLI 和 HTTP API 两种入口，且都进入同一条 pipeline。
+- 有 API 请求大小限制、可选 bearer 鉴权和基础请求诊断。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
 - 有安全触发观察点、组合验证层、组合主题解释层、跨宫跨限运关系解释层和专题细分任务单，能把多层运限和四化重叠宫位列为待验证主题，筛出证据层数达标的合参主题，把已验证宫位转成阶段合参领域，整理当前大限、流年、流月之间的同宫或分宫关系，并把报告章节拆成可审计的专题角度，但不会输出事件断语。
@@ -150,7 +166,7 @@ birth/profile input
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断和 CLI 配置入口已建立，但 UI、权限、系统级观测和生产部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口和 HTTP API 入口已建立；API 已有可选 bearer 鉴权和请求大小限制，但 UI、正式权限体系、系统级观测和生产部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
