@@ -19,7 +19,14 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
       return item.id === "knowledge-coverage" && item.status === "partial";
     })
   );
-  assert.ok(audit.percent >= 75);
+  assert.ok(
+    audit.items.some((item) => {
+      return item.id === "interpretation-depth" &&
+        item.status === "partial" &&
+        item.message.includes("章节级组合归纳");
+    })
+  );
+  assert.ok(audit.percent >= 77);
   assert.ok(
     audit.blockers.some((blocker) => blocker.includes("安全事件触发候选"))
   );

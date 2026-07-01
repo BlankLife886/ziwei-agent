@@ -66,6 +66,13 @@ function composeSectionDraft(section) {
         displayedInterpretationRefs
       ),
       createParagraph(
+        "section-synthesis",
+        composeSectionSynthesisParagraph(section),
+        section.evidenceRefs,
+        section.referenceRefs,
+        displayedInterpretationRefs
+      ),
+      createParagraph(
         "interpretation",
         composeInterpretationParagraph(section),
         section.evidenceRefs,
@@ -94,6 +101,68 @@ function composeInterpretationBasisParagraph(interpretations) {
   });
 
   return `【解释依据】${interpretationSummaries.join("；")}。`;
+}
+
+function composeSectionSynthesisParagraph(section) {
+  const starRoleSynthesis = composeStarRoleSynthesis(section);
+  const evidenceSummary = composeEvidenceSynthesis(section);
+  const knowledgeSummary = composeKnowledgeSnippetSynthesis(section);
+
+  if (starRoleSynthesis) {
+    return `【组合归纳】${joinJudgmentParts([
+      evidenceSummary,
+      starRoleSynthesis,
+      knowledgeSummary
+    ])}`;
+  }
+
+  return `【组合归纳】${joinJudgmentParts([
+    evidenceSummary,
+    composeStructuralBoundary(section),
+    knowledgeSummary
+  ])}`;
+}
+
+function composeEvidenceSynthesis(section) {
+  const evidenceCount = section.evidenceItems?.length ?? section.evidence?.length ?? 0;
+  const referenceCount = section.referenceRefs?.length ?? 0;
+  const interpretationCount = section.interpretationRefs?.length ?? 0;
+
+  return `本节先把${evidenceCount}组命盘证据、${referenceCount}类规则/框架引用和${interpretationCount}条受控解释放在同一章节中合看`;
+}
+
+function composeKnowledgeSnippetSynthesis(section) {
+  const snippetCount = section.knowledgeSnippetRefs?.length ?? 0;
+
+  if (snippetCount === 0) {
+    return "本节尚无 verified 知识片段，组合归纳只能作为本地规则底稿";
+  }
+
+  return `本节已接入${snippetCount}条 verified 知识片段作为框架校验，但这些片段只支持结构归纳，不替代后续书籍/PDF原文细证和组合验证`;
+}
+
+function composeStructuralBoundary(section) {
+  if (section.id === "birth-year-transformations") {
+    return "生年四化目前用于标记本命盘牵引位置，适合进入结构合参，不适合单独推出事件";
+  }
+
+  if (section.id === "major-periods") {
+    return "大限骨架目前用于确定十年阶段排列，适合做阶段索引，不适合单独写成阶段结果";
+  }
+
+  if (section.id === "current-major-period") {
+    return "当前大限定位目前用于说明分析日期落入哪一个阶段，后续仍要结合四化、流年、流月和组合验证";
+  }
+
+  if (section.id === "current-stage") {
+    return "当前阶段已能合看大限、流年和四化观察点，但仍保持待验证表述";
+  }
+
+  if (section.id === "star-balance") {
+    return "星曜类别统计目前用于检查主星、辅星、煞曜和空曜的分布比例，不直接扩展为结论";
+  }
+
+  return "当前组合归纳仍以结构关系为主，后续需要更多规则和资料来源继续加深";
 }
 
 function composeInterpretationParagraph(section) {

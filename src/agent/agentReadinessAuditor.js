@@ -64,10 +64,21 @@ const READINESS_ITEMS = [
     weight: 12,
     evaluate: ({ pipelineResult }) => {
       const sections = pipelineResult.reportPlan.sections ?? [];
+      const draftSections = pipelineResult.reportDraft.sections ?? [];
       const sectionsWithInterpretations = sections.filter((section) => {
         return section.interpretationRefs?.length > 0;
       }).length;
       const ratio = sections.length > 0 ? sectionsWithInterpretations / sections.length : 0;
+      const sectionsWithSynthesis = draftSections.filter((section) => {
+        return section.paragraphs?.some((paragraph) => {
+          return paragraph.kind === "section-synthesis";
+        });
+      }).length;
+      const synthesisRatio = sections.length > 0 ? sectionsWithSynthesis / sections.length : 0;
+
+      if (ratio === 1 && synthesisRatio === 1) {
+        return partial("所有当前章节已有解释条目和章节级组合归纳，但深层跨宫、跨限运解释仍需扩充。", 0.82);
+      }
 
       if (ratio === 1) {
         return partial("所有当前章节已有解释条目，但组合解释仍偏基础。", 0.65);

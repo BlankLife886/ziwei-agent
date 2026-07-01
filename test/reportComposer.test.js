@@ -37,6 +37,30 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
   assert.ok(
     reportDraft.sections
       .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "section-synthesis")
+      .text.includes("【组合归纳】")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "section-synthesis")
+      .text.includes("组命盘证据")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "section-synthesis")
+      .text.includes("尚无 verified 知识片段")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
+      .paragraphs.find((paragraph) => paragraph.kind === "section-synthesis")
+      .text.includes("本地规则底稿")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "life-triad")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("财帛宫见天相、天魁、火星")
   );
@@ -160,6 +184,52 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
       .text.includes("具体年份与事件仍需等待流年盘")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
+});
+
+test("createReportDraft keeps section synthesis inside the planned ref contract", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile())),
+    {
+      knowledgeSnippets: [
+        {
+          id: "knowledge-snippet.life-triad-test",
+          sourceRef: "knowledge-source.local-reviewed-framework-notes",
+          title: "命宫三方四正测试片段",
+          topicIds: ["life"],
+          referenceRefs: ["framework.life-triad"],
+          excerpt: "命宫三方四正需要合看命宫、财帛、官禄和迁移。",
+          citation: "测试知识库 / 命宫三方四正",
+          status: "verified",
+          riskLevel: "low"
+        }
+      ]
+    }
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const section = reportDraft.sections.find((item) => item.id === "life-triad");
+  const synthesisParagraph = section.paragraphs.find((paragraph) => {
+    return paragraph.kind === "section-synthesis";
+  });
+
+  assert.ok(synthesisParagraph.text.includes("1条 verified 知识片段"));
+  assert.deepEqual(synthesisParagraph.evidenceRefs, section.evidenceRefs);
+  assert.deepEqual(synthesisParagraph.referenceRefs, section.referenceRefs);
+  assert.deepEqual(synthesisParagraph.interpretationRefs, [
+    "interpretation.life-triad.structure",
+    "interpretation.palace-role.life",
+    "interpretation.palace-role.wealth",
+    "interpretation.palace-role.career",
+    "interpretation.palace-role.travel",
+    "interpretation.life-triad.empty-life-palace",
+    "interpretation.star.tian-xiang.wealth",
+    "interpretation.star.tian-kui.wealth",
+    "interpretation.star.huo-xing.wealth",
+    "interpretation.star.tian-fu.career",
+    "interpretation.star.qing-yang.career",
+    "interpretation.star.lian-zhen.travel",
+    "interpretation.star.tan-lang.travel",
+    "interpretation.star.tian-guan.travel"
+  ]);
 });
 
 test("createReportDraft writes spouse palace as conservative marriage draft", () => {
