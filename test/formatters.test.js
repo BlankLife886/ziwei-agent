@@ -176,6 +176,13 @@ test("formatReportOutput renders only published user reports", () => {
   const lines = formatReportOutput({
     status: "published",
     title: "示例命主的紫微斗数本命盘分析草稿",
+    metadata: {
+      outputType: "ziwei-user-report",
+      sectionIds: ["life-triad"],
+      evidenceRefs: ["life-triad.life-palace"],
+      referenceRefs: ["framework.life-triad"],
+      interpretationRefs: ["interpretation.life-triad.structure"]
+    },
     introduction: ["本报告以示例命主的本命盘为分析对象。"],
     sections: [
       {
@@ -198,6 +205,10 @@ test("formatReportOutput renders only published user reports", () => {
 
   assert.ok(lines.includes("用户报告："));
   assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
+  assert.ok(lines.includes("报告元信息："));
+  assert.ok(lines.includes("- 输出类型：ziwei-user-report"));
+  assert.ok(lines.includes("- 章节：life-triad"));
+  assert.ok(lines.includes("- 证据引用：1 项"));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.includes("发布门禁：报告审计通过"));
 });

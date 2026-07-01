@@ -18,7 +18,7 @@ export function runZiweiPipeline(buildResult, options = {}) {
   const reportPlan = createReportPlan(agentResult);
   const reportDraft = createReportDraft(reportPlan);
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
-  const reportOutput = publishReportOutput(reportDraft, reportAudit);
+  const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);
 
   return {
     status: derivePipelineStatus({

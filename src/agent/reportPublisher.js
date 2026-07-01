@@ -5,7 +5,7 @@
 // 给用户的 reportOutput。这样未来接入大模型后，也不会把未审计内容
 // 直接当作最终报告输出。
 
-export function publishReportOutput(reportDraft, reportAudit) {
+export function publishReportOutput(reportPlan, reportDraft, reportAudit) {
   if (reportDraft.status !== "drafted") {
     return {
       status: "blocked",
@@ -26,6 +26,7 @@ export function publishReportOutput(reportDraft, reportAudit) {
     status: "published",
     title: reportDraft.title,
     subject: reportDraft.subject,
+    metadata: buildReportMetadata(reportPlan, reportDraft, reportAudit),
     introduction: reportDraft.introduction,
     sections: reportDraft.sections.map(publishSection),
     closing: reportDraft.closing,
@@ -34,6 +35,32 @@ export function publishReportOutput(reportDraft, reportAudit) {
       issues: reportAudit.issues,
       warnings: reportAudit.warnings
     }
+  };
+}
+
+function buildReportMetadata(reportPlan, reportDraft, reportAudit) {
+  const sections = reportPlan.sections ?? [];
+  const queryIntent = reportPlan.queryIntent ?? {};
+
+  return {
+    outputType: "ziwei-user-report",
+    reportStatus: "published",
+    draftStatus: reportDraft.status,
+    auditStatus: reportAudit.status,
+    queryIntent: {
+      status: queryIntent.status ?? "none",
+      topics: queryIntent.topics ?? [],
+      topicIds: queryIntent.topicIds ?? [],
+      focusAreaIds: queryIntent.focusAreaIds ?? [],
+      reportDomainIds: queryIntent.reportDomainIds ?? []
+    },
+    sectionIds: sections.map((section) => section.id),
+    evidenceRefs: uniqueInOrder(sections.flatMap((section) => section.evidenceRefs ?? [])),
+    referenceRefs: uniqueInOrder(sections.flatMap((section) => section.referenceRefs ?? [])),
+    interpretationRefs: uniqueInOrder(
+      sections.flatMap((section) => section.interpretationRefs ?? [])
+    ),
+    guardrails: reportPlan.guardrails ?? []
   };
 }
 
@@ -66,4 +93,8 @@ function buildAuditBlockedMessages(reportAudit) {
   }
 
   return ["报告审计状态不明确，不能发布用户报告。"];
+}
+
+function uniqueInOrder(values) {
+  return [...new Set(values.filter(Boolean))];
 }

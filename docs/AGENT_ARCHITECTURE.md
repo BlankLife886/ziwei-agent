@@ -61,6 +61,16 @@ birth/profile input
 
 这三类引用是后续接入知识库和大模型前的安全底线。大模型只能在这些结构化材料上归纳表达，不能绕过证据直接生成断语。
 
+## 用户报告对象
+
+`reportOutput` 是当前对外可交付的用户报告对象。它必须经过 `reportPublisher` 发布门禁，并包含：
+
+- `metadata`：报告类型、发布状态、审计状态、查询意图、章节列表、证据引用、规则引用、解释引用和写作边界。
+- `introduction`：报告开篇。
+- `sections`：按专题组织的报告正文段落，每段继续保留 `evidenceRefs`、`referenceRefs` 和 `interpretationRefs`。
+- `closing`：报告收束和边界提示。
+- `audit`：发布时使用的审计结果。
+
 ## 当前已支持的报告底稿
 
 当前支持的是“结构性底稿”，不是完整断命：
