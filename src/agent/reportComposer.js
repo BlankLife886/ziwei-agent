@@ -328,6 +328,10 @@ function composeCurrentStageParagraph(section) {
     section,
     INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY
   );
+  const timingCombinationText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.TIMING_COMBINATION_VERIFIED_ONLY
+  );
   const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   return `【草稿判断】${joinJudgmentParts([
@@ -339,6 +343,8 @@ function composeCurrentStageParagraph(section) {
     monthlyPeriodText,
     composeTimingTriggerCandidateSynthesis(section),
     timingTriggerText,
+    composeTimingCombinationVerificationSynthesis(section),
+    timingCombinationText,
     starRoleSynthesis
   ])}`;
 }
@@ -453,6 +459,23 @@ function composeTimingTriggerCandidateSynthesis(section) {
   }).join("；");
 
   return `安全触发候选只列观察点：${candidateText}`;
+}
+
+function composeTimingCombinationVerificationSynthesis(section) {
+  const evidenceItem = section.evidenceItems?.find((item) => {
+    return item.metadata?.timingCombinationVerifications?.length > 0;
+  });
+  const verifications = evidenceItem?.metadata?.timingCombinationVerifications ?? [];
+
+  if (verifications.length === 0) {
+    return "";
+  }
+
+  const verificationText = verifications.map((verification) => {
+    return `${verification.palaceName}已通过${verification.signalGroups.join("、")}组合验证`;
+  }).join("；");
+
+  return `组合验证只把多层证据同时出现的宫位列为合参主题：${verificationText}`;
 }
 
 function groupStarRoleInterpretations(interpretations, palaceOrder = []) {

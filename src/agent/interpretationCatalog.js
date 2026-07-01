@@ -47,6 +47,7 @@ export const INTERPRETATION_IDS = {
   CURRENT_MAJOR_PERIOD_LOCATOR_ONLY: "interpretation.current-major-period.locator-only",
   CURRENT_STAGE_STATIC_ONLY: "interpretation.current-stage.static-only",
   TIMING_TRIGGER_CANDIDATE_ONLY: "interpretation.timing-trigger.candidate-only",
+  TIMING_COMBINATION_VERIFIED_ONLY: "interpretation.timing-combination.verified-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -524,6 +525,7 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.ANNUAL_PERIOD,
       REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.MONTHLY_PERIOD,
+      REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
     ],
@@ -545,6 +547,18 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.MONTHLY_PERIOD
     ],
     text: "事件触发候选只能把多层运限与四化重叠的宫位列为观察点，用来提示后续需要合参的主题；它不是事件预测，不能写成具体年份事件、应期、婚恋结果、财富金额或职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.TIMING_COMBINATION_VERIFIED_ONLY,
+    title: "运限组合验证的安全解释边界",
+    topic: "timing-combination",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
+      REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
+      REFERENCE_IDS.CURRENT_STAGE
+    ],
+    text: "运限组合验证只说明某个观察点同时具备多层证据，适合进入报告合参；它仍不是事件预测，不能写成具体年份、月份事件、应期、婚恋结果、财富金额或职业结果。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

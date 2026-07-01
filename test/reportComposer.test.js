@@ -364,6 +364,8 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("月份事件、应期或吉凶"));
   assert.ok(paragraph.text.includes("安全触发候选只列观察点"));
   assert.ok(paragraph.text.includes("子女宫为高优先级观察点"));
+  assert.ok(paragraph.text.includes("组合验证只把多层证据同时出现的宫位列为合参主题"));
+  assert.ok(paragraph.text.includes("子女宫已通过"));
   assert.ok(paragraph.text.includes("不是事件预测"));
   assert.ok(paragraph.text.includes("不能推今年具体事件"));
   assert.deepEqual(paragraph.interpretationRefs, [
@@ -372,7 +374,8 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.annual-period.structure-only",
     "interpretation.four-transformations.annual-structure-only",
     "interpretation.monthly-period.structure-only",
-    "interpretation.timing-trigger.candidate-only"
+    "interpretation.timing-trigger.candidate-only",
+    "interpretation.timing-combination.verified-only"
   ]);
 });
 

@@ -28,12 +28,9 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
   );
   assert.ok(audit.percent >= 77);
   assert.ok(
-    audit.blockers.some((blocker) => blocker.includes("安全事件触发候选"))
-  );
-  assert.ok(
     audit.blockers.some((blocker) => {
-      return blocker.includes("流月骨架") &&
-        blocker.includes("深层组合验证");
+      return blocker.includes("组合验证底座") &&
+        blocker.includes("深层跨宫、跨限运解释");
     })
   );
   assert.ok(audit.nextPriorities.length > 0);

@@ -21,6 +21,7 @@ export const REFERENCE_IDS = {
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   TIMING_TRIGGER_CANDIDATE: "framework.timing-trigger-candidate",
+  TIMING_COMBINATION_VERIFICATION: "framework.timing-combination-verification",
   CURRENT_STAGE: "framework.current-stage",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
@@ -140,6 +141,13 @@ const REFERENCES = [
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "把当前大限、流年太岁、流月月建、生年四化、大限四化和流年四化的重叠宫位标记为观察点；只用于提示待验证主题，不输出具体事件或应期。"
+  },
+  {
+    id: REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
+    title: "运限组合验证框架",
+    type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
+    note: "只把同时具备多层运限或四化信号、且达到最低证据强度的观察点列为组合验证主题；仍不输出事件、应期或结果断语。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

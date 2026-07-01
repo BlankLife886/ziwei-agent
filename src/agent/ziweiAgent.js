@@ -6,6 +6,10 @@ import {
   buildTimingTriggerCandidates,
   formatTimingTriggerCandidate
 } from "./timingTriggerCatalog.js";
+import {
+  formatTimingCombinationVerification,
+  verifyTimingCombinations
+} from "./timingCombinationVerifier.js";
 
 // 命理师 agent 外壳。
 //
@@ -312,6 +316,9 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     chart.currentMajorPeriod?.period &&
       chart.annualPeriod?.transformations
   );
+  const hasTimingCombinationVerifications = verifyTimingCombinations(
+    buildTimingTriggerCandidates(chart)
+  ).length > 0;
   const dynamicScopeItems = chart.currentMajorPeriod
     ? [
         "生年四化",
@@ -321,7 +328,8 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
         hasAnnualPeriod ? "流年骨架" : null,
         hasAnnualTransformations ? "流年四化骨架" : null,
         hasMonthlyPeriod ? "流月骨架" : null,
-        hasTimingTriggerCandidates ? "安全触发观察点" : null
+        hasTimingTriggerCandidates ? "安全触发观察点" : null,
+        hasTimingCombinationVerifications ? "组合验证底座" : null
       ]
     : [
         "生年四化",
@@ -350,7 +358,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     ...reportGoalScope,
     ...plannedDomainScope,
     ...missingTopicScope,
-    `已接入${dynamicScope}，但尚未完成深层组合验证，因此不能推具体年份事件、月份事件或应期。`,
+    `已接入${dynamicScope}，但尚未完成深层跨宫、跨限运解释，因此不能推具体年份事件、月份事件或应期。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
 }
@@ -547,6 +555,22 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       uniqueInOrder(timingTriggerCandidates.flatMap((candidate) => candidate.referenceRefs)),
       {
         timingTriggerCandidates
+      }
+    ));
+  }
+
+  const timingCombinationVerifications = verifyTimingCombinations(timingTriggerCandidates);
+
+  if (timingCombinationVerifications.length > 0) {
+    items.push(createEvidenceItem(
+      "current-stage.timing-combination-verifications",
+      `运限组合验证：${timingCombinationVerifications.map(formatTimingCombinationVerification).join("；")}`,
+      "agent.timingCombinationVerifications",
+      uniqueInOrder(timingCombinationVerifications.flatMap((verification) => {
+        return verification.referenceRefs;
+      })),
+      {
+        timingCombinationVerifications
       }
     ));
   }

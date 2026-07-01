@@ -107,6 +107,24 @@ const READINESS_ITEMS = [
           });
         })
       );
+      const hasTimingCombinationVerifications = Boolean(
+        pipelineResult.agentResult.allFocusAreas?.some((area) => {
+          return area.evidenceItems?.some((item) => {
+            return item.metadata?.timingCombinationVerifications?.length > 0;
+          });
+        })
+      );
+
+      if (
+        hasCurrentMajorPeriod &&
+        hasMajorPeriodTransformations &&
+        hasAnnualTransformations &&
+        hasMonthlyPeriod &&
+        hasTimingTriggerCandidates &&
+        hasTimingCombinationVerifications
+      ) {
+        return partial("已支持当前大限定位、大限四化骨架、流年四化骨架、流月骨架、安全事件触发候选和组合验证底座，但深层跨宫、跨限运解释仍需扩充。", 0.96);
+      }
 
       if (
         hasCurrentMajorPeriod &&
