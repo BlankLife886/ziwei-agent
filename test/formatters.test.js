@@ -182,6 +182,7 @@ test("formatReportOutput renders only published user reports", () => {
       evidenceRefs: ["life-triad.life-palace"],
       referenceRefs: ["framework.life-triad"],
       sourceRefs: ["source.local.analysis-frameworks"],
+      knowledgeSnippetRefs: [],
       interpretationRefs: ["interpretation.life-triad.structure"]
     },
     introduction: ["本报告以示例命主的本命盘为分析对象。"],
@@ -211,6 +212,7 @@ test("formatReportOutput renders only published user reports", () => {
   assert.ok(lines.includes("- 章节：life-triad"));
   assert.ok(lines.includes("- 证据引用：1 项"));
   assert.ok(lines.includes("- 来源引用：1 项"));
+  assert.ok(lines.includes("- 知识片段引用：0 项"));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.includes("发布门禁：报告审计通过"));
 });

@@ -31,6 +31,7 @@ test("publishReportOutput publishes only audited report drafts", () => {
   assert.ok(
     reportOutput.metadata.sourceRefs.includes("source.local.analysis-frameworks")
   );
+  assert.deepEqual(reportOutput.metadata.knowledgeSnippetRefs, []);
   assert.ok(
     reportOutput.metadata.interpretationRefs.includes(
       "interpretation.life-triad.structure"

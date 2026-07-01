@@ -58,6 +58,9 @@ function buildReportMetadata(reportPlan, reportDraft, reportAudit) {
     evidenceRefs: uniqueInOrder(sections.flatMap((section) => section.evidenceRefs ?? [])),
     referenceRefs: uniqueInOrder(sections.flatMap((section) => section.referenceRefs ?? [])),
     sourceRefs: uniqueInOrder(sections.flatMap((section) => section.sourceRefs ?? [])),
+    knowledgeSnippetRefs: uniqueInOrder(
+      sections.flatMap((section) => section.knowledgeSnippetRefs ?? [])
+    ),
     interpretationRefs: uniqueInOrder(
       sections.flatMap((section) => section.interpretationRefs ?? [])
     ),

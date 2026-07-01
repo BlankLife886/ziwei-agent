@@ -67,6 +67,7 @@ birth/profile input
 
 - `metadata`：报告类型、发布状态、审计状态、查询意图、章节列表、证据引用、规则引用、解释引用和写作边界。
 - `sourceRefs`：当前规则/框架引用对应的来源目录；现阶段主要是本地已实现规则和本地分析框架，后续可映射到书籍、PDF、笔记或向量检索片段。
+- `knowledgeSnippetRefs`：外部知识库片段引用。当前接口已经建立，但尚未录入任何书籍/PDF片段，因此报告中应保持为空。
 - `introduction`：报告开篇。
 - `sections`：按专题组织的报告正文段落，每段继续保留 `evidenceRefs`、`referenceRefs` 和 `interpretationRefs`。
 - `closing`：报告收束和边界提示。
@@ -117,7 +118,7 @@ birth/profile input
 
 当前底座仍需继续补强：
 
-- 外部知识库检索尚未接入。
+- 外部知识库片段接口已建立，但书籍/PDF内容尚未结构化录入。
 - 大模型生成尚未接入。
 - 大限四化和流年规则尚未接入。
 - 宫位、星曜、四化、运限的组合解释仍然很少。

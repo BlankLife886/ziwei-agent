@@ -190,6 +190,7 @@ export function formatReportOutput(reportOutput) {
     `- 证据引用：${reportOutput.metadata.evidenceRefs.length} 项`,
     `- 规则引用：${reportOutput.metadata.referenceRefs.length} 项`,
     `- 来源引用：${reportOutput.metadata.sourceRefs.length} 项`,
+    `- 知识片段引用：${reportOutput.metadata.knowledgeSnippetRefs.length} 项`,
     `- 解释引用：${reportOutput.metadata.interpretationRefs.length} 项`,
     "",
     "开篇：",

@@ -36,14 +36,16 @@ test("findReferences returns known references in catalog order", () => {
 test("findSources returns local source records in catalog order", () => {
   const sources = findSources([
     SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS,
-    SOURCE_IDS.LOCAL_IMPLEMENTED_RULES
+    SOURCE_IDS.LOCAL_IMPLEMENTED_RULES,
+    SOURCE_IDS.PENDING_ZIWEI_CORPUS
   ]);
 
   assert.deepEqual(
     sources.map((source) => source.id),
     [
       SOURCE_IDS.LOCAL_IMPLEMENTED_RULES,
-      SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS
+      SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS,
+      SOURCE_IDS.PENDING_ZIWEI_CORPUS
     ]
   );
   assert.ok(

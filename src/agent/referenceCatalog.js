@@ -4,6 +4,11 @@
 // 后续把 PDF、书籍、笔记或向量检索接进来时，可以把这些 id 映射到
 // 更具体的来源，例如书名、章节、页码、原文摘录或检索片段。
 
+import {
+  KNOWLEDGE_SOURCE_IDS,
+  findKnowledgeSources
+} from "./knowledgeSnippetCatalog.js";
+
 export const REFERENCE_IDS = {
   LIFE_BODY_PALACE: "rule.life-body-palace",
   FIVE_ELEMENT_CLASS: "rule.five-element-class",
@@ -23,7 +28,8 @@ export const REFERENCE_IDS = {
 
 export const SOURCE_IDS = {
   LOCAL_IMPLEMENTED_RULES: "source.local.implemented-rules",
-  LOCAL_ANALYSIS_FRAMEWORKS: "source.local.analysis-frameworks"
+  LOCAL_ANALYSIS_FRAMEWORKS: "source.local.analysis-frameworks",
+  PENDING_ZIWEI_CORPUS: KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS
 };
 
 const SOURCES = [
@@ -154,6 +160,8 @@ export function findReferences(referenceRefs) {
 
 export function findSources(sourceRefs) {
   const refSet = new Set(sourceRefs);
+  const localSources = SOURCES.filter((source) => refSet.has(source.id));
+  const knowledgeSources = findKnowledgeSources(sourceRefs);
 
-  return SOURCES.filter((source) => refSet.has(source.id));
+  return [...localSources, ...knowledgeSources];
 }
