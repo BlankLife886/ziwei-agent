@@ -26,6 +26,8 @@
 
 知识片段录入遵循候选材料、draft、verified 三段流程：扫描件 OCR、PDF 摘录或研读笔记先作为候选片段进入 `knowledgeSnippetIngestor` 标准化；字段完整后仍保持 draft；只有经过人工复核并晋升为 verified 的片段，才允许被 `reportPlanner` 检索并进入报告引用链。
 
+知识片段持久化入口是 JSON store。`knowledgeSnippetStore` 会读取 `snippets` 数组并逐条审计，只有通过 schema 审计的 verified 片段会传入 `runZiweiPipeline`；失败片段保留在 store 审计问题里，不进入报告规划。
+
 ## 当前 Agent 链路
 
 当前主链路在 `src/agent/ziweiPipeline.js`：
@@ -125,7 +127,7 @@ birth/profile input
 当前底座仍需继续补强：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，但书籍/PDF内容尚未结构化录入。
-- 知识片段录入器已建立，但尚未接入 OCR、PDF 解析或持久化存储。
+- 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
 - 大模型生成尚未接入。
 - 大限四化和流年规则尚未接入。
 - 宫位、星曜、四化、运限的组合解释仍然很少。

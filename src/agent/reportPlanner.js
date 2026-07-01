@@ -18,7 +18,7 @@ import {
 // 1. 后续接 LLM 时，可以把这些 section 当成稳定 prompt 输入。
 // 2. 当前规则还没实现完整时，可以明确告诉使用者哪些内容只能浅谈。
 
-export function createReportPlan(agentResult) {
+export function createReportPlan(agentResult, options = {}) {
   if (agentResult.status !== "ready") {
     return {
       status: "blocked",
@@ -34,7 +34,7 @@ export function createReportPlan(agentResult) {
   }
 
   const sections = agentResult.focusAreas.map((focusArea) => {
-    return buildSectionFromFocusArea(focusArea, agentResult.queryIntent);
+    return buildSectionFromFocusArea(focusArea, agentResult.queryIntent, options);
   });
 
   if (sections.length === 0) {
@@ -83,7 +83,7 @@ function buildOpening(agentResult) {
   ];
 }
 
-function buildSectionFromFocusArea(focusArea, queryIntent) {
+function buildSectionFromFocusArea(focusArea, queryIntent, options) {
   const evidenceItems = normalizeEvidenceItems(focusArea);
   const interpretationRefs = buildSectionInterpretationRefs(focusArea.id, evidenceItems);
   const interpretations = findInterpretations(interpretationRefs);
@@ -94,6 +94,8 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
   const knowledgeSnippets = searchKnowledgeSnippets({
     topicIds: queryContext.topicIds,
     referenceRefs
+  }, {
+    snippets: options.knowledgeSnippets
   });
 
   return {

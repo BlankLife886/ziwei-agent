@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  KNOWLEDGE_RISK_LEVELS,
+  KNOWLEDGE_SOURCE_IDS,
+  KNOWLEDGE_SNIPPET_STATUS
+} from "../src/agent/knowledgeSnippetCatalog.js";
 import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
@@ -61,6 +66,35 @@ test("runZiweiPipeline narrows report sections by query intent", () => {
     pipelineResult.reportDraft.sections.map((section) => section.id),
     ["current-major-period"]
   );
+});
+
+test("runZiweiPipeline uses verified knowledge snippets in report planning", () => {
+  const queryIntent = parseQueryIntentFromText("我想看事业。");
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    queryIntent,
+    knowledgeSnippets: [
+      {
+        id: "knowledge-snippet.career-structure-store",
+        sourceRef: KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS,
+        title: "官禄宫结构片段",
+        topicIds: ["career"],
+        referenceRefs: ["framework.career-palace"],
+        excerpt: "官禄宫专题需要合看命宫、财帛宫与夫妻宫。",
+        citation: "示例知识库 / 官禄宫结构",
+        status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED,
+        riskLevel: KNOWLEDGE_RISK_LEVELS.LOW
+      }
+    ]
+  });
+
+  assert.equal(pipelineResult.reportPlan.sections[0].id, "career-palace");
+  assert.deepEqual(pipelineResult.reportPlan.sections[0].knowledgeSnippetRefs, [
+    "knowledge-snippet.career-structure-store"
+  ]);
+  assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
+  assert.deepEqual(pipelineResult.reportOutput.metadata.knowledgeSnippetRefs, [
+    "knowledge-snippet.career-structure-store"
+  ]);
 });
 
 test("runZiweiPipeline drafts current stage for fortune intent", () => {

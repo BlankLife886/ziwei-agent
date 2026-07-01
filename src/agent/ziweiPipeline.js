@@ -16,7 +16,9 @@ import { createZiweiAgentResponse } from "./ziweiAgent.js";
 export function runZiweiPipeline(buildResult, options = {}) {
   const queryIntent = normalizeQueryIntent(options.queryIntent);
   const agentResult = createZiweiAgentResponse(buildResult, { queryIntent });
-  const reportPlan = createReportPlan(agentResult);
+  const reportPlan = createReportPlan(agentResult, {
+    knowledgeSnippets: options.knowledgeSnippets
+  });
   const knowledgeCoverageAudit = auditKnowledgeCoverage(reportPlan);
   const reportDraft = createReportDraft(reportPlan);
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
