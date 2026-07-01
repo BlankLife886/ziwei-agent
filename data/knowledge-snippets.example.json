@@ -1,3 +1,117 @@
 {
-  "snippets": []
+  "snippets": [
+    {
+      "id": "knowledge-snippet.local.life-triad-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "命宫三方四正框架审校样本",
+      "topicIds": ["life", "personality"],
+      "referenceRefs": ["framework.life-triad"],
+      "excerpt": "基础画像先以命宫为入口，再合看财帛、官禄、迁移等三方四正宫位；报告只能描述已排出的宫位、星曜和结构关系，不能脱离证据直接下结论。",
+      "citation": "本地审校分析框架样本 / 命宫三方四正",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.career-palace-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "官禄宫专题框架审校样本",
+      "topicIds": ["career"],
+      "referenceRefs": ["framework.career-palace"],
+      "excerpt": "事业专题以官禄宫为本宫，并把命宫、财帛宫、夫妻宫作为结构参照；未接入更多限运和职业知识前，只能输出事业结构观察，不能推出职位高低、升迁时间或具体职业结果。",
+      "citation": "本地审校分析框架样本 / 官禄宫专题",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.wealth-palace-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "财帛宫专题框架审校样本",
+      "topicIds": ["wealth"],
+      "referenceRefs": ["framework.wealth-palace"],
+      "excerpt": "财富专题以财帛宫为本宫，并合看命宫、官禄宫、福德宫；当前阶段只能说明资源结构和分析边界，不能输出具体金额、投资结果、暴富或破财判断。",
+      "citation": "本地审校分析框架样本 / 财帛宫专题",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.spouse-palace-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "夫妻宫专题框架审校样本",
+      "topicIds": ["marriage"],
+      "referenceRefs": ["framework.spouse-palace"],
+      "excerpt": "婚姻感情专题以夫妻宫为本宫，并合看迁移、官禄、福德；未完成四化、限运与流年组合验证前，只能写静态结构观察，不能推出结婚时间、离婚、分合事件或伴侣具体身份。",
+      "citation": "本地审校分析框架样本 / 夫妻宫专题",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.body-palace-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "身宫落点框架审校样本",
+      "topicIds": ["life", "personality"],
+      "referenceRefs": ["framework.body-palace"],
+      "excerpt": "身宫用于观察后天行为重心，需要与命宫和相关三方四正合参；若只取得身宫落点和已安星曜，报告应保留为结构描述。",
+      "citation": "本地审校分析框架样本 / 身宫落点",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.star-balance-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "星曜类别平衡框架审校样本",
+      "topicIds": ["life", "personality"],
+      "referenceRefs": ["framework.star-balance"],
+      "excerpt": "星曜分析需要区分主星、辅星、煞曜和空曜，避免把不同性质的星曜混为一谈；当前报告只统计与解释已实现的星曜类别，不扩展未计算星系。",
+      "citation": "本地审校分析框架样本 / 星曜类别",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.birth-year-transformations-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "生年四化框架审校样本",
+      "topicIds": ["transformation", "fortune"],
+      "referenceRefs": ["rule.birth-year-four-transformations"],
+      "excerpt": "生年四化先作为本命盘结构证据使用，用来标注化禄、化权、化科、化忌对应星曜及其所在宫位；未与限运和流年交叉验证时，不直接推出事件或吉凶。",
+      "citation": "本地审校分析框架样本 / 生年四化",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.major-periods-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "大限骨架框架审校样本",
+      "topicIds": ["fortune", "timing"],
+      "referenceRefs": ["rule.major-periods"],
+      "excerpt": "大限年龄段用于建立十年阶段骨架，必须先确认起限年龄、顺逆行和各宫段落；没有当前分析日期时，只能展示完整骨架，不能定位当前阶段。",
+      "citation": "本地审校分析框架样本 / 大限骨架",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.current-major-period-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "当前大限定位框架审校样本",
+      "topicIds": ["fortune", "timing"],
+      "referenceRefs": ["rule.current-major-period"],
+      "excerpt": "当前大限以分析日期换算虚岁后匹配大限年龄段；该信息只能说明当前处于哪一阶段，不能单独推出具体年份、具体事件或应期。",
+      "citation": "本地审校分析框架样本 / 当前大限定位",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.current-stage-framework",
+      "sourceRef": "knowledge-source.local-reviewed-framework-notes",
+      "title": "当前阶段合参框架审校样本",
+      "topicIds": ["fortune", "timing", "transformation"],
+      "referenceRefs": [
+        "framework.current-stage",
+        "framework.timing-trigger-candidate"
+      ],
+      "excerpt": "当前阶段分析需要把当前大限、流年骨架、生年四化、大限四化、流年四化和安全触发观察点放在同一节合参；触发候选只能作为待验证观察点，不是事件预测。",
+      "citation": "本地审校分析框架样本 / 当前阶段合参",
+      "status": "verified",
+      "riskLevel": "low"
+    }
+  ]
 }

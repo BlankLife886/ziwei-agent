@@ -11,17 +11,23 @@ import {
   searchKnowledgeSnippets
 } from "../src/agent/knowledgeSnippetCatalog.js";
 
-test("findKnowledgeSources exposes the pending external corpus source", () => {
+test("findKnowledgeSources exposes registered knowledge sources", () => {
   const sources = findKnowledgeSources([
-    KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS
+    KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS,
+    KNOWLEDGE_SOURCE_IDS.LOCAL_REVIEWED_FRAMEWORK_NOTES
   ]);
 
   assert.deepEqual(
     sources.map((source) => source.id),
-    [KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS]
+    [
+      KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS,
+      KNOWLEDGE_SOURCE_IDS.LOCAL_REVIEWED_FRAMEWORK_NOTES
+    ]
   );
   assert.equal(sources[0].status, "planned");
   assert.ok(sources[0].note.includes("不能作为报告断语依据"));
+  assert.equal(sources[1].status, "verified");
+  assert.ok(sources[1].note.includes("不是外部书籍或 PDF"));
 });
 
 test("knowledge snippet lookup stays empty until external material is recorded", () => {
@@ -87,6 +93,18 @@ test("auditKnowledgeSnippet reports schema and status issues", () => {
   );
   assert.ok(
     audit.issues.some((issue) => issue.id === "snippet.status-not-verified")
+  );
+});
+
+test("auditKnowledgeSnippet rejects unknown knowledge source refs", () => {
+  const audit = auditKnowledgeSnippet({
+    ...createSnippet(),
+    sourceRef: "knowledge-source.unknown"
+  });
+
+  assert.equal(audit.status, "failed");
+  assert.ok(
+    audit.issues.some((issue) => issue.id === "snippet.sourceRef.unknown")
   );
 });
 

@@ -38,10 +38,13 @@ function composeSectionDraft(section) {
     id: section.id,
     title: section.title,
     queryContext: section.queryContext,
+    evidenceRefs: section.evidenceRefs,
     interpretationRefs: section.interpretationRefs,
+    knowledgeSnippetRefs: section.knowledgeSnippetRefs,
     interpretations: section.interpretations,
     referenceRefs: section.referenceRefs,
     references: section.references,
+    sourceRefs: section.sourceRefs,
     paragraphs: [
       createParagraph(
         "purpose",

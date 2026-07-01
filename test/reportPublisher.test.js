@@ -43,7 +43,54 @@ test("publishReportOutput publishes only audited report drafts", () => {
     })
   );
   assert.ok(reportOutput.sections.length > 0);
+  assert.ok(reportOutput.sections[0].evidenceRefs.includes("life-triad.life-palace"));
+  assert.ok(reportOutput.sections[0].referenceRefs.includes("framework.life-triad"));
+  assert.ok(reportOutput.sections[0].sourceRefs.includes("source.local.analysis-frameworks"));
   assert.ok(reportOutput.sections[0].paragraphs[0].evidenceRefs);
+});
+
+test("publishReportOutput carries section-level knowledge refs", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()), {
+      queryIntent: parseQueryIntentFromText("我想看事业。")
+    }),
+    {
+      knowledgeSnippets: [
+        {
+          id: "knowledge-snippet.career-structure-store",
+          sourceRef: "knowledge-source.local-reviewed-framework-notes",
+          title: "官禄宫结构片段",
+          topicIds: ["career"],
+          referenceRefs: ["framework.career-palace"],
+          excerpt: "官禄宫专题需要合看命宫、财帛宫与夫妻宫。",
+          citation: "示例知识库 / 官禄宫结构",
+          status: "verified",
+          riskLevel: "low"
+        }
+      ]
+    }
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const reportAudit = auditReportOutput(reportPlan, reportDraft);
+  const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);
+
+  assert.equal(reportOutput.status, "published");
+  assert.deepEqual(reportOutput.sections[0].knowledgeSnippetRefs, [
+    "knowledge-snippet.career-structure-store"
+  ]);
+  assert.ok(
+    reportOutput.sections[0].sourceRefs.includes(
+      "knowledge-source.local-reviewed-framework-notes"
+    )
+  );
+  assert.deepEqual(reportOutput.metadata.knowledgeSnippetRefs, [
+    "knowledge-snippet.career-structure-store"
+  ]);
+  assert.ok(
+    reportOutput.metadata.sourceRefs.includes(
+      "knowledge-source.local-reviewed-framework-notes"
+    )
+  );
 });
 
 test("publishReportOutput blocks drafts that did not pass audit", () => {

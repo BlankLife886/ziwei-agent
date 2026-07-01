@@ -99,6 +99,14 @@ function auditSectionRefs(draftSection, planSection, issues) {
     draftSection.referenceRefs,
     planSection.referenceRefs
   );
+  const missingSourceRefs = findMissingRefs(
+    draftSection.sourceRefs,
+    planSection.sourceRefs
+  );
+  const missingKnowledgeSnippetRefs = findMissingRefs(
+    draftSection.knowledgeSnippetRefs,
+    planSection.knowledgeSnippetRefs
+  );
   const missingInterpretationRefs = findMissingRefs(
     draftSection.interpretationRefs,
     planSection.interpretationRefs
@@ -106,6 +114,8 @@ function auditSectionRefs(draftSection, planSection, issues) {
 
   pushMissingRefIssue(issues, draftSection.id, "evidenceRefs", missingEvidenceRefs);
   pushMissingRefIssue(issues, draftSection.id, "referenceRefs", missingReferenceRefs);
+  pushMissingRefIssue(issues, draftSection.id, "sourceRefs", missingSourceRefs);
+  pushMissingRefIssue(issues, draftSection.id, "knowledgeSnippetRefs", missingKnowledgeSnippetRefs);
   pushMissingRefIssue(issues, draftSection.id, "interpretationRefs", missingInterpretationRefs);
 }
 

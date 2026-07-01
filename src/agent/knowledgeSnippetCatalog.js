@@ -5,7 +5,8 @@
 // 已经可引用的命理依据。
 
 export const KNOWLEDGE_SOURCE_IDS = {
-  PENDING_ZIWEI_CORPUS: "knowledge-source.pending-ziwei-corpus"
+  PENDING_ZIWEI_CORPUS: "knowledge-source.pending-ziwei-corpus",
+  LOCAL_REVIEWED_FRAMEWORK_NOTES: "knowledge-source.local-reviewed-framework-notes"
 };
 
 export const KNOWLEDGE_SNIPPET_STATUS = {
@@ -28,8 +29,20 @@ const KNOWLEDGE_SOURCES = [
     status: "planned",
     citation: "用户提供的文章、PDF、书籍和研读笔记尚未结构化录入。",
     note: "占位来源只用于标记后续知识库接入目标，不能作为报告断语依据。"
+  },
+  {
+    id: KNOWLEDGE_SOURCE_IDS.LOCAL_REVIEWED_FRAMEWORK_NOTES,
+    title: "本地审校分析框架样本",
+    type: "local-reviewed-notes",
+    status: "verified",
+    citation: "当前代码库的分析框架、测试用例和人工审校样本。",
+    note: "用于验证知识片段闭环和报告引用链；不是外部书籍或 PDF 的完整结构化成果。"
   }
 ];
+
+const KNOWN_KNOWLEDGE_SOURCE_IDS = new Set(
+  KNOWLEDGE_SOURCES.map((source) => source.id)
+);
 
 // 知识片段 schema：
 // {
@@ -107,6 +120,13 @@ export function auditKnowledgeSnippet(snippet) {
   requireStringArray(snippet, "referenceRefs", issues);
   requireEnum(snippet, "status", Object.values(KNOWLEDGE_SNIPPET_STATUS), issues);
   requireEnum(snippet, "riskLevel", Object.values(KNOWLEDGE_RISK_LEVELS), issues);
+
+  if (snippet.sourceRef && !KNOWN_KNOWLEDGE_SOURCE_IDS.has(snippet.sourceRef)) {
+    issues.push(buildIssue(
+      "snippet.sourceRef.unknown",
+      "知识片段 sourceRef 必须指向已登记的知识来源。"
+    ));
+  }
 
   if (snippet.status && snippet.status !== KNOWLEDGE_SNIPPET_STATUS.VERIFIED) {
     issues.push(buildIssue(

@@ -12,6 +12,8 @@ import {
   buildKnowledgeSnippetStore,
   loadKnowledgeSnippetStore
 } from "../src/agent/knowledgeSnippetStore.js";
+import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
+import { buildChart } from "../src/chartBuilder.js";
 
 test("buildKnowledgeSnippetStore accepts verified snippets", () => {
   const store = buildKnowledgeSnippetStore({
@@ -67,6 +69,24 @@ test("loadKnowledgeSnippetStore reads a JSON knowledge store file", async () => 
   assert.equal(store.snippets[0].id, "knowledge-snippet.career-structure-store");
 });
 
+test("example knowledge store covers the default report pipeline", async () => {
+  const store = await loadKnowledgeSnippetStore("data/knowledge-snippets.example.json");
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    knowledgeSnippets: store.snippets
+  });
+
+  assert.equal(store.status, "ready");
+  assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
+  assert.equal(pipelineResult.readinessAudit.percent >= 85, true);
+  assert.deepEqual(pipelineResult.knowledgeCoverageAudit.missingSectionIds, []);
+  assert.equal(
+    pipelineResult.reportPlan.sections.every((section) => {
+      return section.knowledgeSnippetRefs.length > 0;
+    }),
+    true
+  );
+});
+
 function createVerifiedSnippet() {
   return {
     id: "knowledge-snippet.career-structure-store",
@@ -78,5 +98,20 @@ function createVerifiedSnippet() {
     citation: "示例知识库 / 官禄宫结构",
     status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED,
     riskLevel: KNOWLEDGE_RISK_LEVELS.LOW
+  };
+}
+
+function createSampleProfile() {
+  return {
+    name: "示例命主",
+    gender: "female",
+    calendar: "solar",
+    birth_date: "1990-05-18",
+    analysis_date: "2026-06-30",
+    birth_time: "23:30",
+    birth_place: "Shanghai, China",
+    timezone: "Asia/Shanghai",
+    use_true_solar_time: false,
+    is_leap_month: false
   };
 }

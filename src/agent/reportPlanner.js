@@ -89,7 +89,6 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
   const interpretations = findInterpretations(interpretationRefs);
   const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
   const references = findReferences(referenceRefs);
-  const sourceRefs = collectSourceRefs(references);
   const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
   const knowledgeSnippets = searchKnowledgeSnippets({
     topicIds: queryContext.topicIds,
@@ -97,6 +96,7 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
   }, {
     snippets: options.knowledgeSnippets
   });
+  const sourceRefs = collectSectionSourceRefs(references, knowledgeSnippets);
 
   return {
     id: focusArea.id,
@@ -145,10 +145,13 @@ function collectReferenceRefs(evidenceItems, interpretations) {
   return [...new Set([...referenceRefs, ...interpretationSourceRefs])];
 }
 
-function collectSourceRefs(references) {
-  return [...new Set(references.flatMap((reference) => {
+function collectSectionSourceRefs(references, knowledgeSnippets) {
+  const referenceSourceRefs = references.flatMap((reference) => {
     return reference.sourceRefs ?? [];
-  }))];
+  });
+  const knowledgeSourceRefs = knowledgeSnippets.map((snippet) => snippet.sourceRef);
+
+  return [...new Set([...referenceSourceRefs, ...knowledgeSourceRefs].filter(Boolean))];
 }
 
 function buildSectionQueryContext(focusAreaId, queryIntent) {

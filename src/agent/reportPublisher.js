@@ -72,6 +72,11 @@ function publishSection(section) {
   return {
     id: section.id,
     title: section.title,
+    evidenceRefs: section.evidenceRefs ?? [],
+    referenceRefs: section.referenceRefs ?? [],
+    sourceRefs: section.sourceRefs ?? [],
+    knowledgeSnippetRefs: section.knowledgeSnippetRefs ?? [],
+    interpretationRefs: section.interpretationRefs ?? [],
     paragraphs: section.paragraphs.map((paragraph) => {
       return {
         kind: paragraph.kind,

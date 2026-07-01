@@ -14,9 +14,12 @@
 
 ```bash
 npm start
+node src/cli.js examples/profile.example.json
 node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json
 npm run validate:knowledge
 ```
+
+`npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。这个示例知识库目前是本地审校分析框架样本，不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
 
 ## 当前模块
 
@@ -32,7 +35,7 @@ npm run validate:knowledge
 - `src/agent/reportDomainCatalog.js`: 定义最终用户报告领域，包括性格、事业、财富、婚姻、运势、因果、前世今生等，并标注当前支持程度和缺失能力。
 - `src/agent/referenceCatalog.js`: 定义本地规则、分析框架引用 id 和本地来源目录，后续可映射到书籍、PDF、笔记或知识库片段。
 - `src/agent/timingTriggerCatalog.js`: 基于当前大限、流年太岁、生年四化、大限四化和流年四化生成安全触发观察点，只输出待验证主题，不生成事件断语。
-- `src/agent/knowledgeSnippetCatalog.js`: 定义外部书籍、PDF、笔记和知识库片段的 schema、审计和检索接口；只有字段完整且 `status` 为 `verified` 的片段才允许进入报告规划，当前不把未录入内容作为报告依据。
+- `src/agent/knowledgeSnippetCatalog.js`: 定义外部书籍、PDF、笔记和知识库片段的 schema、审计和检索接口；只有字段完整、来源已登记且 `status` 为 `verified` 的片段才允许进入报告规划，当前示例只包含本地审校框架样本，不把未录入内容作为报告依据。
 - `src/agent/knowledgeSnippetIngestor.js`: 把候选摘录或研读笔记标准化为 draft 知识片段，并提供晋升为 verified 的门禁，避免未复核材料直接进入报告依据。
 - `src/agent/knowledgeSnippetStore.js`: 从 JSON 文件加载 verified 知识片段，逐条审计后只把通过的片段交给报告规划。
 - `src/agent/interpretationCatalog.js`: 定义当前可用的命理解释条目，让报告正文引用受控解释，而不是直接散写断语。
