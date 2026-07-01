@@ -185,6 +185,15 @@ function buildCoreEvidenceItems(chart, palaceByName) {
     ));
   }
 
+  if (chart.annualPeriod) {
+    items.push(createEvidenceItem(
+      "core.annual-period",
+      `流年骨架：${formatAnnualPeriodSummary(chart)}`,
+      "chart.annualPeriod",
+      [REFERENCE_IDS.ANNUAL_PERIOD]
+    ));
+  }
+
   return items;
 }
 
@@ -275,7 +284,7 @@ function buildFocusAreas(chart, palaceByName) {
     }, {
       id: "current-stage",
       title: "当前阶段运势底稿",
-      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化和大限骨架放到同一节中合参；当前不推具体年份事件。",
+      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化、大限四化和流年四化骨架放到同一节中合参；当前不推具体年份事件。",
       evidenceItems: buildCurrentStageEvidenceItems(chart, palaceByName)
     });
   }
@@ -292,9 +301,23 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
   const hasMajorPeriodTransformations = Boolean(
     chart.currentMajorPeriod?.transformations
   );
-  const dynamicScope = chart.currentMajorPeriod
-    ? `生年四化、大限年龄段、当前大限定位${hasMajorPeriodTransformations ? "与大限四化骨架" : ""}`
-    : `生年四化、大限年龄段${chart.majorPeriodTransformations?.length > 0 ? "与大限四化骨架" : ""}`;
+  const hasAnnualPeriod = Boolean(chart.annualPeriod);
+  const hasAnnualTransformations = Boolean(chart.annualPeriod?.transformations);
+  const dynamicScopeItems = chart.currentMajorPeriod
+    ? [
+        "生年四化",
+        "大限年龄段",
+        "当前大限定位",
+        hasMajorPeriodTransformations ? "大限四化骨架" : null,
+        hasAnnualPeriod ? "流年骨架" : null,
+        hasAnnualTransformations ? "流年四化骨架" : null
+      ]
+    : [
+        "生年四化",
+        "大限年龄段",
+        chart.majorPeriodTransformations?.length > 0 ? "大限四化骨架" : null
+      ];
+  const dynamicScope = dynamicScopeItems.filter(Boolean).join("、");
   const queryScope = queryIntent.hasIntent
     ? [`本轮已按查询意图收敛章节：${queryIntent.topics.join("、")}。`]
     : [];
@@ -316,7 +339,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     ...reportGoalScope,
     ...plannedDomainScope,
     ...missingTopicScope,
-    `已接入${dynamicScope}，但尚未接入流年盘和事件触发规则，因此不能推具体年份事件。`,
+    `已接入${dynamicScope}，但尚未接入事件触发规则、流月和组合验证，因此不能推具体年份事件。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
 }
@@ -473,6 +496,24 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       `当前大限四化骨架：${formatCurrentMajorPeriodTransformations(chart)}`,
       "chart.currentMajorPeriod.transformations",
       [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS]
+    ));
+  }
+
+  if (chart.annualPeriod) {
+    items.push(createEvidenceItem(
+      "current-stage.annual-period",
+      `流年骨架：${formatAnnualPeriodSummary(chart)}`,
+      "chart.annualPeriod",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.ANNUAL_PERIOD]
+    ));
+  }
+
+  if (chart.annualPeriod?.transformations) {
+    items.push(createEvidenceItem(
+      "current-stage.annual-transformations",
+      `流年四化骨架：${formatAnnualTransformations(chart)}`,
+      "chart.annualPeriod.transformations",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS]
     ));
   }
 
@@ -642,6 +683,38 @@ function formatCurrentMajorPeriodTransformations(chart) {
   }).join("；");
 
   return `${periodText}，${currentTransformations.palaceStem}干：${transformationText}`;
+}
+
+function formatAnnualPeriodSummary(chart) {
+  const annual = chart.annualPeriod;
+
+  if (!annual) {
+    return "未计算";
+  }
+
+  const palaceText = annual.palaceName
+    ? `${annual.palaceName}${annual.branch}`
+    : `${annual.yearBranch}支未匹配到本命宫位`;
+
+  return `${annual.analysisDate}对应农历${annual.lunarYear}年${annual.yearStem}${annual.yearBranch}，流年命宫暂按太岁地支定位到${palaceText}`;
+}
+
+function formatAnnualTransformations(chart) {
+  const annualTransformations = chart.annualPeriod?.transformations;
+
+  if (!annualTransformations) {
+    return "未计算";
+  }
+
+  const transformationText = annualTransformations.transformations.map((item) => {
+    const targetText = item.targetPalaceName
+      ? `在本命${item.targetPalaceName}`
+      : "未落入已安星曜宫位";
+
+    return `${item.star}${item.name}${targetText}`;
+  }).join("；");
+
+  return `${annualTransformations.lunarYear}年${annualTransformations.yearStem}${annualTransformations.yearBranch}：${transformationText}`;
 }
 
 function formatCurrentMajorPeriodSummary(chart) {

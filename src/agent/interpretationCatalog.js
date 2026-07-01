@@ -40,6 +40,8 @@ export const INTERPRETATION_IDS = {
   STAR_TIAN_GUAN_TRAVEL: "interpretation.star.tian-guan.travel",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY: "interpretation.four-transformations.major-period-stage-only",
+  ANNUAL_PERIOD_STRUCTURE_ONLY: "interpretation.annual-period.structure-only",
+  ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY: "interpretation.four-transformations.annual-structure-only",
   MAJOR_PERIODS_STRUCTURE_ONLY: "interpretation.major-periods.structure-only",
   CURRENT_MAJOR_PERIOD_LOCATOR_ONLY: "interpretation.current-major-period.locator-only",
   CURRENT_STAGE_STATIC_ONLY: "interpretation.current-stage.static-only",
@@ -465,6 +467,25 @@ const INTERPRETATIONS = [
     text: "大限四化可作为当前十年阶段的禄、权、科、忌牵引骨架；当前只用于补强阶段观察方向，尚不能替代流年盘、触发规则或组合验证来推具体年份事件。"
   },
   {
+    id: INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY,
+    title: "流年骨架的解释边界",
+    topic: "annual-period",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.ANNUAL_PERIOD],
+    text: "流年骨架可把分析日期对应到某一农历年干支和太岁地支所在本命宫位；当前只用于年度结构定位，不能直接写成年度事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY,
+    title: "流年四化的年度解释边界",
+    topic: "four-transformations",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.ANNUAL_PERIOD
+    ],
+    text: "流年四化可作为分析年度的禄、权、科、忌牵引骨架；当前尚未接入触发规则、流月和组合验证，因此只能写年度观察方向，不能推具体事件或应期。"
+  },
+  {
     id: INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY,
     title: "大限骨架的解释边界",
     topic: "major-periods",
@@ -490,10 +511,12 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
       REFERENCE_IDS.MAJOR_PERIODS,
       REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.ANNUAL_PERIOD,
+      REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
     ],
-    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化和大限四化骨架放在同一节中观察阶段主题；但尚未接入流年盘和事件触发规则，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
+    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架和流年四化骨架放在同一节中观察阶段主题；但尚未接入事件触发规则、流月和组合验证，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,
@@ -517,7 +540,7 @@ const INTERPRETATIONS = [
     topic: "star-balance",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.STAR_BALANCE],
-    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化、大限年龄段和大限四化骨架；但尚未纳入流年，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
+    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化、大限年龄段、大限四化骨架和流年四化骨架；但尚未纳入触发规则，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
   }
 ];
 

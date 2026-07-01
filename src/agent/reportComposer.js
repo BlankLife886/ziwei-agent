@@ -240,12 +240,22 @@ function composeCurrentStageParagraph(section) {
     section,
     INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY
   );
+  const annualPeriodText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY
+  );
+  const annualTransformationText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY
+  );
   const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   return `【草稿判断】${joinJudgmentParts([
     ...section.evidence,
     boundaryText,
     majorPeriodTransformationText,
+    annualPeriodText,
+    annualTransformationText,
     starRoleSynthesis
   ])}`;
 }

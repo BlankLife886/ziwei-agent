@@ -357,16 +357,22 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "rule.major-periods",
     "rule.star-placement",
     "rule.birth-year-four-transformations",
-    "rule.major-period-four-transformations"
+    "rule.major-period-four-transformations",
+    "rule.annual-period",
+    "rule.annual-four-transformations"
   ]);
   assert.deepEqual(section.interpretationRefs, [
     "interpretation.current-stage.static-only",
-    "interpretation.four-transformations.major-period-stage-only"
+    "interpretation.four-transformations.major-period-stage-only",
+    "interpretation.annual-period.structure-only",
+    "interpretation.four-transformations.annual-structure-only"
   ]);
   assert.ok(section.evidence.some((item) => item.includes("当前阶段定位")));
   assert.ok(section.evidence.some((item) => item.includes("阶段大限宫位：34-43岁子女宫寅")));
   assert.ok(section.evidence.some((item) => item.includes("子女宫寅")));
   assert.ok(section.evidence.some((item) => item.includes("当前大限四化骨架")));
+  assert.ok(section.evidence.some((item) => item.includes("流年骨架")));
+  assert.ok(section.evidence.some((item) => item.includes("流年四化骨架")));
   assert.ok(section.writingPrompt.includes("不推今年具体事件"));
 });
 

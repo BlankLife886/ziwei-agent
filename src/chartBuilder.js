@@ -6,9 +6,11 @@ import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
 import {
+  applyAnnualFourTransformations,
   applyBirthYearFourTransformations,
   applyMajorPeriodFourTransformations
 } from "./fourTransformationCalculator.js";
+import { applyAnnualPeriod } from "./annualPeriodCalculator.js";
 import { validateBirthProfile } from "./intake.js";
 import {
   applyCurrentMajorPeriod,
@@ -129,6 +131,13 @@ function buildChartFromResolvedProfile({ profile, chineseHour }) {
 
   if (profile.lunar_year_stem) {
     chart = applyBirthYearFourTransformations(chart);
+  }
+
+  if (profile.analysis_date) {
+    chart = applyAnnualPeriod(chart, {
+      analysisDate: profile.analysis_date
+    });
+    chart = applyAnnualFourTransformations(chart);
   }
 
   // 大限四化需要先有大限宫干，也需要星曜已经安入宫位后才能标记目标宫。

@@ -85,6 +85,13 @@ const READINESS_ITEMS = [
       const hasMajorPeriodTransformations = Boolean(
         pipelineResult.buildResult.chart?.currentMajorPeriod?.transformations
       );
+      const hasAnnualTransformations = Boolean(
+        pipelineResult.buildResult.chart?.annualPeriod?.transformations
+      );
+
+      if (hasCurrentMajorPeriod && hasMajorPeriodTransformations && hasAnnualTransformations) {
+        return partial("已支持当前大限定位、大限四化骨架和流年四化骨架，但尚未接入事件触发规则、流月和组合验证。", 0.7);
+      }
 
       if (hasCurrentMajorPeriod && hasMajorPeriodTransformations) {
         return partial("已支持当前大限定位和大限四化骨架，但尚未接入流年盘和事件触发规则。", 0.55);

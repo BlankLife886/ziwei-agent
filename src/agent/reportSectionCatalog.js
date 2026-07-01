@@ -22,7 +22,7 @@ const SECTION_DEFINITIONS = {
     guidingQuestionsWhenQueried: ({ queryContext }) => [
       `${queryContext.primaryPalaceNames.join("、")}分别提供了哪些已排出的宫位和星曜证据？`,
       "命宫与其余三方四正宫位如何作为本轮专题的结构参照？",
-      "当前哪些判断仍需等待流年和更多组合规则？"
+      "当前哪些判断仍需等待触发规则和更多组合规则？"
     ],
     guidingQuestions: [
       "命宫本身呈现什么样的基础气质？",
@@ -89,14 +89,14 @@ const SECTION_DEFINITIONS = {
       "哪些宫位已经有较强星曜证据，哪些宫位仍然偏空？",
       "当前能说的是结构倾向，还是已经足以形成具体判断？"
     ],
-    writingPrompt: "先做星曜类别统计，再提醒读者当前缺少流年盘和事件触发规则，不能过度推演。",
+    writingPrompt: "先做星曜类别统计，再提醒读者当前缺少事件触发规则，不能过度推演。",
     interpretationRefs: [INTERPRETATION_IDS.STAR_BALANCE_STATIC_ONLY]
   },
   "birth-year-transformations": {
     guidingQuestions: [
       "化禄、化权、化科、化忌分别落在哪些星曜和宫位？",
       "这些四化能补充命宫三方四正的哪些结构线索？",
-      "哪些内容仍需等待大限四化合参、流年后才能判断？"
+      "哪些内容仍需等待大限四化、流年四化合参后才能判断？"
     ],
     writingPrompt: "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",
     interpretationRefs: [INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY]
@@ -123,9 +123,9 @@ const SECTION_DEFINITIONS = {
     guidingQuestions: [
       "当前分析日期和虚岁把命主定位到哪一个大限？",
       "当前阶段落宫及其星曜提供了哪些已排出的证据？",
-      "生年四化、大限骨架和大限四化能提供哪些结构参照，哪些仍需等待流年？"
+      "生年四化、大限骨架、大限四化和流年四化能提供哪些结构参照，哪些仍需等待触发规则？"
     ],
-    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化和大限四化参照，不推今年具体事件、应期或吉凶。",
+    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化和流年四化参照，不推今年具体事件、应期或吉凶。",
     buildInterpretationRefs: buildCurrentStageInterpretationRefs
   }
 };
@@ -276,6 +276,8 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
   return [
     INTERPRETATION_IDS.CURRENT_STAGE_STATIC_ONLY,
     INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,
+    INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY,
+    INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY,
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     ...getStarRoleInterpretationRefs(evidenceItems)
   ];

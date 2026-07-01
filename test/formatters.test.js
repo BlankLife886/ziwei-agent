@@ -68,7 +68,7 @@ test("formatAgentBriefing renders evidence and focus areas", () => {
   assert.ok(lines.includes("建议分析重点："));
   assert.ok(lines.some((line) => line.includes("命宫与三方四正")));
   assert.ok(lines.includes("当前限制："));
-  assert.ok(lines.some((line) => line.includes("已接入生年四化、大限年龄段与大限四化骨架")));
+  assert.ok(lines.some((line) => line.includes("已接入生年四化、大限年龄段、大限四化骨架")));
 });
 
 test("formatAgentBriefing renders structured follow-up questions", () => {

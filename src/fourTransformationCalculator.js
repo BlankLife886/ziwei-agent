@@ -80,6 +80,11 @@ export function calculateMajorPeriodFourTransformations({ palaceStem }) {
   return BIRTH_YEAR_FOUR_TRANSFORMATIONS_BY_STEM[palaceStem];
 }
 
+export function calculateAnnualFourTransformations({ yearStem }) {
+  assertValidYearStem(yearStem);
+  return BIRTH_YEAR_FOUR_TRANSFORMATIONS_BY_STEM[yearStem];
+}
+
 export function applyMajorPeriodFourTransformations(chart) {
   if (!chart.majorPeriods || chart.majorPeriods.length === 0) {
     return chart;
@@ -137,6 +142,52 @@ export function applyMajorPeriodFourTransformations(chart) {
     calculationNotes: [
       ...chart.calculationNotes,
       `已按各大限宫干计算大限四化骨架，当前仅作为阶段结构证据。`
+    ]
+  };
+}
+
+export function applyAnnualFourTransformations(chart) {
+  if (!chart.annualPeriod) {
+    return chart;
+  }
+
+  const transformations = calculateAnnualFourTransformations({
+    yearStem: chart.annualPeriod.yearStem
+  });
+  const transformationEntries = Object.entries(transformations).map(([name, star]) => {
+    return {
+      name,
+      star,
+      source: "annual-year-stem",
+      analysisDate: chart.annualPeriod.analysisDate,
+      annualLunarYear: chart.annualPeriod.lunarYear,
+      annualYearStem: chart.annualPeriod.yearStem,
+      annualYearBranch: chart.annualPeriod.yearBranch,
+      targetPalaceName: findPalaceNameByStar(chart.palaces, star)
+    };
+  });
+
+  const annualTransformations = {
+    analysisDate: chart.annualPeriod.analysisDate,
+    lunarYear: chart.annualPeriod.lunarYear,
+    yearStem: chart.annualPeriod.yearStem,
+    yearBranch: chart.annualPeriod.yearBranch,
+    transformations: transformationEntries
+  };
+
+  return {
+    ...chart,
+    annualPeriod: {
+      ...chart.annualPeriod,
+      transformations: annualTransformations
+    },
+    starAnchors: {
+      ...chart.starAnchors,
+      annualTransformations
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `已按流年天干${chart.annualPeriod.yearStem}计算流年四化骨架，当前仅作为年度结构证据。`
     ]
   };
 }

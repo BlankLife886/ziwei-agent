@@ -120,6 +120,7 @@ export function createChartSkeleton(profile) {
       jieKong: null,
       birthYearTransformations: null,
       majorPeriodTransformations: null,
+      annualTransformations: null,
       fireBell: null
     },
 

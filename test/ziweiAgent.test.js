@@ -112,7 +112,7 @@ test("createZiweiAgentResponse prepares analysis context for a complete chart", 
       .referenceRefs.includes("rule.major-period-four-transformations")
   );
   assert.ok(
-    agentResult.limitations.some((item) => item.includes("已接入生年四化、大限年龄段与大限四化骨架"))
+    agentResult.limitations.some((item) => item.includes("已接入生年四化、大限年龄段、大限四化骨架"))
   );
 });
 
@@ -174,11 +174,26 @@ test("createZiweiAgentResponse includes current major period when analysis date 
   );
   assert.ok(
     agentResult.evidenceItems
+      .find((item) => item.id === "core.annual-period")
+      .referenceRefs.includes("rule.annual-period")
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("流年骨架"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("天同化禄在本命子女宫"))
+  );
+  assert.ok(
+    agentResult.evidenceItems
       .find((item) => item.id === "core.current-major-period")
       .referenceRefs.includes("rule.current-major-period")
   );
   assert.ok(
-    agentResult.limitations.some((item) => item.includes("当前大限定位与大限四化骨架"))
+    agentResult.limitations.some((item) => item.includes("当前大限定位、大限四化骨架、流年骨架、流年四化骨架"))
   );
 });
 

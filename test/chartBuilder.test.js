@@ -73,6 +73,12 @@ test("buildChart creates a complete chart from a solar birth profile", () => {
   assert.equal(result.chart.currentMajorPeriod.age, 37);
   assert.equal(result.chart.currentMajorPeriod.period.palaceName, "子女宫");
   assert.equal(result.chart.currentMajorPeriod.period.branch, "寅");
+  assert.equal(result.chart.annualPeriod.lunarYear, 2026);
+  assert.equal(result.chart.annualPeriod.yearStem, "丙");
+  assert.equal(result.chart.annualPeriod.yearBranch, "午");
+  assert.equal(result.chart.annualPeriod.palaceName, "父母宫");
+  assert.equal(result.chart.annualPeriod.transformations.transformations[0].star, "天同");
+  assert.equal(result.chart.annualPeriod.transformations.transformations[0].targetPalaceName, "子女宫");
 
   const palaceByBranch = new Map(
     result.chart.palaces.map((palace) => [palace.branch, palace])

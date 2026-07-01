@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   applyBirthYearFourTransformations,
+  applyAnnualFourTransformations,
   applyMajorPeriodFourTransformations,
+  calculateAnnualFourTransformations,
   calculateBirthYearFourTransformations,
   calculateMajorPeriodFourTransformations
 } from "../src/fourTransformationCalculator.js";
+import { applyAnnualPeriod } from "../src/annualPeriodCalculator.js";
 import { createChartSkeleton } from "../src/chart.js";
 import { applyFiveElementClass } from "../src/fiveElementClassCalculator.js";
 import {
@@ -163,6 +166,67 @@ test("major period four transformations are attached as structural timing eviden
   assert.ok(
     chart.calculationNotes.some((note) => note.includes("大限四化骨架"))
   );
+});
+
+test("annual four transformations are attached as annual structural evidence", () => {
+  let chart = createChartWithStarsAndMajorPeriods();
+
+  chart = applyAnnualPeriod(chart, {
+    analysisDate: "2026-06-30"
+  });
+  chart = applyAnnualFourTransformations(chart);
+
+  assert.deepEqual(calculateAnnualFourTransformations({ yearStem: "丙" }), {
+    化禄: "天同",
+    化权: "天机",
+    化科: "文昌",
+    化忌: "廉贞"
+  });
+  assert.equal(chart.annualPeriod.yearStem, "丙");
+  assert.equal(chart.annualPeriod.yearBranch, "午");
+  assert.deepEqual(chart.annualPeriod.transformations.transformations, [
+    {
+      name: "化禄",
+      star: "天同",
+      source: "annual-year-stem",
+      analysisDate: "2026-06-30",
+      annualLunarYear: 2026,
+      annualYearStem: "丙",
+      annualYearBranch: "午",
+      targetPalaceName: "子女宫"
+    },
+    {
+      name: "化权",
+      star: "天机",
+      source: "annual-year-stem",
+      analysisDate: "2026-06-30",
+      annualLunarYear: 2026,
+      annualYearStem: "丙",
+      annualYearBranch: "午",
+      targetPalaceName: "父母宫"
+    },
+    {
+      name: "化科",
+      star: "文昌",
+      source: "annual-year-stem",
+      analysisDate: "2026-06-30",
+      annualLunarYear: 2026,
+      annualYearStem: "丙",
+      annualYearBranch: "午",
+      targetPalaceName: null
+    },
+    {
+      name: "化忌",
+      star: "廉贞",
+      source: "annual-year-stem",
+      analysisDate: "2026-06-30",
+      annualLunarYear: 2026,
+      annualYearStem: "丙",
+      annualYearBranch: "午",
+      targetPalaceName: "迁移宫"
+    }
+  ]);
+  assert.deepEqual(chart.starAnchors.annualTransformations, chart.annualPeriod.transformations);
 });
 
 function createChartWithStarsAndMajorPeriods() {

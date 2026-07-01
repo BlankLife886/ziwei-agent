@@ -15,6 +15,8 @@ export const REFERENCE_IDS = {
   STAR_PLACEMENT: "rule.star-placement",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS: "rule.birth-year-four-transformations",
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS: "rule.major-period-four-transformations",
+  ANNUAL_PERIOD: "rule.annual-period",
+  ANNUAL_FOUR_TRANSFORMATIONS: "rule.annual-four-transformations",
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   CURRENT_STAGE: "framework.current-stage",
@@ -89,6 +91,20 @@ const REFERENCES = [
     note: "根据每个大限所在宫位的宫干查表取得大限化禄、化权、化科、化忌，并标记四化星曜在本命盘中的目标宫位。"
   },
   {
+    id: REFERENCE_IDS.ANNUAL_PERIOD,
+    title: "流年骨架定位规则",
+    type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
+    note: "根据分析日期换算农历年份，取得流年天干地支，并暂按太岁地支定位流年命宫所在本命宫位。"
+  },
+  {
+    id: REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
+    title: "流年四化计算规则",
+    type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
+    note: "根据分析日期对应的流年天干查表取得流年化禄、化权、化科、化忌，并标记四化星曜在本命盘中的目标宫位。"
+  },
+  {
     id: REFERENCE_IDS.MAJOR_PERIODS,
     title: "大限年龄段计算规则",
     type: "implemented-rule",
@@ -107,7 +123,7 @@ const REFERENCES = [
     title: "当前阶段分析框架",
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
-    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架和大限四化骨架放在同一节中合参；当前仍不含流年盘和事件触发规则。"
+    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架和流年骨架放在同一节中合参；当前仍不含事件触发规则。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,
