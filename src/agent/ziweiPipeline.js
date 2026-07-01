@@ -23,7 +23,8 @@ export function runZiweiPipeline(buildResult, options = {}) {
   const knowledgeCoverageAudit = auditKnowledgeCoverage(reportPlan);
   const reportGeneration = generateReportDraft(reportPlan, {
     provider: options.reportDraftProvider,
-    generatorId: options.reportGeneratorId
+    generatorId: options.reportGeneratorId,
+    externalProvider: options.externalReportDraftProvider
   });
   const reportDraft = reportGeneration.reportDraft;
   const reportAudit = auditReportOutput(reportPlan, reportDraft);

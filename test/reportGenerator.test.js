@@ -3,7 +3,8 @@ import test from "node:test";
 import {
   REPORT_GENERATOR_IDS,
   createReportGenerationContext,
-  generateReportDraft
+  generateReportDraft,
+  resolveReportDraftProvider
 } from "../src/agent/reportGenerator.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
 import { createZiweiAgentResponse } from "../src/agent/ziweiAgent.js";
@@ -21,6 +22,7 @@ test("createReportGenerationContext preserves the planned evidence and ref contr
   assert.equal(generationContext.status, "ready");
   assert.equal(generationContext.version, "report-generation-context.v1");
   assert.equal(generationContext.generatorId, REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE);
+  assert.equal(generationContext.providerMode, "deterministic");
   assert.ok(generationContext.guardrails.some((guardrail) => {
     return guardrail.includes("所有结论必须能回指");
   }));
@@ -37,6 +39,14 @@ test("createReportGenerationContext preserves the planned evidence and ref contr
       "interpretation.life-triad.structure"
     )
   );
+  assert.ok(lifeSection.topicRefinements.length > 0);
+  assert.ok(
+    lifeSection.topicRefinements.every((refinement) => {
+      return refinement.evidenceRefs.length > 0 &&
+        refinement.referenceRefs.includes("framework.topic-refinement") &&
+        refinement.interpretationRefs.includes("interpretation.topic-refinement.structure-only");
+    })
+  );
   assert.deepEqual(generationContext.outputContract.requiredSectionRefFields, [
     "evidenceRefs",
     "referenceRefs",
@@ -48,6 +58,15 @@ test("createReportGenerationContext preserves the planned evidence and ref contr
   assert.equal(generationContext.outputContract.publishGate, "reportPublisher");
 });
 
+test("resolveReportDraftProvider selects the deterministic provider by default", () => {
+  const providerResolution = resolveReportDraftProvider();
+
+  assert.equal(providerResolution.status, "ready");
+  assert.equal(providerResolution.providerId, REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE);
+  assert.equal(providerResolution.mode, "deterministic");
+  assert.equal(typeof providerResolution.provider, "function");
+});
+
 test("generateReportDraft uses the deterministic provider without bypassing draft metadata", () => {
   const reportPlan = createReportPlan(
     createZiweiAgentResponse(buildChart(createSampleProfile()))
@@ -56,6 +75,7 @@ test("generateReportDraft uses the deterministic provider without bypassing draf
 
   assert.equal(reportGeneration.status, "generated");
   assert.equal(reportGeneration.providerId, REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE);
+  assert.equal(reportGeneration.providerResolution.mode, "deterministic");
   assert.equal(reportGeneration.reportDraft.status, "drafted");
   assert.equal(
     reportGeneration.reportDraft.generation.providerId,
@@ -90,6 +110,8 @@ test("generateReportDraft allows a custom provider but keeps the planned contrac
   });
 
   assert.equal(reportGeneration.generationContext.generatorId, REPORT_GENERATOR_IDS.EXTERNAL_LLM);
+  assert.equal(reportGeneration.generationContext.providerMode, "custom");
+  assert.equal(reportGeneration.providerResolution.mode, "custom");
   assert.equal(reportGeneration.providerId, "test-llm-provider");
   assert.equal(reportGeneration.reportDraft.generation.contextVersion, "report-generation-context.v1");
   assert.deepEqual(reportGeneration.reportDraft.generation.outputContract.requiredParagraphRefFields, [
@@ -97,6 +119,71 @@ test("generateReportDraft allows a custom provider but keeps the planned contrac
     "referenceRefs",
     "interpretationRefs"
   ]);
+});
+
+test("generateReportDraft runs a configured external LLM provider inside the report contract", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportGeneration = generateReportDraft(reportPlan, {
+    generatorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalProvider: ({ reportPlan: plannedReport, generationContext }) => {
+      return {
+        providerId: "configured-external-llm",
+        messages: [`收到 ${generationContext.sections.length} 个受控章节。`],
+        reportDraft: {
+          status: "drafted",
+          title: `${plannedReport.subject.name}的外部模型测试草稿`,
+          subject: plannedReport.subject,
+          introduction: plannedReport.opening,
+          sections: [],
+          closing: []
+        }
+      };
+    }
+  });
+
+  assert.equal(reportGeneration.status, "generated");
+  assert.equal(reportGeneration.generationContext.generatorId, REPORT_GENERATOR_IDS.EXTERNAL_LLM);
+  assert.equal(reportGeneration.generationContext.providerMode, "external-llm");
+  assert.equal(reportGeneration.providerResolution.mode, "external-llm");
+  assert.equal(reportGeneration.providerId, "configured-external-llm");
+  assert.equal(reportGeneration.reportDraft.generation.providerId, "configured-external-llm");
+  assert.equal(
+    reportGeneration.reportDraft.generation.outputContract.publishGate,
+    "reportPublisher"
+  );
+});
+
+test("generateReportDraft blocks an external LLM generator until an external provider is configured", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportGeneration = generateReportDraft(reportPlan, {
+    generatorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM
+  });
+
+  assert.equal(reportGeneration.status, "blocked");
+  assert.equal(reportGeneration.providerId, REPORT_GENERATOR_IDS.EXTERNAL_LLM);
+  assert.equal(reportGeneration.generationContext.providerMode, "external-llm");
+  assert.equal(reportGeneration.providerResolution.status, "blocked");
+  assert.equal(reportGeneration.reportDraft.status, "blocked");
+  assert.ok(reportGeneration.messages[0].includes("尚未配置可调用的 externalProvider"));
+});
+
+test("generateReportDraft blocks unknown report generator ids", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportGeneration = generateReportDraft(reportPlan, {
+    generatorId: "unknown-generator"
+  });
+
+  assert.equal(reportGeneration.status, "blocked");
+  assert.equal(reportGeneration.providerId, "unknown-generator");
+  assert.equal(reportGeneration.providerResolution.mode, "unknown");
+  assert.equal(reportGeneration.reportDraft.status, "blocked");
+  assert.ok(reportGeneration.messages[0].includes("未知报告生成器"));
 });
 
 test("generateReportDraft blocks before generation when report planning is blocked", () => {
@@ -128,6 +215,28 @@ test("generateReportDraft blocks malformed providers without throwing", () => {
   assert.equal(reportGeneration.providerId, "malformed-provider");
   assert.equal(reportGeneration.reportDraft.status, "blocked");
   assert.ok(reportGeneration.messages[0].includes("未返回 reportDraft"));
+});
+
+test("generateReportDraft blocks non-function or throwing providers without crashing the pipeline", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const nonFunctionProviderGeneration = generateReportDraft(reportPlan, {
+    provider: "not-a-function"
+  });
+  const throwingProviderGeneration = generateReportDraft(reportPlan, {
+    provider: () => {
+      throw new Error("测试 provider 故障");
+    }
+  });
+
+  assert.equal(nonFunctionProviderGeneration.status, "blocked");
+  assert.equal(nonFunctionProviderGeneration.providerResolution.mode, "custom");
+  assert.ok(nonFunctionProviderGeneration.messages[0].includes("不是函数"));
+  assert.equal(throwingProviderGeneration.status, "blocked");
+  assert.equal(throwingProviderGeneration.providerId, "provider-error");
+  assert.ok(throwingProviderGeneration.messages[0].includes("执行失败"));
+  assert.ok(throwingProviderGeneration.messages[1].includes("未返回 reportDraft"));
 });
 
 function createSampleProfile() {

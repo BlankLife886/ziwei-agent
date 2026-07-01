@@ -33,6 +33,13 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
         item.message.includes("跨宫跨限运关系解释");
     })
   );
+  assert.ok(
+    audit.items.some((item) => {
+      return item.id === "llm-and-product" &&
+        item.status === "partial" &&
+        item.message.includes("provider 选择边界");
+    })
+  );
   assert.ok(audit.percent >= 77);
   assert.ok(
     audit.blockers.some((blocker) => {

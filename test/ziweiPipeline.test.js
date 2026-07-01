@@ -6,6 +6,8 @@ import {
   KNOWLEDGE_SNIPPET_STATUS
 } from "../src/agent/knowledgeSnippetCatalog.js";
 import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
+import { createReportDraft } from "../src/agent/reportComposer.js";
+import { REPORT_GENERATOR_IDS } from "../src/agent/reportGenerator.js";
 import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
@@ -178,6 +180,42 @@ test("runZiweiPipeline blocks custom providers that omit planned sections", () =
       return issue.id === "planned-section-missing";
     })
   );
+});
+
+test("runZiweiPipeline passes a configured external LLM provider through the full agent chain", () => {
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    reportGeneratorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+    externalReportDraftProvider: ({ reportPlan, generationContext }) => {
+      const draft = createReportDraft(reportPlan);
+
+      return {
+        providerId: "pipeline-external-llm",
+        messages: [`外部 provider 收到 ${generationContext.sections.length} 个章节。`],
+        reportDraft: draft
+      };
+    }
+  });
+
+  assert.equal(pipelineResult.status, "published");
+  assert.equal(pipelineResult.reportGeneration.status, "generated");
+  assert.equal(pipelineResult.reportGeneration.providerResolution.mode, "external-llm");
+  assert.equal(pipelineResult.reportGeneration.generationContext.providerMode, "external-llm");
+  assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "pipeline-external-llm");
+  assert.equal(pipelineResult.reportAudit.status, "passed");
+});
+
+test("runZiweiPipeline blocks the external LLM generator when no provider is configured", () => {
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    reportGeneratorId: REPORT_GENERATOR_IDS.EXTERNAL_LLM
+  });
+
+  assert.equal(pipelineResult.status, "planned");
+  assert.equal(pipelineResult.reportGeneration.status, "blocked");
+  assert.equal(pipelineResult.reportGeneration.providerResolution.status, "blocked");
+  assert.equal(pipelineResult.reportDraft.status, "blocked");
+  assert.equal(pipelineResult.reportAudit.status, "skipped");
+  assert.equal(pipelineResult.reportOutput.status, "blocked");
+  assert.ok(pipelineResult.nextAction.includes("生成报告正文草稿"));
 });
 
 test("runZiweiPipeline drafts a conservative marriage report section", () => {

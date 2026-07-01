@@ -245,8 +245,20 @@ const READINESS_ITEMS = [
     title: "大模型报告器与产品化",
     weight: 6,
     evaluate: ({ pipelineResult }) => {
-      if (pipelineResult.reportGeneration?.status === "generated") {
-        return partial("已建立报告生成器合同和确定性 provider，但尚未接入外部大模型、API、UI、权限、观测和生产部署。", 0.25);
+      const providerResolution = pipelineResult.reportGeneration?.providerResolution;
+
+      if (
+        pipelineResult.reportGeneration?.status === "generated" &&
+        providerResolution?.status === "ready"
+      ) {
+        return partial("已建立报告生成器合同、provider 选择边界、确定性 provider 和外部 provider 配置入口，但尚未接入真实外部大模型 API、UI、权限、观测和生产部署。", 0.45);
+      }
+
+      if (
+        pipelineResult.reportGeneration?.status === "blocked" &&
+        providerResolution?.mode === "external-llm"
+      ) {
+        return partial("已能识别外部大模型 provider 未配置并安全阻断，但尚未接入真实外部大模型 API、UI、权限、观测和生产部署。", 0.35);
       }
 
       return partial("尚未接入大模型生成器、API、UI、权限、观测和生产部署。", 0);

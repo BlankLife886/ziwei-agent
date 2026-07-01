@@ -31,22 +31,47 @@ export function generateReportDraft(reportPlan, options = {}) {
     };
   }
 
-  const provider = options.provider ?? createDeterministicDraftProvider();
-  const providerResult = provider({
+  const providerResolution = resolveReportDraftProvider(options);
+
+  if (providerResolution.status !== "ready") {
+    return {
+      status: "blocked",
+      providerId: providerResolution.providerId,
+      contextVersion: generationContext.version,
+      messages: providerResolution.messages,
+      generationContext,
+      providerResolution,
+      reportDraft: {
+        status: "blocked",
+        messages: providerResolution.messages,
+        sections: [],
+        closing: []
+      }
+    };
+  }
+
+  const provider = providerResolution.provider;
+  const providerResult = callReportDraftProvider(provider, {
     reportPlan,
     generationContext
   });
 
   if (!providerResult?.reportDraft) {
+    const failureMessages = [
+      ...(providerResult?.messages ?? []),
+      "报告生成 provider 未返回 reportDraft，已阻断后续发布。"
+    ];
+
     return {
       status: "blocked",
       providerId: providerResult?.providerId ?? "unknown-provider",
       contextVersion: generationContext.version,
-      messages: ["报告生成 provider 未返回 reportDraft，已阻断后续发布。"],
+      messages: failureMessages,
       generationContext,
+      providerResolution,
       reportDraft: {
         status: "blocked",
-        messages: ["报告生成 provider 未返回 reportDraft。"],
+        messages: failureMessages,
         sections: [],
         closing: []
       }
@@ -65,6 +90,7 @@ export function generateReportDraft(reportPlan, options = {}) {
     contextVersion: generationContext.version,
     messages: providerResult.messages ?? [],
     generationContext,
+    providerResolution,
     reportDraft
   };
 }
@@ -75,6 +101,7 @@ export function createReportGenerationContext(reportPlan, options = {}) {
       status: "blocked",
       version: GENERATION_CONTEXT_VERSION,
       generatorId: options.generatorId ?? REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE,
+      providerMode: deriveProviderMode(options),
       messages: ["报告规划尚未完成，不能进入报告生成器。"],
       sections: [],
       guardrails: reportPlan.guardrails ?? [],
@@ -86,6 +113,7 @@ export function createReportGenerationContext(reportPlan, options = {}) {
     status: "ready",
     version: GENERATION_CONTEXT_VERSION,
     generatorId: options.generatorId ?? REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE,
+    providerMode: deriveProviderMode(options),
     subject: reportPlan.subject,
     queryIntent: reportPlan.queryIntent,
     opening: reportPlan.opening,
@@ -95,7 +123,66 @@ export function createReportGenerationContext(reportPlan, options = {}) {
   };
 }
 
-function createDeterministicDraftProvider() {
+export function resolveReportDraftProvider(options = {}) {
+  if (options.provider && typeof options.provider !== "function") {
+    return {
+      status: "blocked",
+      providerId: options.providerId ?? options.generatorId ?? "custom-provider",
+      mode: "custom",
+      messages: ["调用方传入的报告 provider 不是函数，已阻断报告生成。"]
+    };
+  }
+
+  if (typeof options.provider === "function") {
+    return {
+      status: "ready",
+      providerId: options.providerId ?? options.generatorId ?? "custom-provider",
+      mode: "custom",
+      messages: ["已使用调用方传入的报告 provider。"],
+      provider: options.provider
+    };
+  }
+
+  const generatorId = options.generatorId ?? REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE;
+
+  if (generatorId === REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE) {
+    return {
+      status: "ready",
+      providerId: REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE,
+      mode: "deterministic",
+      messages: ["已选择确定性模板 provider。"],
+      provider: createDeterministicDraftProvider()
+    };
+  }
+
+  if (generatorId === REPORT_GENERATOR_IDS.EXTERNAL_LLM) {
+    if (typeof options.externalProvider === "function") {
+      return {
+        status: "ready",
+        providerId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+        mode: "external-llm",
+        messages: ["已选择外部大模型 provider。"],
+        provider: options.externalProvider
+      };
+    }
+
+    return {
+      status: "blocked",
+      providerId: REPORT_GENERATOR_IDS.EXTERNAL_LLM,
+      mode: "external-llm",
+      messages: ["已选择外部大模型报告器，但尚未配置可调用的 externalProvider。"]
+    };
+  }
+
+  return {
+    status: "blocked",
+    providerId: generatorId,
+    mode: "unknown",
+    messages: [`未知报告生成器：${generatorId}。`]
+  };
+}
+
+export function createDeterministicDraftProvider() {
   return ({ reportPlan }) => {
     return {
       providerId: REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE,
@@ -103,6 +190,19 @@ function createDeterministicDraftProvider() {
       reportDraft: createReportDraft(reportPlan)
     };
   };
+}
+
+function callReportDraftProvider(provider, input) {
+  try {
+    return provider(input);
+  } catch (error) {
+    return {
+      providerId: "provider-error",
+      messages: [
+        `报告生成 provider 执行失败：${error instanceof Error ? error.message : String(error)}`
+      ]
+    };
+  }
 }
 
 function buildGenerationSectionInput(section) {
@@ -129,6 +229,23 @@ function buildGenerationSectionInput(section) {
       knowledgeSnippetRefs: section.knowledgeSnippetRefs ?? [],
       interpretationRefs: section.interpretationRefs ?? []
     },
+    topicRefinements: (section.topicRefinements ?? []).map((refinement) => {
+      return {
+        id: refinement.id,
+        topicId: refinement.topicId,
+        topicTitle: refinement.topicTitle,
+        title: refinement.title,
+        angles: refinement.angles,
+        text: refinement.text,
+        evidenceRefs: refinement.evidenceRefs,
+        referenceRefs: refinement.referenceRefs,
+        sourceRefs: refinement.sourceRefs,
+        knowledgeSnippetRefs: refinement.knowledgeSnippetRefs,
+        interpretationRefs: refinement.interpretationRefs,
+        riskLevel: refinement.riskLevel,
+        blockedClaims: refinement.blockedClaims
+      };
+    }),
     knowledgeSnippets: (section.knowledgeSnippets ?? []).map((snippet) => {
       return {
         id: snippet.id,
@@ -169,6 +286,18 @@ function buildOutputContract() {
     auditGate: "reportAuditor",
     publishGate: "reportPublisher"
   };
+}
+
+function deriveProviderMode(options) {
+  if (options.provider) {
+    return "custom";
+  }
+
+  if (options.generatorId === REPORT_GENERATOR_IDS.EXTERNAL_LLM) {
+    return "external-llm";
+  }
+
+  return "deterministic";
 }
 
 function attachGenerationMetadata(reportDraft, metadata) {

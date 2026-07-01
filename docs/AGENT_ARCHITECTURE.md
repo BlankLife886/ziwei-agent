@@ -40,7 +40,8 @@ birth/profile input
   -> reportPlanner
   -> knowledgeCoverageAudit
   -> reportGenerator
-  -> reportComposer/default provider
+  -> provider resolution
+  -> reportComposer/default provider 或 external LLM provider
   -> reportDraft
   -> reportAuditor
   -> reportPublisher
@@ -55,12 +56,24 @@ birth/profile input
 - `reportPlanner`：把分析上下文转换为报告章节计划。
 - `topicRefinementInterpreter`：把报告章节整理成专题角度、证据范围和禁止断语，作为确定性报告器和未来大模型的可审计任务单。
 - `knowledgeCoverageAuditor`：审计每个报告章节是否已有 verified 外部知识片段，用于判断能否升级为文献/知识库支撑的深入报告；该审计不阻塞当前保守底稿发布。
-- `reportGenerator`：建立报告生成器合同，把章节、证据、引用、知识片段、解释条目和 guardrails 组织成未来可交给大模型的 generation context；当前默认 provider 仍调用确定性模板。
+- `reportGenerator`：建立报告生成器合同，把章节、证据、引用、知识片段、解释条目、专题细分任务单和 guardrails 组织成可交给报告 provider 的 generation context；当前默认 provider 调用确定性模板，也支持选择外部大模型 provider。若选择 `external-llm` 但未配置可调用 provider，会在生成前阻断。
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
 
 这个分层是当前底座最重要的约束：计算层不写报告，报告层不重新排盘，解释层必须通过证据链回指到已计算结果。
+
+## 报告生成器边界
+
+`reportGenerator` 是未来接入大模型的隔离层，而不是让模型直接读取整份命盘对象自由发挥。它先生成 `generationContext`，其中只包含本轮报告计划允许使用的章节、证据、引用、知识片段、解释条目、专题细分任务单和写作边界。
+
+当前支持三类 provider 路径：
+
+- `deterministic-template`：默认路径，调用确定性 `reportComposer` 生成保守底稿。
+- `custom`：测试或调用方显式传入 provider 函数，用于验证报告器合同。
+- `external-llm`：外部大模型路径。只有在调用方提供可调用 provider 时才会执行；未配置、未知 generator、非函数 provider 或 provider 抛错都会返回阻断状态，不进入发布门禁。
+
+外部 provider 返回的草稿仍然必须经过 `reportAuditor` 和 `reportPublisher`。这意味着大模型只能作为报告写作器，不能替代排盘、证据选择、规则引用、知识片段审计或发布门禁。
 
 ## 证据链契约
 
@@ -134,7 +147,7 @@ birth/profile input
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同已建立，但真实外部大模型 provider、API、UI、权限、观测和生产部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider 和外部 provider 配置入口已建立，但真实外部大模型 API、UI、权限、观测和生产部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
@@ -148,5 +161,5 @@ birth/profile input
 2. 建立知识库引用层：把文档、书籍、PDF 摘录映射为可审计、可检索的 verified snippet。
 3. 扩充组合解释：把已有跨宫跨限运关系继续细分为更多专题、规则和文献支撑。
 4. 补齐书籍/PDF/OCR 知识片段：把真实资料摘录映射为可审计、可检索的 verified snippet。
-5. 接入大模型 provider：让模型基于 report generation context、证据、引用和边界生成完整用户报告。
+5. 接入真实大模型 API provider：让模型基于 report generation context、证据、引用、专题细分任务单和边界生成完整用户报告。
 6. 扩展报告审计器：继续扫描是否存在无证据断言、越权断语和引用缺失。
