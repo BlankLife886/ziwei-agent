@@ -1,7 +1,7 @@
 import {
   findInterpretations
 } from "./interpretationCatalog.js";
-import { findReferences } from "./referenceCatalog.js";
+import { findReferences, findSources } from "./referenceCatalog.js";
 import {
   buildSectionGuidingQuestions,
   buildSectionInterpretationRefs,
@@ -87,6 +87,8 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
   const interpretationRefs = buildSectionInterpretationRefs(focusArea.id, evidenceItems);
   const interpretations = findInterpretations(interpretationRefs);
   const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
+  const references = findReferences(referenceRefs);
+  const sourceRefs = collectSourceRefs(references);
   const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
 
   return {
@@ -101,7 +103,9 @@ function buildSectionFromFocusArea(focusArea, queryIntent) {
     interpretationRefs,
     interpretations,
     referenceRefs,
-    references: findReferences(referenceRefs),
+    references,
+    sourceRefs,
+    sources: findSources(sourceRefs),
     writingPrompt: buildSectionWritingPrompt(focusArea.id, queryContext)
   };
 }
@@ -130,6 +134,12 @@ function collectReferenceRefs(evidenceItems, interpretations) {
   });
 
   return [...new Set([...referenceRefs, ...interpretationSourceRefs])];
+}
+
+function collectSourceRefs(references) {
+  return [...new Set(references.flatMap((reference) => {
+    return reference.sourceRefs ?? [];
+  }))];
 }
 
 function buildSectionQueryContext(focusAreaId, queryIntent) {

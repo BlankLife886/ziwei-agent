@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  findSources,
   findReferences,
-  REFERENCE_IDS
+  REFERENCE_IDS,
+  SOURCE_IDS
 } from "../src/agent/referenceCatalog.js";
 
 test("findReferences returns known references in catalog order", () => {
@@ -26,7 +28,27 @@ test("findReferences returns known references in catalog order", () => {
   );
   assert.ok(
     references.every((reference) => {
-      return reference.title && reference.type && reference.note;
+      return reference.title && reference.type && reference.note && reference.sourceRefs;
+    })
+  );
+});
+
+test("findSources returns local source records in catalog order", () => {
+  const sources = findSources([
+    SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS,
+    SOURCE_IDS.LOCAL_IMPLEMENTED_RULES
+  ]);
+
+  assert.deepEqual(
+    sources.map((source) => source.id),
+    [
+      SOURCE_IDS.LOCAL_IMPLEMENTED_RULES,
+      SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS
+    ]
+  );
+  assert.ok(
+    sources.every((source) => {
+      return source.title && source.type && source.status && source.citation;
     })
   );
 });

@@ -66,6 +66,7 @@ birth/profile input
 `reportOutput` 是当前对外可交付的用户报告对象。它必须经过 `reportPublisher` 发布门禁，并包含：
 
 - `metadata`：报告类型、发布状态、审计状态、查询意图、章节列表、证据引用、规则引用、解释引用和写作边界。
+- `sourceRefs`：当前规则/框架引用对应的来源目录；现阶段主要是本地已实现规则和本地分析框架，后续可映射到书籍、PDF、笔记或向量检索片段。
 - `introduction`：报告开篇。
 - `sections`：按专题组织的报告正文段落，每段继续保留 `evidenceRefs`、`referenceRefs` 和 `interpretationRefs`。
 - `closing`：报告收束和边界提示。
@@ -116,7 +117,7 @@ birth/profile input
 
 当前底座仍需继续补强：
 
-- 知识库检索尚未接入。
+- 外部知识库检索尚未接入。
 - 大模型生成尚未接入。
 - 大限四化和流年规则尚未接入。
 - 宫位、星曜、四化、运限的组合解释仍然很少。

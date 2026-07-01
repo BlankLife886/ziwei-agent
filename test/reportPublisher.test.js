@@ -26,6 +26,12 @@ test("publishReportOutput publishes only audited report drafts", () => {
   assert.ok(reportOutput.metadata.evidenceRefs.includes("life-triad.life-palace"));
   assert.ok(reportOutput.metadata.referenceRefs.includes("framework.life-triad"));
   assert.ok(
+    reportOutput.metadata.sourceRefs.includes("source.local.implemented-rules")
+  );
+  assert.ok(
+    reportOutput.metadata.sourceRefs.includes("source.local.analysis-frameworks")
+  );
+  assert.ok(
     reportOutput.metadata.interpretationRefs.includes(
       "interpretation.life-triad.structure"
     )

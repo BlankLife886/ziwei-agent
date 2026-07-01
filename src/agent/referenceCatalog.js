@@ -21,89 +21,127 @@ export const REFERENCE_IDS = {
   STAR_BALANCE: "framework.star-balance"
 };
 
+export const SOURCE_IDS = {
+  LOCAL_IMPLEMENTED_RULES: "source.local.implemented-rules",
+  LOCAL_ANALYSIS_FRAMEWORKS: "source.local.analysis-frameworks"
+};
+
+const SOURCES = [
+  {
+    id: SOURCE_IDS.LOCAL_IMPLEMENTED_RULES,
+    title: "本地已实现排盘规则",
+    type: "local-rule-catalog",
+    status: "implemented",
+    citation: "当前代码库的排盘计算模块与对应测试。",
+    note: "用于标记已经由代码实现并通过测试覆盖的排盘规则；不是外部书籍来源。"
+  },
+  {
+    id: SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS,
+    title: "本地分析框架目录",
+    type: "local-framework-catalog",
+    status: "draft",
+    citation: "当前代码库的 referenceCatalog、reportSectionCatalog 与 interpretationCatalog。",
+    note: "用于标记当前 agent 内部的保守分析框架；后续需要映射到书籍、PDF、笔记或知识库片段。"
+  }
+];
+
 const REFERENCES = [
   {
     id: REFERENCE_IDS.LIFE_BODY_PALACE,
     title: "命宫/身宫排定规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "根据农历月份与出生时辰排定命宫、身宫。"
   },
   {
     id: REFERENCE_IDS.FIVE_ELEMENT_CLASS,
     title: "五行局计算规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "根据年干、命宫干支与纳音推定五行局。"
   },
   {
     id: REFERENCE_IDS.STAR_PLACEMENT,
     title: "已实现星曜安星规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "引用当前排盘模块已经完成的主星、辅星、煞曜和空曜安星结果。"
   },
   {
     id: REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
     title: "生年四化计算规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "根据出生年干查表取得化禄、化权、化科、化忌，并挂回已安星曜所在宫位。"
   },
   {
     id: REFERENCE_IDS.MAJOR_PERIODS,
     title: "大限年龄段计算规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "根据五行局数确定起限年龄，并按阳男阴女顺行、阴男阳女逆行排布十二宫大限。"
   },
   {
     id: REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
     title: "当前大限定位规则",
     type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
     note: "根据分析日期按虚岁定位当前年龄，再匹配已排出的大限年龄段。"
   },
   {
     id: REFERENCE_IDS.CURRENT_STAGE,
     title: "当前阶段分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "把当前大限定位、阶段落宫星曜、生年四化和大限骨架放在同一节中合参；当前仍不含大限四化、流年盘和事件触发规则。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,
     title: "十二宫角色分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "为命宫、夫妻宫、财帛宫、官禄宫、迁移宫、福德宫等宫位提供基础语义，供不同专题复用。"
   },
   {
     id: REFERENCE_IDS.LIFE_TRIAD,
     title: "命宫与三方四正分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "先看命宫，再合看财帛、官禄、迁移以建立基础格局。"
   },
   {
     id: REFERENCE_IDS.CAREER_PALACE,
     title: "官禄宫三方四正分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "以官禄宫为本宫，合看命宫、财帛宫、夫妻宫作为事业发展的静态结构参照，再等待四化、限运、流年和职业知识库补足细断。"
   },
   {
     id: REFERENCE_IDS.WEALTH_PALACE,
     title: "财帛宫三方四正分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "以财帛宫为本宫，合看命宫、官禄宫、福德宫作为财富资源的静态结构参照，再等待四化、限运、流年和风险规则补足细断。"
   },
   {
     id: REFERENCE_IDS.SPOUSE_PALACE,
     title: "夫妻宫三方四正分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "以夫妻宫为本宫，合看迁移、官禄、福德作为婚姻感情的静态结构参照，再等待四化、限运和流年补足细断。"
   },
   {
     id: REFERENCE_IDS.BODY_PALACE,
     title: "身宫落点分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "把身宫作为后天行为重心，与命宫和三方四正合参。"
   },
   {
     id: REFERENCE_IDS.STAR_BALANCE,
     title: "星曜类别平衡分析框架",
     type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "区分主星、辅星、煞曜和空曜，避免把不同性质的星曜混为一谈。"
   }
 ];
@@ -112,4 +150,10 @@ export function findReferences(referenceRefs) {
   const refSet = new Set(referenceRefs);
 
   return REFERENCES.filter((reference) => refSet.has(reference.id));
+}
+
+export function findSources(sourceRefs) {
+  const refSet = new Set(sourceRefs);
+
+  return SOURCES.filter((source) => refSet.has(source.id));
 }

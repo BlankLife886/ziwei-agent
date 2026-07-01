@@ -189,6 +189,7 @@ export function formatReportOutput(reportOutput) {
     `- 章节：${reportOutput.metadata.sectionIds.join("、")}`,
     `- 证据引用：${reportOutput.metadata.evidenceRefs.length} 项`,
     `- 规则引用：${reportOutput.metadata.referenceRefs.length} 项`,
+    `- 来源引用：${reportOutput.metadata.sourceRefs.length} 项`,
     `- 解释引用：${reportOutput.metadata.interpretationRefs.length} 项`,
     "",
     "开篇：",
