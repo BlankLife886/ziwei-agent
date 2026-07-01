@@ -49,6 +49,7 @@ export const INTERPRETATION_IDS = {
   TIMING_TRIGGER_CANDIDATE_ONLY: "interpretation.timing-trigger.candidate-only",
   TIMING_COMBINATION_VERIFIED_ONLY: "interpretation.timing-combination.verified-only",
   TIMING_COMBINATION_THEME_ONLY: "interpretation.timing-combination.theme-only",
+  TIMING_CROSS_LAYER_STRUCTURE_ONLY: "interpretation.timing-cross-layer.structure-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -529,10 +530,11 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
       REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
       REFERENCE_IDS.TIMING_COMBINATION_THEME,
+      REFERENCE_IDS.TIMING_CROSS_LAYER_ANALYSIS,
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
     ],
-    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架、流月骨架、安全触发观察点、组合验证和组合主题解释放在同一节中观察阶段主题；它仍只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
+    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架、流月骨架、安全触发观察点、组合验证、组合主题解释和跨宫跨限运关系放在同一节中观察阶段主题；它仍只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY,
@@ -574,6 +576,22 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.CURRENT_STAGE
     ],
     text: "运限组合主题解释只能把已验证宫位转换为当前阶段需要合参的人生领域，例如关系、资源、外部环境、内在承压或制度支持；它仍然不能写成实际发生事件、应期、吉凶、婚恋结果、财富金额或职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.TIMING_CROSS_LAYER_STRUCTURE_ONLY,
+    title: "跨宫跨限运关系解释的安全边界",
+    topic: "timing-cross-layer",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.TIMING_CROSS_LAYER_ANALYSIS,
+      REFERENCE_IDS.TIMING_COMBINATION_THEME,
+      REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
+      REFERENCE_IDS.CURRENT_STAGE,
+      REFERENCE_IDS.CURRENT_MAJOR_PERIOD,
+      REFERENCE_IDS.ANNUAL_PERIOD,
+      REFERENCE_IDS.MONTHLY_PERIOD
+    ],
+    text: "跨宫跨限运关系解释只能说明已验证阶段主题与当前大限、流年、流月定位之间的同宫、分宫和层级合参关系；它不能写成实际发生事件、具体应期、吉凶、婚恋结果、财富金额或职业结果。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

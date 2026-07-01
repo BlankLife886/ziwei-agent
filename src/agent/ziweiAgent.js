@@ -14,6 +14,10 @@ import {
   formatTimingCombinationTheme,
   interpretTimingCombinationThemes
 } from "./timingCombinationThemeInterpreter.js";
+import {
+  formatTimingCrossLayerInteraction,
+  interpretTimingCrossLayerInteractions
+} from "./timingCrossLayerInterpreter.js";
 
 // 命理师 agent 外壳。
 //
@@ -324,6 +328,8 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     buildTimingTriggerCandidates(chart)
   ).length > 0;
   const hasTimingCombinationThemes = hasTimingCombinationVerifications;
+  const hasTimingCrossLayerInteractions = hasTimingCombinationThemes &&
+    Boolean(chart.currentMajorPeriod?.period);
   const dynamicScopeItems = chart.currentMajorPeriod
     ? [
         "生年四化",
@@ -335,7 +341,8 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
         hasMonthlyPeriod ? "流月骨架" : null,
         hasTimingTriggerCandidates ? "安全触发观察点" : null,
         hasTimingCombinationVerifications ? "组合验证底座" : null,
-        hasTimingCombinationThemes ? "组合主题解释" : null
+        hasTimingCombinationThemes ? "组合主题解释" : null,
+        hasTimingCrossLayerInteractions ? "跨宫跨限运关系" : null
       ]
     : [
         "生年四化",
@@ -364,7 +371,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     ...reportGoalScope,
     ...plannedDomainScope,
     ...missingTopicScope,
-    `已接入${dynamicScope}，但尚未完成深层跨宫、跨限运解释，因此不能推具体年份事件、月份事件或应期。`,
+    `已接入${dynamicScope}，跨宫跨限运目前只支持基础关系结构，深层规则和文献支撑仍待扩充，因此不能推具体年份事件、月份事件或应期。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
 }
@@ -593,6 +600,27 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       })),
       {
         timingCombinationThemes
+      }
+    ));
+  }
+
+  const timingCrossLayerInteractions = interpretTimingCrossLayerInteractions({
+    themes: timingCombinationThemes,
+    currentMajorPalaceName: currentPeriod?.palaceName,
+    annualPalaceName: chart.annualPeriod?.palaceName,
+    monthlyPalaceName: chart.monthlyPeriod?.palaceName
+  });
+
+  if (timingCrossLayerInteractions.length > 0) {
+    items.push(createEvidenceItem(
+      "current-stage.timing-cross-layer-interactions",
+      `跨宫跨限运关系：${timingCrossLayerInteractions.map(formatTimingCrossLayerInteraction).join("；")}`,
+      "agent.timingCrossLayerInteractions",
+      uniqueInOrder(timingCrossLayerInteractions.flatMap((interaction) => {
+        return interaction.referenceRefs;
+      })),
+      {
+        timingCrossLayerInteractions
       }
     ));
   }

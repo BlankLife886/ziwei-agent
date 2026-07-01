@@ -363,7 +363,8 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "rule.monthly-period",
     "framework.timing-trigger-candidate",
     "framework.timing-combination-verification",
-    "framework.timing-combination-theme"
+    "framework.timing-combination-theme",
+    "framework.timing-cross-layer-analysis"
   ]);
   assert.deepEqual(section.interpretationRefs, [
     "interpretation.current-stage.static-only",
@@ -373,7 +374,8 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",
-    "interpretation.timing-combination.theme-only"
+    "interpretation.timing-combination.theme-only",
+    "interpretation.timing-cross-layer.structure-only"
   ]);
   assert.ok(section.evidence.some((item) => item.includes("当前阶段定位")));
   assert.ok(section.evidence.some((item) => item.includes("阶段大限宫位：34-43岁子女宫寅")));
@@ -385,6 +387,7 @@ test("createReportPlan includes current stage synthesis when available", () => {
   assert.ok(section.evidence.some((item) => item.includes("安全触发观察点")));
   assert.ok(section.evidence.some((item) => item.includes("运限组合验证")));
   assert.ok(section.evidence.some((item) => item.includes("组合验证主题解释")));
+  assert.ok(section.evidence.some((item) => item.includes("跨宫跨限运关系")));
   assert.ok(section.writingPrompt.includes("不推今年具体事件"));
   assert.ok(section.writingPrompt.includes("不推今年具体事件、月份事件"));
 });

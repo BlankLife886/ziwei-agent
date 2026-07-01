@@ -124,9 +124,9 @@ const SECTION_DEFINITIONS = {
       "当前分析日期和虚岁把命主定位到哪一个大限？",
       "当前阶段落宫及其星曜提供了哪些已排出的证据？",
       "生年四化、大限骨架、大限四化、流年四化和流月骨架能提供哪些结构参照？",
-      "安全触发候选把哪些宫位列为观察点，哪些观察点已经通过组合验证，并能转成哪些阶段主题？"
+      "安全触发候选把哪些宫位列为观察点，哪些观察点已经通过组合验证，并能转成哪些阶段主题和跨层合参关系？"
     ],
-    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化、流年四化、流月骨架、安全触发观察点、组合验证主题和组合主题解释，不推今年具体事件、月份事件、应期或吉凶。",
+    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化、流年四化、流月骨架、安全触发观察点、组合验证主题、组合主题解释和跨宫跨限运关系，不推今年具体事件、月份事件、应期或吉凶。",
     buildInterpretationRefs: buildCurrentStageInterpretationRefs
   }
 };
@@ -283,6 +283,7 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     ...getTimingTriggerInterpretationRefs(evidenceItems),
     ...getTimingCombinationInterpretationRefs(evidenceItems),
     ...getTimingCombinationThemeInterpretationRefs(evidenceItems),
+    ...getTimingCrossLayerInterpretationRefs(evidenceItems),
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     ...getStarRoleInterpretationRefs(evidenceItems)
   ];
@@ -325,6 +326,16 @@ function getTimingCombinationThemeInterpretationRefs(evidenceItems) {
 
   return hasTimingCombinationThemes
     ? [INTERPRETATION_IDS.TIMING_COMBINATION_THEME_ONLY]
+    : [];
+}
+
+function getTimingCrossLayerInterpretationRefs(evidenceItems) {
+  const hasTimingCrossLayerInteractions = evidenceItems.some((item) => {
+    return item.metadata?.timingCrossLayerInteractions?.length > 0;
+  });
+
+  return hasTimingCrossLayerInteractions
+    ? [INTERPRETATION_IDS.TIMING_CROSS_LAYER_STRUCTURE_ONLY]
     : [];
 }
 

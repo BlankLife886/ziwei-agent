@@ -23,6 +23,7 @@ export const REFERENCE_IDS = {
   TIMING_TRIGGER_CANDIDATE: "framework.timing-trigger-candidate",
   TIMING_COMBINATION_VERIFICATION: "framework.timing-combination-verification",
   TIMING_COMBINATION_THEME: "framework.timing-combination-theme",
+  TIMING_CROSS_LAYER_ANALYSIS: "framework.timing-cross-layer-analysis",
   CURRENT_STAGE: "framework.current-stage",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
@@ -156,6 +157,13 @@ const REFERENCES = [
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "把已通过组合验证的宫位转成阶段主题解释，只用于报告合参方向；不输出事件、应期、吉凶或结果断语。"
+  },
+  {
+    id: REFERENCE_IDS.TIMING_CROSS_LAYER_ANALYSIS,
+    title: "跨宫跨限运关系解释框架",
+    type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
+    note: "把已验证阶段主题与当前大限、流年、流月定位之间的同宫或分宫关系整理为报告合参结构；不输出事件、应期、吉凶或结果断语。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

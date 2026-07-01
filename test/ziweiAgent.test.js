@@ -236,6 +236,24 @@ test("createZiweiAgentResponse includes current major period when analysis date 
       .referenceRefs.includes("framework.timing-combination-theme")
   );
   assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("跨宫跨限运关系"))
+  );
+  assert.equal(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidenceItems.find((item) => item.id === "current-stage.timing-cross-layer-interactions")
+      .metadata.timingCrossLayerInteractions[0].title,
+    "大限落宫与组合主题同宫"
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidenceItems.find((item) => item.id === "current-stage.timing-cross-layer-interactions")
+      .referenceRefs.includes("framework.timing-cross-layer-analysis")
+  );
+  assert.ok(
     agentResult.evidenceItems
       .find((item) => item.id === "core.current-major-period")
       .referenceRefs.includes("rule.current-major-period")

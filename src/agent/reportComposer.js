@@ -336,6 +336,10 @@ function composeCurrentStageParagraph(section) {
   const timingCombinationThemeText = timingCombinationThemeSynthesis
     ? getInterpretationText(section, INTERPRETATION_IDS.TIMING_COMBINATION_THEME_ONLY)
     : "";
+  const timingCrossLayerSynthesis = composeTimingCrossLayerSynthesis(section);
+  const timingCrossLayerText = timingCrossLayerSynthesis
+    ? getInterpretationText(section, INTERPRETATION_IDS.TIMING_CROSS_LAYER_STRUCTURE_ONLY)
+    : "";
   const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   return `【草稿判断】${joinJudgmentParts([
@@ -351,6 +355,8 @@ function composeCurrentStageParagraph(section) {
     timingCombinationText,
     timingCombinationThemeSynthesis,
     timingCombinationThemeText,
+    timingCrossLayerSynthesis,
+    timingCrossLayerText,
     starRoleSynthesis
   ])}`;
 }
@@ -499,6 +505,23 @@ function composeTimingCombinationThemeSynthesis(section) {
   }).join("；");
 
   return `组合主题解释只把已验证宫位转成阶段合参领域：${themeText}`;
+}
+
+function composeTimingCrossLayerSynthesis(section) {
+  const evidenceItem = section.evidenceItems?.find((item) => {
+    return item.metadata?.timingCrossLayerInteractions?.length > 0;
+  });
+  const interactions = evidenceItem?.metadata?.timingCrossLayerInteractions ?? [];
+
+  if (interactions.length === 0) {
+    return "";
+  }
+
+  const interactionText = interactions.map((interaction) => {
+    return `${interaction.title}，${interaction.primaryPalaceName}与${interaction.secondaryPalaceName}合参`;
+  }).join("；");
+
+  return `跨宫跨限运解释只整理关系结构：${interactionText}`;
 }
 
 function groupStarRoleInterpretations(interpretations, palaceOrder = []) {

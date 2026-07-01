@@ -78,6 +78,13 @@ const READINESS_ITEMS = [
       const hasTimingCombinationThemeInterpretation = sections.some((section) => {
         return section.interpretationRefs?.includes("interpretation.timing-combination.theme-only");
       });
+      const hasTimingCrossLayerInterpretation = sections.some((section) => {
+        return section.interpretationRefs?.includes("interpretation.timing-cross-layer.structure-only");
+      });
+
+      if (ratio === 1 && synthesisRatio === 1 && hasTimingCrossLayerInterpretation) {
+        return partial("所有当前章节已有解释条目、章节级组合归纳、组合主题解释和跨宫跨限运关系解释；后续仍需扩充更多文献支撑与专题细分。", 0.94);
+      }
 
       if (ratio === 1 && synthesisRatio === 1 && hasTimingCombinationThemeInterpretation) {
         return partial("所有当前章节已有解释条目、章节级组合归纳和组合主题解释，但深层跨宫、跨限运解释仍需继续扩充。", 0.88);
@@ -128,6 +135,26 @@ const READINESS_ITEMS = [
           });
         })
       );
+      const hasTimingCrossLayerInteractions = Boolean(
+        pipelineResult.agentResult.allFocusAreas?.some((area) => {
+          return area.evidenceItems?.some((item) => {
+            return item.metadata?.timingCrossLayerInteractions?.length > 0;
+          });
+        })
+      );
+
+      if (
+        hasCurrentMajorPeriod &&
+        hasMajorPeriodTransformations &&
+        hasAnnualTransformations &&
+        hasMonthlyPeriod &&
+        hasTimingTriggerCandidates &&
+        hasTimingCombinationVerifications &&
+        hasTimingCombinationThemes &&
+        hasTimingCrossLayerInteractions
+      ) {
+        return completed("已支持当前大限定位、大限四化骨架、流年四化骨架、流月骨架、安全事件触发候选、组合验证底座、组合主题解释和跨宫跨限运关系解释。");
+      }
 
       if (
         hasCurrentMajorPeriod &&
