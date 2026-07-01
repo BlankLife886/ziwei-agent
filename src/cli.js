@@ -73,9 +73,22 @@ function buildPipelineOptions(knowledgeSnippets) {
       endpoint: process.env.ZIWEI_LLM_ENDPOINT,
       apiKey: process.env.ZIWEI_LLM_API_KEY,
       model: process.env.ZIWEI_LLM_MODEL,
-      providerId: process.env.ZIWEI_LLM_PROVIDER_ID
+      providerId: process.env.ZIWEI_LLM_PROVIDER_ID,
+      timeoutMs: parseOptionalInteger(process.env.ZIWEI_LLM_TIMEOUT_MS),
+      retryCount: parseOptionalInteger(process.env.ZIWEI_LLM_RETRY_COUNT),
+      maxResponseBytes: parseOptionalInteger(process.env.ZIWEI_LLM_MAX_RESPONSE_BYTES)
     })
   };
+}
+
+function parseOptionalInteger(value) {
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isInteger(parsedValue) ? parsedValue : undefined;
 }
 
 function formatKnowledgeStoreSummary(knowledgeStore) {

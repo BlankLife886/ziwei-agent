@@ -90,7 +90,153 @@ test("createExternalLLMReportProvider posts generation context and parses direct
   assert.equal(requestBody.model, "test-model");
   assert.equal(userPayload.generationContext.outputContract.publishGate, "reportPublisher");
   assert.equal(result.providerId, "http-test-provider");
+  assert.equal(result.diagnostics.endpointHost, "llm.example.test");
+  assert.equal(result.diagnostics.finalStatus, "success");
+  assert.equal(result.diagnostics.attempts, 1);
+  assert.equal(result.diagnostics.apiKey, undefined);
   assert.equal(result.reportDraft.title, expectedDraft.title);
+});
+
+test("createExternalLLMReportProvider retries transient HTTP failures without leaking secrets", async () => {
+  const expectedDraft = createReportDraft(
+    createReportPlan(
+      createZiweiAgentResponse(buildChart(createSampleProfile()))
+    )
+  );
+  let fetchCalls = 0;
+  const provider = createExternalLLMReportProvider({
+    endpoint: "https://llm.example.test/report",
+    apiKey: "secret-key",
+    model: "test-model",
+    retryCount: 1,
+    fetchImpl: async () => {
+      fetchCalls += 1;
+
+      if (fetchCalls === 1) {
+        return {
+          ok: false,
+          status: 503,
+          text: async () => ""
+        };
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ reportDraft: expectedDraft })
+      };
+    }
+  });
+  const result = await provider({
+    generationContext: createGenerationContext()
+  });
+
+  assert.equal(fetchCalls, 2);
+  assert.equal(result.reportDraft.title, expectedDraft.title);
+  assert.equal(result.diagnostics.attempts, 2);
+  assert.equal(result.diagnostics.attemptLog[0].status, "http-error");
+  assert.equal(result.diagnostics.attemptLog[0].statusCode, 503);
+  assert.equal(JSON.stringify(result.diagnostics).includes("secret-key"), false);
+});
+
+test("createExternalLLMReportProvider does not retry non-retryable HTTP failures", async () => {
+  let fetchCalls = 0;
+  const provider = createExternalLLMReportProvider({
+    endpoint: "https://llm.example.test/report",
+    apiKey: "test-key",
+    model: "test-model",
+    retryCount: 3,
+    fetchImpl: async () => {
+      fetchCalls += 1;
+
+      return {
+        ok: false,
+        status: 400,
+        text: async () => ""
+      };
+    }
+  });
+  const result = await provider({
+    generationContext: createGenerationContext()
+  });
+
+  assert.equal(fetchCalls, 1);
+  assert.equal(result.reportDraft, undefined);
+  assert.equal(result.diagnostics.finalStatus, "http-error");
+  assert.equal(result.messages[0], "外部大模型请求失败：HTTP 400。");
+});
+
+test("createExternalLLMReportProvider blocks oversized and malformed responses", async () => {
+  const oversizedProvider = createExternalLLMReportProvider({
+    endpoint: "https://llm.example.test/report",
+    apiKey: "test-key",
+    model: "test-model",
+    maxResponseBytes: 10,
+    fetchImpl: async () => {
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          reportDraft: {
+            status: "drafted",
+            title: "这个响应会超过限制"
+          }
+        })
+      };
+    }
+  });
+  const oversizedResult = await oversizedProvider({
+    generationContext: createGenerationContext()
+  });
+  const malformedProvider = createExternalLLMReportProvider({
+    endpoint: "https://llm.example.test/report",
+    apiKey: "test-key",
+    model: "test-model",
+    fetchImpl: async () => {
+      return {
+        ok: true,
+        status: 200,
+        text: async () => "{not-json"
+      };
+    }
+  });
+  const malformedResult = await malformedProvider({
+    generationContext: createGenerationContext()
+  });
+
+  assert.equal(oversizedResult.reportDraft, undefined);
+  assert.equal(oversizedResult.diagnostics.finalStatus, "response-too-large");
+  assert.ok(oversizedResult.messages[0].includes("超过大小限制"));
+  assert.equal(malformedResult.reportDraft, undefined);
+  assert.equal(malformedResult.diagnostics.finalStatus, "invalid-json");
+  assert.equal(malformedResult.messages[0], "外部大模型响应不是合法 JSON。");
+});
+
+test("createExternalLLMReportProvider reports timeout attempts as blocked diagnostics", async () => {
+  const provider = createExternalLLMReportProvider({
+    endpoint: "https://llm.example.test/report",
+    apiKey: "test-key",
+    model: "test-model",
+    timeoutMs: 1,
+    retryCount: 0,
+    fetchImpl: async (_url, request) => {
+      await new Promise((resolve, reject) => {
+        request.signal.addEventListener("abort", () => {
+          const error = new Error("aborted");
+          error.name = "AbortError";
+          reject(error);
+        });
+      });
+    }
+  });
+  const result = await provider({
+    generationContext: createGenerationContext()
+  });
+
+  assert.equal(result.reportDraft, undefined);
+  assert.equal(result.diagnostics.finalStatus, "timeout");
+  assert.equal(result.diagnostics.attempts, 1);
+  assert.ok(result.messages[0].includes("请求超时"));
 });
 
 test("extractReportDraft supports chat content JSON and rejects malformed responses", () => {
