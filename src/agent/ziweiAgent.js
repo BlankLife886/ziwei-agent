@@ -10,6 +10,10 @@ import {
   formatTimingCombinationVerification,
   verifyTimingCombinations
 } from "./timingCombinationVerifier.js";
+import {
+  formatTimingCombinationTheme,
+  interpretTimingCombinationThemes
+} from "./timingCombinationThemeInterpreter.js";
 
 // 命理师 agent 外壳。
 //
@@ -292,7 +296,7 @@ function buildFocusAreas(chart, palaceByName) {
     }, {
       id: "current-stage",
       title: "当前阶段运势底稿",
-      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化、大限四化、流年四化、流月骨架和安全触发观察点放到同一节中合参；当前不推具体年份事件、月份事件或应期。",
+      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化、大限四化、流年四化、流月骨架、安全触发观察点、组合验证和主题解释放到同一节中合参；当前不推具体年份事件、月份事件或应期。",
       evidenceItems: buildCurrentStageEvidenceItems(chart, palaceByName)
     });
   }
@@ -319,6 +323,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
   const hasTimingCombinationVerifications = verifyTimingCombinations(
     buildTimingTriggerCandidates(chart)
   ).length > 0;
+  const hasTimingCombinationThemes = hasTimingCombinationVerifications;
   const dynamicScopeItems = chart.currentMajorPeriod
     ? [
         "生年四化",
@@ -329,7 +334,8 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
         hasAnnualTransformations ? "流年四化骨架" : null,
         hasMonthlyPeriod ? "流月骨架" : null,
         hasTimingTriggerCandidates ? "安全触发观察点" : null,
-        hasTimingCombinationVerifications ? "组合验证底座" : null
+        hasTimingCombinationVerifications ? "组合验证底座" : null,
+        hasTimingCombinationThemes ? "组合主题解释" : null
       ]
     : [
         "生年四化",
@@ -571,6 +577,22 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       })),
       {
         timingCombinationVerifications
+      }
+    ));
+  }
+
+  const timingCombinationThemes = interpretTimingCombinationThemes(timingCombinationVerifications);
+
+  if (timingCombinationThemes.length > 0) {
+    items.push(createEvidenceItem(
+      "current-stage.timing-combination-themes",
+      `组合验证主题解释：${timingCombinationThemes.map(formatTimingCombinationTheme).join("；")}`,
+      "agent.timingCombinationThemes",
+      uniqueInOrder(timingCombinationThemes.flatMap((theme) => {
+        return theme.referenceRefs;
+      })),
+      {
+        timingCombinationThemes
       }
     ));
   }

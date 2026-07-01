@@ -75,6 +75,13 @@ const READINESS_ITEMS = [
         });
       }).length;
       const synthesisRatio = sections.length > 0 ? sectionsWithSynthesis / sections.length : 0;
+      const hasTimingCombinationThemeInterpretation = sections.some((section) => {
+        return section.interpretationRefs?.includes("interpretation.timing-combination.theme-only");
+      });
+
+      if (ratio === 1 && synthesisRatio === 1 && hasTimingCombinationThemeInterpretation) {
+        return partial("所有当前章节已有解释条目、章节级组合归纳和组合主题解释，但深层跨宫、跨限运解释仍需继续扩充。", 0.88);
+      }
 
       if (ratio === 1 && synthesisRatio === 1) {
         return partial("所有当前章节已有解释条目和章节级组合归纳，但深层跨宫、跨限运解释仍需扩充。", 0.82);
@@ -114,6 +121,25 @@ const READINESS_ITEMS = [
           });
         })
       );
+      const hasTimingCombinationThemes = Boolean(
+        pipelineResult.agentResult.allFocusAreas?.some((area) => {
+          return area.evidenceItems?.some((item) => {
+            return item.metadata?.timingCombinationThemes?.length > 0;
+          });
+        })
+      );
+
+      if (
+        hasCurrentMajorPeriod &&
+        hasMajorPeriodTransformations &&
+        hasAnnualTransformations &&
+        hasMonthlyPeriod &&
+        hasTimingTriggerCandidates &&
+        hasTimingCombinationVerifications &&
+        hasTimingCombinationThemes
+      ) {
+        return partial("已支持当前大限定位、大限四化骨架、流年四化骨架、流月骨架、安全事件触发候选、组合验证底座和组合主题解释，但深层跨宫、跨限运解释仍需继续扩充。", 0.98);
+      }
 
       if (
         hasCurrentMajorPeriod &&

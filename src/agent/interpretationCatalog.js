@@ -48,6 +48,7 @@ export const INTERPRETATION_IDS = {
   CURRENT_STAGE_STATIC_ONLY: "interpretation.current-stage.static-only",
   TIMING_TRIGGER_CANDIDATE_ONLY: "interpretation.timing-trigger.candidate-only",
   TIMING_COMBINATION_VERIFIED_ONLY: "interpretation.timing-combination.verified-only",
+  TIMING_COMBINATION_THEME_ONLY: "interpretation.timing-combination.theme-only",
   BODY_PALACE_SAME_AS_LIFE: "interpretation.body-palace.same-as-life",
   BODY_PALACE_DIFFERENT_FROM_LIFE: "interpretation.body-palace.different-from-life",
   STAR_BALANCE_STATIC_ONLY: "interpretation.star-balance.static-only"
@@ -525,11 +526,13 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.ANNUAL_PERIOD,
       REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.MONTHLY_PERIOD,
+      REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
       REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
+      REFERENCE_IDS.TIMING_COMBINATION_THEME,
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
     ],
-    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架、流月骨架和安全触发观察点放在同一节中观察阶段主题；但尚未完成深层组合验证，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
+    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架、流月骨架、安全触发观察点、组合验证和组合主题解释放在同一节中观察阶段主题；它仍只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY,
@@ -559,6 +562,18 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.CURRENT_STAGE
     ],
     text: "运限组合验证只说明某个观察点同时具备多层证据，适合进入报告合参；它仍不是事件预测，不能写成具体年份、月份事件、应期、婚恋结果、财富金额或职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.TIMING_COMBINATION_THEME_ONLY,
+    title: "运限组合主题解释的安全边界",
+    topic: "timing-combination",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.TIMING_COMBINATION_THEME,
+      REFERENCE_IDS.TIMING_COMBINATION_VERIFICATION,
+      REFERENCE_IDS.CURRENT_STAGE
+    ],
+    text: "运限组合主题解释只能把已验证宫位转换为当前阶段需要合参的人生领域，例如关系、资源、外部环境、内在承压或制度支持；它仍然不能写成实际发生事件、应期、吉凶、婚恋结果、财富金额或职业结果。"
   },
   {
     id: INTERPRETATION_IDS.BODY_PALACE_SAME_AS_LIFE,

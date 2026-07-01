@@ -124,9 +124,9 @@ const SECTION_DEFINITIONS = {
       "当前分析日期和虚岁把命主定位到哪一个大限？",
       "当前阶段落宫及其星曜提供了哪些已排出的证据？",
       "生年四化、大限骨架、大限四化、流年四化和流月骨架能提供哪些结构参照？",
-      "安全触发候选把哪些宫位列为观察点，哪些观察点已经通过组合验证？"
+      "安全触发候选把哪些宫位列为观察点，哪些观察点已经通过组合验证，并能转成哪些阶段主题？"
     ],
-    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化、流年四化、流月骨架、安全触发观察点和组合验证主题，不推今年具体事件、月份事件、应期或吉凶。",
+    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化、流年四化、流月骨架、安全触发观察点、组合验证主题和组合主题解释，不推今年具体事件、月份事件、应期或吉凶。",
     buildInterpretationRefs: buildCurrentStageInterpretationRefs
   }
 };
@@ -282,6 +282,7 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     ...getMonthlyPeriodInterpretationRefs(evidenceItems),
     ...getTimingTriggerInterpretationRefs(evidenceItems),
     ...getTimingCombinationInterpretationRefs(evidenceItems),
+    ...getTimingCombinationThemeInterpretationRefs(evidenceItems),
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     ...getStarRoleInterpretationRefs(evidenceItems)
   ];
@@ -314,6 +315,16 @@ function getTimingCombinationInterpretationRefs(evidenceItems) {
 
   return hasTimingCombinationVerifications
     ? [INTERPRETATION_IDS.TIMING_COMBINATION_VERIFIED_ONLY]
+    : [];
+}
+
+function getTimingCombinationThemeInterpretationRefs(evidenceItems) {
+  const hasTimingCombinationThemes = evidenceItems.some((item) => {
+    return item.metadata?.timingCombinationThemes?.length > 0;
+  });
+
+  return hasTimingCombinationThemes
+    ? [INTERPRETATION_IDS.TIMING_COMBINATION_THEME_ONLY]
     : [];
 }
 

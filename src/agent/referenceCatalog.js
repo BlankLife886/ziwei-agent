@@ -22,6 +22,7 @@ export const REFERENCE_IDS = {
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   TIMING_TRIGGER_CANDIDATE: "framework.timing-trigger-candidate",
   TIMING_COMBINATION_VERIFICATION: "framework.timing-combination-verification",
+  TIMING_COMBINATION_THEME: "framework.timing-combination-theme",
   CURRENT_STAGE: "framework.current-stage",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
@@ -133,7 +134,7 @@ const REFERENCES = [
     title: "当前阶段分析框架",
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
-    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架、流年骨架、流月骨架和安全触发观察点放在同一节中合参；当前仍不含深层组合验证。"
+    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架、流年骨架、流月骨架、安全触发观察点、组合验证和组合主题解释放在同一节中合参；当前仍不输出事件或结果断语。"
   },
   {
     id: REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
@@ -148,6 +149,13 @@ const REFERENCES = [
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
     note: "只把同时具备多层运限或四化信号、且达到最低证据强度的观察点列为组合验证主题；仍不输出事件、应期或结果断语。"
+  },
+  {
+    id: REFERENCE_IDS.TIMING_COMBINATION_THEME,
+    title: "运限组合主题解释框架",
+    type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
+    note: "把已通过组合验证的宫位转成阶段主题解释，只用于报告合参方向；不输出事件、应期、吉凶或结果断语。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

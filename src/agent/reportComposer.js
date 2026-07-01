@@ -332,6 +332,10 @@ function composeCurrentStageParagraph(section) {
     section,
     INTERPRETATION_IDS.TIMING_COMBINATION_VERIFIED_ONLY
   );
+  const timingCombinationThemeSynthesis = composeTimingCombinationThemeSynthesis(section);
+  const timingCombinationThemeText = timingCombinationThemeSynthesis
+    ? getInterpretationText(section, INTERPRETATION_IDS.TIMING_COMBINATION_THEME_ONLY)
+    : "";
   const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   return `【草稿判断】${joinJudgmentParts([
@@ -345,6 +349,8 @@ function composeCurrentStageParagraph(section) {
     timingTriggerText,
     composeTimingCombinationVerificationSynthesis(section),
     timingCombinationText,
+    timingCombinationThemeSynthesis,
+    timingCombinationThemeText,
     starRoleSynthesis
   ])}`;
 }
@@ -476,6 +482,23 @@ function composeTimingCombinationVerificationSynthesis(section) {
   }).join("；");
 
   return `组合验证只把多层证据同时出现的宫位列为合参主题：${verificationText}`;
+}
+
+function composeTimingCombinationThemeSynthesis(section) {
+  const evidenceItem = section.evidenceItems?.find((item) => {
+    return item.metadata?.timingCombinationThemes?.length > 0;
+  });
+  const themes = evidenceItem?.metadata?.timingCombinationThemes ?? [];
+
+  if (themes.length === 0) {
+    return "";
+  }
+
+  const themeText = themes.map((theme) => {
+    return `${theme.palaceName}归为${theme.title}`;
+  }).join("；");
+
+  return `组合主题解释只把已验证宫位转成阶段合参领域：${themeText}`;
 }
 
 function groupStarRoleInterpretations(interpretations, palaceOrder = []) {
