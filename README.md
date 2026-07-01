@@ -24,6 +24,7 @@ node src/cli.js examples/profile.example.json data/knowledge-snippets.example.js
 - `src/chart.js`: 定义命盘数据结构，包括十二宫、主星、辅星、煞曜、空曜、四化和命盘骨架。
 - `src/chartBuilder.js`: 编排输入校验、历法转换和各类排盘规则，输出可供 CLI、API 或 agent 使用的结构化命盘。
 - `src/agent/ziweiPipeline.js`: 统一编排 agent 主流程，把排盘结果转换为分析上下文、报告规划、正文草稿、报告审计和用户报告。
+- `src/agent/agentReadinessAuditor.js`: 按工程能力项审计 agent 完整度，输出当前进度、阻塞项和下一步优先级；该进度不是命理准确率。
 - `src/agent/intakeSession.js`: 维护多轮输入中的出生资料草稿，把用户新补充的字段合并后重新调用完整 agent 流程。
 - `src/agent/profilePatchParser.js`: 把用户自然语言补充转换为可审计的结构化资料 patch，支持出生资料和分析日期，并保留字段来源片段。
 - `src/agent/queryIntentParser.js`: 把“看当前大限 / 看事业 / 看财帛 / 看运势 / 看四化”等自然语言问题转换为可审计的查询意图，用于收敛本轮报告章节，并保留事业、财帛、迁移等专题上下文。

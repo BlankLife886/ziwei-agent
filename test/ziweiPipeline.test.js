@@ -26,7 +26,8 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
       "knowledge-coverage",
       "report-draft",
       "report-audit",
-      "report-output"
+      "report-output",
+      "agent-readiness"
     ]
   );
   assert.equal(pipelineResult.steps[0].status, "none");
@@ -35,6 +36,8 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
     pipelineResult.knowledgeCoverageAudit.summary.includes("verified 外部知识片段")
   );
   assert.equal(pipelineResult.reportAudit.status, "passed");
+  assert.equal(pipelineResult.readinessAudit.status, "in_progress");
+  assert.ok(pipelineResult.readinessAudit.percent < 100);
   assert.deepEqual(pipelineResult.reportAudit.issues, []);
   assert.ok(pipelineResult.nextAction.includes("审阅已发布的用户报告"));
 });

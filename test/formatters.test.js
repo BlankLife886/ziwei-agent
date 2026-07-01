@@ -8,6 +8,7 @@ import {
   formatAgentBriefing,
   formatBuildResult,
   formatKnowledgeCoverageAudit,
+  formatReadinessAudit,
   formatReportAudit,
   formatReportDraft,
   formatReportOutput,
@@ -194,6 +195,33 @@ test("formatKnowledgeCoverageAudit renders insufficient and skipped states", () 
   assert.ok(lines.some((line) => line.includes("事业专题")));
   assert.ok(lines.includes("  知识片段：无"));
   assert.ok(lines.includes("补齐建议："));
+});
+
+test("formatReadinessAudit renders progress and priorities", () => {
+  const lines = formatReadinessAudit({
+    status: "in_progress",
+    percent: 52,
+    items: [
+      {
+        status: "complete",
+        title: "报告发布门禁",
+        weight: 10,
+        message: "已能发布保守报告。"
+      },
+      {
+        status: "partial",
+        title: "外部知识库覆盖",
+        weight: 14,
+        message: "仍缺 verified 外部知识片段。"
+      }
+    ],
+    nextPriorities: ["外部知识库覆盖：仍缺 verified 外部知识片段。"]
+  });
+
+  assert.ok(lines.includes("Agent 完整度审计："));
+  assert.ok(lines.includes("- 进度：52%"));
+  assert.ok(lines.some((line) => line.includes("[partial] 外部知识库覆盖")));
+  assert.ok(lines.includes("下一步优先级："));
 });
 
 test("formatReportOutput renders only published user reports", () => {

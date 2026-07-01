@@ -1,3 +1,4 @@
+import { auditAgentReadiness } from "./agentReadinessAuditor.js";
 import { createReportDraft } from "./reportComposer.js";
 import { auditKnowledgeCoverage } from "./knowledgeCoverageAuditor.js";
 import { auditReportOutput } from "./reportAuditor.js";
@@ -23,6 +24,16 @@ export function runZiweiPipeline(buildResult, options = {}) {
   const reportDraft = createReportDraft(reportPlan);
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
   const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);
+  const readinessAudit = auditAgentReadiness({
+    queryIntent,
+    buildResult,
+    agentResult,
+    reportPlan,
+    knowledgeCoverageAudit,
+    reportDraft,
+    reportAudit,
+    reportOutput
+  });
 
   return {
     status: derivePipelineStatus({
@@ -47,6 +58,7 @@ export function runZiweiPipeline(buildResult, options = {}) {
     reportDraft,
     reportAudit,
     reportOutput,
+    readinessAudit,
     steps: [
       buildStep("query-intent", queryIntent.status),
       buildStep("agent-context", agentResult.status),
@@ -54,7 +66,8 @@ export function runZiweiPipeline(buildResult, options = {}) {
       buildStep("knowledge-coverage", knowledgeCoverageAudit.status),
       buildStep("report-draft", reportDraft.status),
       buildStep("report-audit", reportAudit.status),
-      buildStep("report-output", reportOutput.status)
+      buildStep("report-output", reportOutput.status),
+      buildStep("agent-readiness", readinessAudit.status)
     ]
   };
 }

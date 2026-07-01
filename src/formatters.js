@@ -205,6 +205,20 @@ export function formatKnowledgeCoverageAudit(knowledgeCoverageAudit) {
   ];
 }
 
+export function formatReadinessAudit(readinessAudit) {
+  return [
+    "Agent 完整度审计：",
+    `- 状态：${readinessAudit.status}`,
+    `- 进度：${readinessAudit.percent}%`,
+    "能力项：",
+    ...readinessAudit.items.map((item) => {
+      return `- [${item.status}] ${item.title}（权重 ${item.weight}）：${item.message}`;
+    }),
+    "下一步优先级：",
+    ...readinessAudit.nextPriorities.map((item) => `- ${item}`)
+  ];
+}
+
 export function formatReportOutput(reportOutput) {
   if (reportOutput.status !== "published") {
     return [

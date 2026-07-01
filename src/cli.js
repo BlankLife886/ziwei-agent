@@ -6,6 +6,7 @@ import {
   formatAgentBriefing,
   formatBuildResult,
   formatKnowledgeCoverageAudit,
+  formatReadinessAudit,
   formatReportAudit,
   formatReportOutput,
   formatReportPlan
@@ -40,6 +41,8 @@ async function main() {
     ...formatKnowledgeCoverageAudit(pipelineResult.knowledgeCoverageAudit),
     "",
     ...formatReportAudit(pipelineResult.reportAudit),
+    "",
+    ...formatReadinessAudit(pipelineResult.readinessAudit),
     "",
     ...formatReportOutput(pipelineResult.reportOutput)
   ];
