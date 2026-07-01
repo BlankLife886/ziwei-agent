@@ -173,6 +173,38 @@ export function formatReportAudit(reportAudit) {
   ];
 }
 
+export function formatKnowledgeCoverageAudit(knowledgeCoverageAudit) {
+  if (knowledgeCoverageAudit.status === "skipped") {
+    return [
+      "知识覆盖审计：已跳过",
+      `- ${knowledgeCoverageAudit.summary}`
+    ];
+  }
+
+  const sectionLines = knowledgeCoverageAudit.sections.flatMap((section) => {
+    return [
+      `- ${section.title}：${section.message}`,
+      `  章节：${section.sectionId}`,
+      `  规则引用：${section.referenceRefs.join("、") || "无"}`,
+      `  知识片段：${section.knowledgeSnippetRefs.join("、") || "无"}`
+    ];
+  });
+  const recommendationLines = knowledgeCoverageAudit.recommendations.length > 0
+    ? [
+        "补齐建议：",
+        ...knowledgeCoverageAudit.recommendations.map((item) => `- ${item}`)
+      ]
+    : ["补齐建议：无"];
+
+  return [
+    `知识覆盖审计：${knowledgeCoverageAudit.status === "covered" ? "已覆盖" : "不足"}`,
+    `- ${knowledgeCoverageAudit.summary}`,
+    "章节覆盖：",
+    ...sectionLines,
+    ...recommendationLines
+  ];
+}
+
 export function formatReportOutput(reportOutput) {
   if (reportOutput.status !== "published") {
     return [

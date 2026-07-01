@@ -7,6 +7,7 @@ import { buildChart } from "../src/chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatKnowledgeCoverageAudit,
   formatReportAudit,
   formatReportDraft,
   formatReportOutput,
@@ -161,6 +162,38 @@ test("formatReportAudit renders passed, skipped, and failed audit states", () =>
     "审计警告：",
     "- [risk-language.event-timing] 出现时间或事件断语。"
   ]);
+});
+
+test("formatKnowledgeCoverageAudit renders insufficient and skipped states", () => {
+  assert.deepEqual(formatKnowledgeCoverageAudit({
+    status: "skipped",
+    summary: "报告规划尚未完成，暂不审计知识覆盖。",
+    sections: [],
+    recommendations: []
+  }), [
+    "知识覆盖审计：已跳过",
+    "- 报告规划尚未完成，暂不审计知识覆盖。"
+  ]);
+
+  const lines = formatKnowledgeCoverageAudit({
+    status: "insufficient",
+    summary: "1 个报告章节中有 1 个尚无 verified 外部知识片段。",
+    sections: [
+      {
+        sectionId: "career-palace",
+        title: "事业专题",
+        message: "本章节尚无 verified 外部知识片段，目前只能使用本地规则、证据和受控解释。",
+        referenceRefs: ["framework.career-palace"],
+        knowledgeSnippetRefs: []
+      }
+    ],
+    recommendations: ["优先从已研读的书籍、PDF或笔记中录入可复核摘录。"]
+  });
+
+  assert.ok(lines.includes("知识覆盖审计：不足"));
+  assert.ok(lines.some((line) => line.includes("事业专题")));
+  assert.ok(lines.includes("  知识片段：无"));
+  assert.ok(lines.includes("补齐建议："));
 });
 
 test("formatReportOutput renders only published user reports", () => {

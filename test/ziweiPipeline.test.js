@@ -18,12 +18,17 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
       "query-intent",
       "agent-context",
       "report-plan",
+      "knowledge-coverage",
       "report-draft",
       "report-audit",
       "report-output"
     ]
   );
   assert.equal(pipelineResult.steps[0].status, "none");
+  assert.equal(pipelineResult.knowledgeCoverageAudit.status, "insufficient");
+  assert.ok(
+    pipelineResult.knowledgeCoverageAudit.summary.includes("verified 外部知识片段")
+  );
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.deepEqual(pipelineResult.reportAudit.issues, []);
   assert.ok(pipelineResult.nextAction.includes("审阅已发布的用户报告"));

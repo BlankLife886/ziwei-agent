@@ -22,6 +22,8 @@
 
 当前项目还没有进入“完整命运报告”阶段。现在的核心产出是通过发布门禁的用户报告底稿：它能说明用了哪些命盘证据、引用了哪些本地规则、哪些解释条目参与了正文生成，以及哪些结论不能写。没有通过审计的草稿只能用于调试，不能作为用户报告发布。
 
+知识覆盖审计会单独标记每个章节是否已有 verified 外部知识片段。当前没有真实书籍/PDF片段录入时，系统仍可发布保守底稿，但不能把它包装成文献和知识库已经充分支撑的深入命运报告。
+
 ## 当前 Agent 链路
 
 当前主链路在 `src/agent/ziweiPipeline.js`：
@@ -32,6 +34,7 @@ birth/profile input
   -> queryIntent
   -> ziweiAgent context
   -> reportPlanner
+  -> knowledgeCoverageAudit
   -> reportComposer
   -> reportDraft
   -> reportAuditor
@@ -45,6 +48,7 @@ birth/profile input
 - `queryIntentParser`：把用户问题转换成可审计的专题意图。
 - `ziweiAgent`：把命盘转换为 agent 分析上下文，包括证据、分析重点、限制和追问。
 - `reportPlanner`：把分析上下文转换为报告章节计划。
+- `knowledgeCoverageAuditor`：审计每个报告章节是否已有 verified 外部知识片段，用于判断能否升级为文献/知识库支撑的深入报告；该审计不阻塞当前保守底稿发布。
 - `reportComposer`：用确定性模板生成保守正文草稿。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。

@@ -4,6 +4,7 @@ import { buildChart } from "./chartBuilder.js";
 import {
   formatAgentBriefing,
   formatBuildResult,
+  formatKnowledgeCoverageAudit,
   formatReportAudit,
   formatReportOutput,
   formatReportPlan
@@ -26,6 +27,8 @@ async function main() {
     ...formatAgentBriefing(pipelineResult.agentResult),
     "",
     ...formatReportPlan(pipelineResult.reportPlan),
+    "",
+    ...formatKnowledgeCoverageAudit(pipelineResult.knowledgeCoverageAudit),
     "",
     ...formatReportAudit(pipelineResult.reportAudit),
     "",

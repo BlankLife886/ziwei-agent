@@ -34,6 +34,7 @@ npm start
 - `src/agent/ziweiAgent.js`: 根据排盘结果生成 agent 分析上下文，包括核心证据、建议分析重点和当前限制；核心证据同时保留文本和结构化 `evidenceItems`。
 - `src/agent/reportSectionCatalog.js`: 集中定义各类报告章节的标题、目的、引导问题、写作提示和解释引用构造规则。
 - `src/agent/reportPlanner.js`: 把 agent 分析上下文转换为报告草稿章节，包括写作问题、可用证据、`evidenceRefs`、`referenceRefs`、`interpretationRefs` 和写作边界。
+- `src/agent/knowledgeCoverageAuditor.js`: 审计报告章节是否已有 verified 外部知识片段，防止把只有本地规则支撑的保守底稿包装成知识库充分支撑的深入报告。
 - `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能通过 `evidenceRefs` 回指到已有证据，并通过 `referenceRefs` 回指到规则/分析框架。
 - `src/agent/reportAuditor.js`: 审计报告草稿是否遵守章节引用契约，并扫描未被边界约束的高风险断语。
 - `src/agent/reportPublisher.js`: 作为最终发布门禁，只有审计通过的草稿才会转换成可交付的用户报告。
