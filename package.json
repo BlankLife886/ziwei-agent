@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/cli.js examples/profile.example.json",
-    "test": "node --test"
+    "test": "node --test",
+    "validate:knowledge": "node src/validateKnowledgeStore.js data/knowledge-snippets.example.json"
   },
   "engines": {
     "node": ">=20"

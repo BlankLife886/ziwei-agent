@@ -15,6 +15,7 @@
 ```bash
 npm start
 node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json
+npm run validate:knowledge
 ```
 
 ## 当前模块
