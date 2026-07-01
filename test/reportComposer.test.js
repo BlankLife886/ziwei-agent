@@ -360,6 +360,8 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("流年四化骨架"));
   assert.ok(paragraph.text.includes("天同化禄在本命子女宫"));
   assert.ok(paragraph.text.includes("年度观察方向"));
+  assert.ok(paragraph.text.includes("流月骨架"));
+  assert.ok(paragraph.text.includes("月份事件、应期或吉凶"));
   assert.ok(paragraph.text.includes("安全触发候选只列观察点"));
   assert.ok(paragraph.text.includes("子女宫为高优先级观察点"));
   assert.ok(paragraph.text.includes("不是事件预测"));
@@ -369,6 +371,7 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
     "interpretation.four-transformations.annual-structure-only",
+    "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only"
   ]);
 });

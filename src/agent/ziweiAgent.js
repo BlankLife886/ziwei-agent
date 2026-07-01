@@ -288,7 +288,7 @@ function buildFocusAreas(chart, palaceByName) {
     }, {
       id: "current-stage",
       title: "当前阶段运势底稿",
-      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化、大限四化、流年四化和安全触发观察点放到同一节中合参；当前不推具体年份事件。",
+      reason: "当前阶段分析用于把大限定位、阶段落宫星曜、生年四化、大限四化、流年四化、流月骨架和安全触发观察点放到同一节中合参；当前不推具体年份事件、月份事件或应期。",
       evidenceItems: buildCurrentStageEvidenceItems(chart, palaceByName)
     });
   }
@@ -307,6 +307,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
   );
   const hasAnnualPeriod = Boolean(chart.annualPeriod);
   const hasAnnualTransformations = Boolean(chart.annualPeriod?.transformations);
+  const hasMonthlyPeriod = Boolean(chart.monthlyPeriod);
   const hasTimingTriggerCandidates = Boolean(
     chart.currentMajorPeriod?.period &&
       chart.annualPeriod?.transformations
@@ -319,6 +320,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
         hasMajorPeriodTransformations ? "大限四化骨架" : null,
         hasAnnualPeriod ? "流年骨架" : null,
         hasAnnualTransformations ? "流年四化骨架" : null,
+        hasMonthlyPeriod ? "流月骨架" : null,
         hasTimingTriggerCandidates ? "安全触发观察点" : null
       ]
     : [
@@ -348,7 +350,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     ...reportGoalScope,
     ...plannedDomainScope,
     ...missingTopicScope,
-    `已接入${dynamicScope}，但尚未接入流月和组合验证，因此不能推具体年份事件。`,
+    `已接入${dynamicScope}，但尚未完成深层组合验证，因此不能推具体年份事件、月份事件或应期。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
 }
@@ -523,6 +525,15 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       `流年四化骨架：${formatAnnualTransformations(chart)}`,
       "chart.annualPeriod.transformations",
       [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS]
+    ));
+  }
+
+  if (chart.monthlyPeriod) {
+    items.push(createEvidenceItem(
+      "current-stage.monthly-period",
+      `流月骨架：${formatMonthlyPeriodSummary(chart)}`,
+      "chart.monthlyPeriod",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MONTHLY_PERIOD]
     ));
   }
 
@@ -738,6 +749,21 @@ function formatAnnualTransformations(chart) {
   }).join("；");
 
   return `${annualTransformations.lunarYear}年${annualTransformations.yearStem}${annualTransformations.yearBranch}：${transformationText}`;
+}
+
+function formatMonthlyPeriodSummary(chart) {
+  const monthly = chart.monthlyPeriod;
+
+  if (!monthly) {
+    return "未计算";
+  }
+
+  const palaceText = monthly.palaceName
+    ? `${monthly.palaceName}${monthly.branch}`
+    : `${monthly.monthBranch}支未匹配到本命宫位`;
+  const leapText = monthly.isLeapMonth ? "闰" : "";
+
+  return `${monthly.analysisDate}对应农历${monthly.lunarYear}年${leapText}${monthly.lunarMonth}月${monthly.lunarDay}日，流月月建暂按${monthly.monthBranch}支定位到${palaceText}`;
 }
 
 function formatCurrentMajorPeriodSummary(chart) {

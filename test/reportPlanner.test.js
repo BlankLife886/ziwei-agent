@@ -360,6 +360,7 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "rule.major-period-four-transformations",
     "rule.annual-period",
     "rule.annual-four-transformations",
+    "rule.monthly-period",
     "framework.timing-trigger-candidate"
   ]);
   assert.deepEqual(section.interpretationRefs, [
@@ -367,6 +368,7 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
     "interpretation.four-transformations.annual-structure-only",
+    "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only"
   ]);
   assert.ok(section.evidence.some((item) => item.includes("当前阶段定位")));
@@ -375,8 +377,10 @@ test("createReportPlan includes current stage synthesis when available", () => {
   assert.ok(section.evidence.some((item) => item.includes("当前大限四化骨架")));
   assert.ok(section.evidence.some((item) => item.includes("流年骨架")));
   assert.ok(section.evidence.some((item) => item.includes("流年四化骨架")));
+  assert.ok(section.evidence.some((item) => item.includes("流月骨架")));
   assert.ok(section.evidence.some((item) => item.includes("安全触发观察点")));
   assert.ok(section.writingPrompt.includes("不推今年具体事件"));
+  assert.ok(section.writingPrompt.includes("不推今年具体事件、月份事件"));
 });
 
 test("createReportPlan asks for analysis date when current stage is unavailable", () => {

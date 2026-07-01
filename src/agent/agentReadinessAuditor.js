@@ -99,6 +99,7 @@ const READINESS_ITEMS = [
       const hasAnnualTransformations = Boolean(
         pipelineResult.buildResult.chart?.annualPeriod?.transformations
       );
+      const hasMonthlyPeriod = Boolean(pipelineResult.buildResult.chart?.monthlyPeriod);
       const hasTimingTriggerCandidates = Boolean(
         pipelineResult.agentResult.allFocusAreas?.some((area) => {
           return area.evidenceItems?.some((item) => {
@@ -106,6 +107,16 @@ const READINESS_ITEMS = [
           });
         })
       );
+
+      if (
+        hasCurrentMajorPeriod &&
+        hasMajorPeriodTransformations &&
+        hasAnnualTransformations &&
+        hasMonthlyPeriod &&
+        hasTimingTriggerCandidates
+      ) {
+        return partial("已支持当前大限定位、大限四化骨架、流年四化骨架、流月骨架和安全事件触发候选，但尚未完成深层组合验证。", 0.9);
+      }
 
       if (
         hasCurrentMajorPeriod &&

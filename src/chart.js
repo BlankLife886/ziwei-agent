@@ -132,10 +132,12 @@ export function createChartSkeleton(profile) {
     // majorPeriodTransformations 用来放每个大限按宫干查出的四化骨架。
     // currentMajorPeriod 用来放“分析日期”对应的当前大限定位。
     // annualPeriod 用来放当前流年。
+    // monthlyPeriod 用来放分析日期对应的流月骨架。
     majorPeriods: [],
     majorPeriodTransformations: [],
     currentMajorPeriod: null,
     annualPeriod: null,
+    monthlyPeriod: null,
 
     // calculationNotes 记录关键计算过程。
     // 后续生成报告时，agent 可以解释“为什么这样排”，而不是只给结论。

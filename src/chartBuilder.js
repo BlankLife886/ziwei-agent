@@ -30,6 +30,7 @@ import {
   applyTianChuStar,
   applyTianGuanFuStars
 } from "./yearStemStarCalculator.js";
+import { applyMonthlyPeriod } from "./monthlyPeriodCalculator.js";
 
 // 排盘服务层：把“从出生资料到完整命盘”的流程集中在这里。
 //
@@ -135,6 +136,9 @@ function buildChartFromResolvedProfile({ profile, chineseHour }) {
 
   if (profile.analysis_date) {
     chart = applyAnnualPeriod(chart, {
+      analysisDate: profile.analysis_date
+    });
+    chart = applyMonthlyPeriod(chart, {
       analysisDate: profile.analysis_date
     });
     chart = applyAnnualFourTransformations(chart);

@@ -7,7 +7,7 @@ import { REFERENCE_IDS } from "./referenceCatalog.js";
 // 标记成后续报告的观察点。它只消费已经算出的结构化证据：
 // 1. 当前大限所在宫。
 // 2. 生年四化、大限四化、流年四化的落宫。
-// 3. 流年太岁定位宫。
+// 3. 流年太岁定位宫和流月月建定位宫。
 //
 // 输出必须保持保守：只能说“可作为观察点/待验证主题”，不能生成应期、
 // 具体事件、婚恋结果、财富金额或职业结果。
@@ -50,6 +50,7 @@ function buildTimingContext(chart) {
   return {
     currentMajorPeriod: chart.currentMajorPeriod,
     annualPeriod: chart.annualPeriod ?? null,
+    monthlyPeriod: chart.monthlyPeriod ?? null,
     birthYearTransformations: collectBirthYearTransformationEntries(chart),
     majorPeriodTransformations:
       chart.currentMajorPeriod?.transformations?.transformations ?? [],
@@ -62,6 +63,7 @@ function collectCandidatePalaceNames(context) {
   return uniqueInOrder([
     context.currentMajorPeriod.period.palaceName,
     context.annualPeriod?.palaceName,
+    context.monthlyPeriod?.palaceName,
     ...collectTransformationPalaceNames(context.birthYearTransformations),
     ...collectTransformationPalaceNames(context.majorPeriodTransformations),
     ...collectTransformationPalaceNames(context.annualTransformations)
@@ -78,6 +80,7 @@ function buildCandidateForPalace(palaceName, context) {
   const signals = [
     ...buildCurrentMajorPeriodSignals(palaceName, context),
     ...buildAnnualPeriodSignals(palaceName, context),
+    ...buildMonthlyPeriodSignals(palaceName, context),
     ...buildTransformationSignals("birth-year", palaceName, context.birthYearTransformations),
     ...buildTransformationSignals("major-period", palaceName, context.majorPeriodTransformations),
     ...buildTransformationSignals("annual", palaceName, context.annualTransformations)
@@ -132,6 +135,20 @@ function buildAnnualPeriodSignals(palaceName, context) {
     weight: 1,
     evidenceRefs: ["current-stage.annual-period"],
     referenceRefs: [REFERENCE_IDS.ANNUAL_PERIOD]
+  }];
+}
+
+function buildMonthlyPeriodSignals(palaceName, context) {
+  if (!context.monthlyPeriod || context.monthlyPeriod.palaceName !== palaceName) {
+    return [];
+  }
+
+  return [{
+    type: "monthly-period-palace",
+    text: `流月月建定位到${palaceName}`,
+    weight: 0.5,
+    evidenceRefs: ["current-stage.monthly-period"],
+    referenceRefs: [REFERENCE_IDS.MONTHLY_PERIOD]
   }];
 }
 

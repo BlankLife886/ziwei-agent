@@ -26,6 +26,16 @@ test("buildTimingTriggerCandidates creates observation points without event clai
       return signal.text.includes("流年天同化禄落子女宫");
     })
   );
+  const monthlyCandidate = candidates.find((candidate) => {
+    return candidate.palaceName === "父母宫";
+  });
+  assert.ok(monthlyCandidate);
+  assert.ok(
+    monthlyCandidate.signals.some((signal) => {
+      return signal.text.includes("流月月建定位到父母宫");
+    })
+  );
+  assert.ok(monthlyCandidate.referenceRefs.includes("rule.monthly-period"));
   assert.ok(candidates[0].referenceRefs.includes("framework.timing-trigger-candidate"));
   assert.deepEqual(candidates[0].interpretationRefs, [
     "interpretation.timing-trigger.candidate-only"

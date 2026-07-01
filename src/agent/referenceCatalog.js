@@ -17,6 +17,7 @@ export const REFERENCE_IDS = {
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS: "rule.major-period-four-transformations",
   ANNUAL_PERIOD: "rule.annual-period",
   ANNUAL_FOUR_TRANSFORMATIONS: "rule.annual-four-transformations",
+  MONTHLY_PERIOD: "rule.monthly-period",
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
   TIMING_TRIGGER_CANDIDATE: "framework.timing-trigger-candidate",
@@ -106,6 +107,13 @@ const REFERENCES = [
     note: "根据分析日期对应的流年天干查表取得流年化禄、化权、化科、化忌，并标记四化星曜在本命盘中的目标宫位。"
   },
   {
+    id: REFERENCE_IDS.MONTHLY_PERIOD,
+    title: "流月骨架定位规则",
+    type: "implemented-rule",
+    sourceRefs: [SOURCE_IDS.LOCAL_IMPLEMENTED_RULES],
+    note: "根据分析日期换算农历月份，并按正月建寅、逐月顺行的月建地支定位流月所在本命宫位。"
+  },
+  {
     id: REFERENCE_IDS.MAJOR_PERIODS,
     title: "大限年龄段计算规则",
     type: "implemented-rule",
@@ -124,14 +132,14 @@ const REFERENCES = [
     title: "当前阶段分析框架",
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
-    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架、流年骨架和安全触发观察点放在同一节中合参；当前仍不含流月和组合验证。"
+    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架、流年骨架、流月骨架和安全触发观察点放在同一节中合参；当前仍不含深层组合验证。"
   },
   {
     id: REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
     title: "安全事件触发候选框架",
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
-    note: "把当前大限、流年太岁、生年四化、大限四化和流年四化的重叠宫位标记为观察点；只用于提示待验证主题，不输出具体事件或应期。"
+    note: "把当前大限、流年太岁、流月月建、生年四化、大限四化和流年四化的重叠宫位标记为观察点；只用于提示待验证主题，不输出具体事件或应期。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

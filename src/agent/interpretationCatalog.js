@@ -42,6 +42,7 @@ export const INTERPRETATION_IDS = {
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY: "interpretation.four-transformations.major-period-stage-only",
   ANNUAL_PERIOD_STRUCTURE_ONLY: "interpretation.annual-period.structure-only",
   ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY: "interpretation.four-transformations.annual-structure-only",
+  MONTHLY_PERIOD_STRUCTURE_ONLY: "interpretation.monthly-period.structure-only",
   MAJOR_PERIODS_STRUCTURE_ONLY: "interpretation.major-periods.structure-only",
   CURRENT_MAJOR_PERIOD_LOCATOR_ONLY: "interpretation.current-major-period.locator-only",
   CURRENT_STAGE_STATIC_ONLY: "interpretation.current-stage.static-only",
@@ -484,7 +485,15 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.ANNUAL_PERIOD
     ],
-    text: "流年四化可作为分析年度的禄、权、科、忌牵引骨架；当前已能进一步形成安全触发观察点，但尚未接入流月和组合验证，因此只能写年度观察方向，不能推具体事件或应期。"
+    text: "流年四化可作为分析年度的禄、权、科、忌牵引骨架；当前已能进一步结合流月骨架形成安全触发观察点，但尚未完成深层组合验证，因此只能写年度观察方向，不能推具体事件或应期。"
+  },
+  {
+    id: INTERPRETATION_IDS.MONTHLY_PERIOD_STRUCTURE_ONLY,
+    title: "流月骨架的解释边界",
+    topic: "monthly-period",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.MONTHLY_PERIOD],
+    text: "流月骨架可把分析日期对应到农历月份和月建地支所在本命宫位；当前只用于补充阶段观察层级，尚不能写成月份事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.MAJOR_PERIODS_STRUCTURE_ONLY,
@@ -514,10 +523,11 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.ANNUAL_PERIOD,
       REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.MONTHLY_PERIOD,
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
     ],
-    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架和安全触发观察点放在同一节中观察阶段主题；但尚未接入流月和组合验证，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
+    text: "当前阶段底稿可以把分析日期、当前大限落宫、该宫星曜、生年四化、大限四化骨架、流年四化骨架、流月骨架和安全触发观察点放在同一节中观察阶段主题；但尚未完成深层组合验证，因此只能写阶段观察方向，不能推今年具体事件、应期或吉凶。"
   },
   {
     id: INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY,
@@ -531,7 +541,8 @@ const INTERPRETATIONS = [
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.ANNUAL_PERIOD,
-      REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS
+      REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.MONTHLY_PERIOD
     ],
     text: "事件触发候选只能把多层运限与四化重叠的宫位列为观察点，用来提示后续需要合参的主题；它不是事件预测，不能写成具体年份事件、应期、婚恋结果、财富金额或职业结果。"
   },
@@ -557,7 +568,7 @@ const INTERPRETATIONS = [
     topic: "star-balance",
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.STAR_BALANCE],
-    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化、大限年龄段、大限四化骨架、流年四化骨架和安全触发观察点；但尚未纳入流月和组合验证，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
+    text: "当前已能统计主星、辅星、煞曜与空曜的分布，并已接入生年四化、大限年龄段、大限四化骨架、流年四化骨架、流月骨架和安全触发观察点；但尚未完成深层组合验证，所以这一节适合描述结构倾向，不适合直接推到具体年份或事件。"
   }
 ];
 

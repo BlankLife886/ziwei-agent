@@ -320,6 +320,10 @@ function composeCurrentStageParagraph(section) {
     section,
     INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY
   );
+  const monthlyPeriodText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.MONTHLY_PERIOD_STRUCTURE_ONLY
+  );
   const timingTriggerText = getInterpretationText(
     section,
     INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY
@@ -332,6 +336,7 @@ function composeCurrentStageParagraph(section) {
     majorPeriodTransformationText,
     annualPeriodText,
     annualTransformationText,
+    monthlyPeriodText,
     composeTimingTriggerCandidateSynthesis(section),
     timingTriggerText,
     starRoleSynthesis
