@@ -188,6 +188,24 @@ test("createZiweiAgentResponse includes current major period when analysis date 
       .evidence.some((item) => item.includes("天同化禄在本命子女宫"))
   );
   assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidence.some((item) => item.includes("安全触发观察点"))
+  );
+  assert.ok(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidenceItems.find((item) => item.id === "current-stage.timing-trigger-candidates")
+      .referenceRefs.includes("framework.timing-trigger-candidate")
+  );
+  assert.equal(
+    agentResult.focusAreas
+      .find((area) => area.id === "current-stage")
+      .evidenceItems.find((item) => item.id === "current-stage.timing-trigger-candidates")
+      .metadata.timingTriggerCandidates[0].palaceName,
+    "子女宫"
+  );
+  assert.ok(
     agentResult.evidenceItems
       .find((item) => item.id === "core.current-major-period")
       .referenceRefs.includes("rule.current-major-period")

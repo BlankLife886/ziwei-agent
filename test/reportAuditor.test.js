@@ -104,6 +104,46 @@ test("auditReportOutput warns when risky fortune language is not framed as a bou
   assert.equal(audit.warnings[0].id, "risk-language.event-timing");
 });
 
+test("auditReportOutput warns when timing trigger candidates lose observation framing", () => {
+  const reportPlan = {
+    status: "planned",
+    sections: [
+      {
+        id: "current-stage",
+        evidenceRefs: ["current-stage.timing-trigger-candidates"],
+        referenceRefs: ["framework.timing-trigger-candidate"],
+        interpretationRefs: ["interpretation.timing-trigger.candidate-only"]
+      }
+    ]
+  };
+  const reportDraft = {
+    status: "drafted",
+    sections: [
+      {
+        id: "current-stage",
+        evidenceRefs: ["current-stage.timing-trigger-candidates"],
+        referenceRefs: ["framework.timing-trigger-candidate"],
+        interpretationRefs: ["interpretation.timing-trigger.candidate-only"],
+        paragraphs: [
+          {
+            kind: "interpretation",
+            text: "【草稿判断】安全触发候选集中在子女宫。",
+            evidenceRefs: ["current-stage.timing-trigger-candidates"],
+            referenceRefs: ["framework.timing-trigger-candidate"],
+            interpretationRefs: ["interpretation.timing-trigger.candidate-only"]
+          }
+        ]
+      }
+    ],
+    closing: []
+  };
+  const audit = auditReportOutput(reportPlan, reportDraft);
+
+  assert.equal(audit.status, "passed");
+  assert.equal(audit.warnings.length, 1);
+  assert.equal(audit.warnings[0].id, "risk-language.timing-trigger-framing");
+});
+
 function createSampleProfile() {
   return {
     name: "示例命主",

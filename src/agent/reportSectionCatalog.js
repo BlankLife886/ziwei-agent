@@ -123,9 +123,10 @@ const SECTION_DEFINITIONS = {
     guidingQuestions: [
       "当前分析日期和虚岁把命主定位到哪一个大限？",
       "当前阶段落宫及其星曜提供了哪些已排出的证据？",
-      "生年四化、大限骨架、大限四化和流年四化能提供哪些结构参照，哪些仍需等待触发规则？"
+      "生年四化、大限骨架、大限四化和流年四化能提供哪些结构参照？",
+      "安全触发候选把哪些宫位列为观察点，哪些仍需等待流月和组合验证？"
     ],
-    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化和流年四化参照，不推今年具体事件、应期或吉凶。",
+    writingPrompt: "围绕当前阶段写保守运势底稿，只说明当前大限落宫、阶段宫位星曜、生年四化、大限四化、流年四化和安全触发观察点，不推今年具体事件、应期或吉凶。",
     buildInterpretationRefs: buildCurrentStageInterpretationRefs
   }
 };
@@ -278,9 +279,20 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,
     INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY,
     INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY,
+    ...getTimingTriggerInterpretationRefs(evidenceItems),
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     ...getStarRoleInterpretationRefs(evidenceItems)
   ];
+}
+
+function getTimingTriggerInterpretationRefs(evidenceItems) {
+  const hasTimingTriggerCandidates = evidenceItems.some((item) => {
+    return item.metadata?.timingTriggerCandidates?.length > 0;
+  });
+
+  return hasTimingTriggerCandidates
+    ? [INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY]
+    : [];
 }
 
 function getPalaceRoleInterpretationRefs(evidenceItems) {

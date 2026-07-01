@@ -19,6 +19,7 @@ export const REFERENCE_IDS = {
   ANNUAL_FOUR_TRANSFORMATIONS: "rule.annual-four-transformations",
   MAJOR_PERIODS: "rule.major-periods",
   CURRENT_MAJOR_PERIOD: "rule.current-major-period",
+  TIMING_TRIGGER_CANDIDATE: "framework.timing-trigger-candidate",
   CURRENT_STAGE: "framework.current-stage",
   PALACE_ROLE: "framework.palace-role",
   LIFE_TRIAD: "framework.life-triad",
@@ -123,7 +124,14 @@ const REFERENCES = [
     title: "当前阶段分析框架",
     type: "analysis-framework",
     sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
-    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架和流年骨架放在同一节中合参；当前仍不含事件触发规则。"
+    note: "把当前大限定位、阶段落宫星曜、生年四化、大限骨架、大限四化骨架、流年骨架和安全触发观察点放在同一节中合参；当前仍不含流月和组合验证。"
+  },
+  {
+    id: REFERENCE_IDS.TIMING_TRIGGER_CANDIDATE,
+    title: "安全事件触发候选框架",
+    type: "analysis-framework",
+    sourceRefs: [SOURCE_IDS.LOCAL_ANALYSIS_FRAMEWORKS],
+    note: "把当前大限、流年太岁、生年四化、大限四化和流年四化的重叠宫位标记为观察点；只用于提示待验证主题，不输出具体事件或应期。"
   },
   {
     id: REFERENCE_IDS.PALACE_ROLE,

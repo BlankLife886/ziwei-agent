@@ -248,6 +248,10 @@ function composeCurrentStageParagraph(section) {
     section,
     INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY
   );
+  const timingTriggerText = getInterpretationText(
+    section,
+    INTERPRETATION_IDS.TIMING_TRIGGER_CANDIDATE_ONLY
+  );
   const starRoleSynthesis = composeStarRoleSynthesis(section);
 
   return `【草稿判断】${joinJudgmentParts([
@@ -256,6 +260,8 @@ function composeCurrentStageParagraph(section) {
     majorPeriodTransformationText,
     annualPeriodText,
     annualTransformationText,
+    composeTimingTriggerCandidateSynthesis(section),
+    timingTriggerText,
     starRoleSynthesis
   ])}`;
 }
@@ -351,6 +357,25 @@ function composeStarRoleSynthesis(section) {
   );
 
   return `${groups.join("；")}。这些线索仍属于本命盘静态结构，需再结合生年四化、限运和更多组合验证。`;
+}
+
+function composeTimingTriggerCandidateSynthesis(section) {
+  const evidenceItem = section.evidenceItems?.find((item) => {
+    return item.metadata?.timingTriggerCandidates?.length > 0;
+  });
+  const candidates = evidenceItem?.metadata?.timingTriggerCandidates ?? [];
+
+  if (candidates.length === 0) {
+    return "";
+  }
+
+  const candidateText = candidates.map((candidate) => {
+    const signalText = candidate.signals.map((signal) => signal.text).join("、");
+
+    return `${candidate.palaceName}为${candidate.priorityLabel}观察点（${signalText}）`;
+  }).join("；");
+
+  return `安全触发候选只列观察点：${candidateText}`;
 }
 
 function groupStarRoleInterpretations(interpretations, palaceOrder = []) {

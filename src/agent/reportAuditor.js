@@ -67,6 +67,7 @@ export function auditReportOutput(reportPlan, reportDraft) {
 
   auditDraftSections(reportDraft, sectionsById, issues);
   auditRiskLanguage(reportDraft, warnings);
+  auditTimingTriggerFraming(reportDraft, warnings);
 
   return buildAuditResult(issues, warnings);
 }
@@ -187,6 +188,26 @@ function auditRiskLanguage(reportDraft, warnings) {
         paragraphKind: item.paragraphKind,
         text: item.text
       });
+    });
+  });
+}
+
+function auditTimingTriggerFraming(reportDraft, warnings) {
+  collectDraftTexts(reportDraft).forEach((item) => {
+    if (!/触发候选|触发观察点|安全触发/u.test(item.text)) {
+      return;
+    }
+
+    if (/观察点|待验证|不推|不能|不是事件预测/u.test(item.text)) {
+      return;
+    }
+
+    warnings.push({
+      id: "risk-language.timing-trigger-framing",
+      message: "触发候选必须保持观察点或待验证表述，不能写成事件预测。",
+      sectionId: item.sectionId,
+      paragraphKind: item.paragraphKind,
+      text: item.text
     });
   });
 }

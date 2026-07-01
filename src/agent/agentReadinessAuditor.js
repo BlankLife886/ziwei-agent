@@ -88,6 +88,22 @@ const READINESS_ITEMS = [
       const hasAnnualTransformations = Boolean(
         pipelineResult.buildResult.chart?.annualPeriod?.transformations
       );
+      const hasTimingTriggerCandidates = Boolean(
+        pipelineResult.agentResult.allFocusAreas?.some((area) => {
+          return area.evidenceItems?.some((item) => {
+            return item.metadata?.timingTriggerCandidates?.length > 0;
+          });
+        })
+      );
+
+      if (
+        hasCurrentMajorPeriod &&
+        hasMajorPeriodTransformations &&
+        hasAnnualTransformations &&
+        hasTimingTriggerCandidates
+      ) {
+        return partial("已支持当前大限定位、大限四化骨架、流年四化骨架和安全事件触发候选，但尚未接入流月和组合验证。", 0.82);
+      }
 
       if (hasCurrentMajorPeriod && hasMajorPeriodTransformations && hasAnnualTransformations) {
         return partial("已支持当前大限定位、大限四化骨架和流年四化骨架，但尚未接入事件触发规则、流月和组合验证。", 0.7);

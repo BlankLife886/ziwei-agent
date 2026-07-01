@@ -202,6 +202,45 @@ test("report section catalog keeps unknown sections conservative", () => {
   assert.ok(buildSectionWritingPrompt("unknown-section", queryContext).includes("明确未知项"));
 });
 
+test("current stage section includes timing trigger boundary only when candidates exist", () => {
+  const evidenceItems = [
+    {
+      id: "current-stage.current-major-period",
+      text: "当前阶段定位：测试",
+      metadata: {}
+    },
+    {
+      id: "current-stage.timing-trigger-candidates",
+      text: "安全触发观察点：测试",
+      metadata: {
+        timingTriggerCandidates: [
+          {
+            palaceName: "子女宫"
+          }
+        ]
+      }
+    }
+  ];
+
+  assert.ok(
+    buildSectionWritingPrompt("current-stage", {
+      hasIntent: true,
+      topics: ["运势"],
+      primaryPalaceNames: []
+    }).includes("安全触发观察点")
+  );
+  assert.ok(
+    buildSectionInterpretationRefs("current-stage", evidenceItems).includes(
+      "interpretation.timing-trigger.candidate-only"
+    )
+  );
+  assert.ok(
+    !buildSectionInterpretationRefs("current-stage", [evidenceItems[0]]).includes(
+      "interpretation.timing-trigger.candidate-only"
+    )
+  );
+});
+
 function createPalaceEvidence(palaceName, starGroups) {
   return {
     id: `test.${palaceName}`,
