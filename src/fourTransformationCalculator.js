@@ -75,10 +75,82 @@ export function applyBirthYearFourTransformations(chart) {
   };
 }
 
+export function calculateMajorPeriodFourTransformations({ palaceStem }) {
+  assertValidYearStem(palaceStem);
+  return BIRTH_YEAR_FOUR_TRANSFORMATIONS_BY_STEM[palaceStem];
+}
+
+export function applyMajorPeriodFourTransformations(chart) {
+  if (!chart.majorPeriods || chart.majorPeriods.length === 0) {
+    return chart;
+  }
+
+  const majorPeriodTransformations = chart.majorPeriods.map((period) => {
+    const transformations = calculateMajorPeriodFourTransformations({
+      palaceStem: period.palaceStem
+    });
+    const transformationEntries = Object.entries(transformations).map(([name, star]) => {
+      return {
+        name,
+        star,
+        source: "major-period-palace-stem",
+        majorPeriodNumber: period.number,
+        majorPeriodPalaceName: period.palaceName,
+        majorPeriodBranch: period.branch,
+        majorPeriodStem: period.palaceStem,
+        startAge: period.startAge,
+        endAge: period.endAge,
+        targetPalaceName: findPalaceNameByStar(chart.palaces, star)
+      };
+    });
+
+    return {
+      majorPeriodNumber: period.number,
+      palaceName: period.palaceName,
+      branch: period.branch,
+      palaceStem: period.palaceStem,
+      startAge: period.startAge,
+      endAge: period.endAge,
+      transformations: transformationEntries
+    };
+  });
+
+  const currentMajorPeriodTransformations = chart.currentMajorPeriod?.period
+    ? majorPeriodTransformations.find((item) => {
+        return item.majorPeriodNumber === chart.currentMajorPeriod.period.number;
+      }) ?? null
+    : null;
+
+  return {
+    ...chart,
+    majorPeriodTransformations,
+    currentMajorPeriod: chart.currentMajorPeriod
+      ? {
+          ...chart.currentMajorPeriod,
+          transformations: currentMajorPeriodTransformations
+        }
+      : chart.currentMajorPeriod,
+    starAnchors: {
+      ...chart.starAnchors,
+      majorPeriodTransformations
+    },
+    calculationNotes: [
+      ...chart.calculationNotes,
+      `已按各大限宫干计算大限四化骨架，当前仅作为阶段结构证据。`
+    ]
+  };
+}
+
 function palaceHasStar(palace, starName) {
   return STAR_GROUP_KEYS.some((key) => {
     return palace[key].includes(starName);
   });
+}
+
+function findPalaceNameByStar(palaces, starName) {
+  const palace = palaces.find((item) => palaceHasStar(item, starName));
+
+  return palace?.name ?? null;
 }
 
 function addTransformationToPalace(palace, transformation) {

@@ -5,7 +5,10 @@ import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
 test("auditAgentReadiness exposes progress and remaining blockers", () => {
-  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()));
+  const pipelineResult = runZiweiPipeline(buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  }));
   const audit = auditAgentReadiness(pipelineResult);
 
   assert.equal(audit.status, "in_progress");
@@ -16,8 +19,9 @@ test("auditAgentReadiness exposes progress and remaining blockers", () => {
       return item.id === "knowledge-coverage" && item.status === "partial";
     })
   );
+  assert.ok(audit.percent >= 72);
   assert.ok(
-    audit.blockers.some((blocker) => blocker.includes("大限四化"))
+    audit.blockers.some((blocker) => blocker.includes("流年盘"))
   );
   assert.ok(audit.nextPriorities.length > 0);
 });

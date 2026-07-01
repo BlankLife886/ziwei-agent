@@ -14,7 +14,7 @@ const RISK_RULES = [
   {
     id: "event-timing",
     pattern: /具体年份|具体事件|今年具体事件|应期/u,
-    allowedContextPattern: /不能|不得|不推|不宜|尚未|需要等待|边界/u,
+    allowedContextPattern: /不能|不得|不推|不宜|不适合|尚未|需等待|需要等待|仍需等待|边界/u,
     message: "出现时间或事件断语，需要确认是否只是能力边界。"
   },
   {

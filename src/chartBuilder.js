@@ -5,7 +5,10 @@ import {
 import { resolveLunarProfile } from "./calendarConverter.js";
 import { createChartSkeleton } from "./chart.js";
 import { applyFiveElementClass } from "./fiveElementClassCalculator.js";
-import { applyBirthYearFourTransformations } from "./fourTransformationCalculator.js";
+import {
+  applyBirthYearFourTransformations,
+  applyMajorPeriodFourTransformations
+} from "./fourTransformationCalculator.js";
 import { validateBirthProfile } from "./intake.js";
 import {
   applyCurrentMajorPeriod,
@@ -126,6 +129,12 @@ function buildChartFromResolvedProfile({ profile, chineseHour }) {
 
   if (profile.lunar_year_stem) {
     chart = applyBirthYearFourTransformations(chart);
+  }
+
+  // 大限四化需要先有大限宫干，也需要星曜已经安入宫位后才能标记目标宫。
+  // 因此它放在排盘流程末尾，只补充结构证据，不在计算层解释吉凶。
+  if (chart.majorPeriods.length > 0) {
+    chart = applyMajorPeriodFourTransformations(chart);
   }
 
   return chart;

@@ -2,9 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   applyBirthYearFourTransformations,
-  calculateBirthYearFourTransformations
+  applyMajorPeriodFourTransformations,
+  calculateBirthYearFourTransformations,
+  calculateMajorPeriodFourTransformations
 } from "../src/fourTransformationCalculator.js";
 import { createChartSkeleton } from "../src/chart.js";
+import { applyFiveElementClass } from "../src/fiveElementClassCalculator.js";
+import {
+  applyCurrentMajorPeriod,
+  applyMajorPeriods
+} from "../src/majorPeriodCalculator.js";
 import { applyLifeAndBodyPalaces } from "../src/palaceCalculator.js";
 import {
   applyTianFuStarGroup,
@@ -38,13 +45,9 @@ test("birth year four transformations are attached to palaces containing target 
     lunarMonth: 4,
     chineseHour: "子时"
   });
-  chart = {
-    ...chart,
-    fiveElementClass: {
-      name: "金四局",
-      number: 4
-    }
-  };
+  chart = applyFiveElementClass(chart, {
+    yearStem: "庚"
+  });
   chart = applyZiWeiStar(chart);
   chart = applyZiWeiStarGroup(chart);
   chart = applyTianFuStarGroup(chart);
@@ -88,6 +91,119 @@ test("birth year four transformations are attached to palaces containing target 
     }
   ]);
 });
+
+test("major period four transformations reuse the palace stem transformation table", () => {
+  assert.deepEqual(calculateMajorPeriodFourTransformations({ palaceStem: "戊" }), {
+    化禄: "贪狼",
+    化权: "太阴",
+    化科: "右弼",
+    化忌: "天机"
+  });
+});
+
+test("major period four transformations are attached as structural timing evidence", () => {
+  let chart = createChartWithStarsAndMajorPeriods();
+
+  chart = applyMajorPeriodFourTransformations(chart);
+
+  assert.equal(chart.majorPeriodTransformations.length, 12);
+  assert.equal(chart.starAnchors.majorPeriodTransformations.length, 12);
+  assert.equal(chart.currentMajorPeriod.transformations.majorPeriodNumber, 4);
+  assert.equal(chart.currentMajorPeriod.transformations.palaceStem, "戊");
+  assert.deepEqual(chart.currentMajorPeriod.transformations.transformations, [
+    {
+      name: "化禄",
+      star: "贪狼",
+      source: "major-period-palace-stem",
+      majorPeriodNumber: 4,
+      majorPeriodPalaceName: "子女宫",
+      majorPeriodBranch: "寅",
+      majorPeriodStem: "戊",
+      startAge: 34,
+      endAge: 43,
+      targetPalaceName: "迁移宫"
+    },
+    {
+      name: "化权",
+      star: "太阴",
+      source: "major-period-palace-stem",
+      majorPeriodNumber: 4,
+      majorPeriodPalaceName: "子女宫",
+      majorPeriodBranch: "寅",
+      majorPeriodStem: "戊",
+      startAge: 34,
+      endAge: 43,
+      targetPalaceName: "仆役宫"
+    },
+    {
+      name: "化科",
+      star: "右弼",
+      source: "major-period-palace-stem",
+      majorPeriodNumber: 4,
+      majorPeriodPalaceName: "子女宫",
+      majorPeriodBranch: "寅",
+      majorPeriodStem: "戊",
+      startAge: 34,
+      endAge: 43,
+      targetPalaceName: "福德宫"
+    },
+    {
+      name: "化忌",
+      star: "天机",
+      source: "major-period-palace-stem",
+      majorPeriodNumber: 4,
+      majorPeriodPalaceName: "子女宫",
+      majorPeriodBranch: "寅",
+      majorPeriodStem: "戊",
+      startAge: 34,
+      endAge: 43,
+      targetPalaceName: "父母宫"
+    }
+  ]);
+  assert.ok(
+    chart.calculationNotes.some((note) => note.includes("大限四化骨架"))
+  );
+});
+
+function createChartWithStarsAndMajorPeriods() {
+  let chart = createChartSkeleton({
+    ...createResolvedSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+
+  chart = applyLifeAndBodyPalaces(chart, {
+    lunarMonth: 4,
+    chineseHour: "子时"
+  });
+  chart = applyFiveElementClass(chart, {
+    yearStem: "庚"
+  });
+  chart = applyZiWeiStar(chart);
+  chart = applyZiWeiStarGroup(chart);
+  chart = applyTianFuStarGroup(chart);
+  chart = applyMajorPeriods(chart);
+  chart = applyCurrentMajorPeriod(chart, {
+    analysisDate: "2026-06-30"
+  });
+
+  // 当前大限戊干化科落右弼。这里手动加入右弼，保持本测试聚焦四化挂载，
+  // 不把月系辅星计算也拉进本文件的断言范围。
+  chart = {
+    ...chart,
+    palaces: chart.palaces.map((palace) => {
+      if (palace.name !== "福德宫") {
+        return palace;
+      }
+
+      return {
+        ...palace,
+        auxiliaryStars: [...palace.auxiliaryStars, "右弼"]
+      };
+    })
+  };
+
+  return chart;
+}
 
 function createResolvedSampleProfile() {
   return {

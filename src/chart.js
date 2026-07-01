@@ -119,6 +119,7 @@ export function createChartSkeleton(profile) {
       tianChu: null,
       jieKong: null,
       birthYearTransformations: null,
+      majorPeriodTransformations: null,
       fireBell: null
     },
 
@@ -127,9 +128,11 @@ export function createChartSkeleton(profile) {
     palaces: PALACE_NAMES.map((name) => createEmptyPalace(name)),
 
     // majorPeriods 用来放十二个大限年龄段。
+    // majorPeriodTransformations 用来放每个大限按宫干查出的四化骨架。
     // currentMajorPeriod 用来放“分析日期”对应的当前大限定位。
     // annualPeriod 用来放当前流年。
     majorPeriods: [],
+    majorPeriodTransformations: [],
     currentMajorPeriod: null,
     annualPeriod: null,
 

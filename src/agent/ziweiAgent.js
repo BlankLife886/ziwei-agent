@@ -167,6 +167,15 @@ function buildCoreEvidenceItems(chart, palaceByName) {
     )
   ];
 
+  if (chart.majorPeriodTransformations?.length > 0) {
+    items.push(createEvidenceItem(
+      "core.major-period-transformations",
+      `大限四化骨架：${formatMajorPeriodTransformationCount(chart)}`,
+      "chart.majorPeriodTransformations",
+      [REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS, REFERENCE_IDS.MAJOR_PERIODS]
+    ));
+  }
+
   if (chart.currentMajorPeriod) {
     items.push(createEvidenceItem(
       "core.current-major-period",
@@ -280,9 +289,12 @@ function buildFocusAreas(chart, palaceByName) {
 }
 
 function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFields = []) {
+  const hasMajorPeriodTransformations = Boolean(
+    chart.currentMajorPeriod?.transformations
+  );
   const dynamicScope = chart.currentMajorPeriod
-    ? "生年四化、大限年龄段与当前大限定位"
-    : "生年四化与大限年龄段";
+    ? `生年四化、大限年龄段、当前大限定位${hasMajorPeriodTransformations ? "与大限四化骨架" : ""}`
+    : `生年四化、大限年龄段${chart.majorPeriodTransformations?.length > 0 ? "与大限四化骨架" : ""}`;
   const queryScope = queryIntent.hasIntent
     ? [`本轮已按查询意图收敛章节：${queryIntent.topics.join("、")}。`]
     : [];
@@ -304,7 +316,7 @@ function buildLimitations(chart, queryIntent, reportDomains = [], missingTopicFi
     ...reportGoalScope,
     ...plannedDomainScope,
     ...missingTopicScope,
-    `已接入${dynamicScope}，但尚未接入大限四化、流年，因此不能推具体年份事件。`,
+    `已接入${dynamicScope}，但尚未接入流年盘和事件触发规则，因此不能推具体年份事件。`,
     "尚未接入知识库检索与引用，因此解释应以已实现规则为边界。"
   ];
 }
@@ -455,6 +467,15 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
     items.splice(2, 0, createPalaceEvidenceItem("current-stage", currentPalace));
   }
 
+  if (chart.currentMajorPeriod?.transformations) {
+    items.push(createEvidenceItem(
+      "current-stage.major-period-transformations",
+      `当前大限四化骨架：${formatCurrentMajorPeriodTransformations(chart)}`,
+      "chart.currentMajorPeriod.transformations",
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS]
+    ));
+  }
+
   return items;
 }
 
@@ -592,6 +613,35 @@ function formatMajorPeriodSummary(chart) {
   });
 
   return `${direction.genderLabel}${direction.directionLabel}；${periods.join("；")}`;
+}
+
+function formatMajorPeriodTransformationCount(chart) {
+  const count = chart.majorPeriodTransformations?.length ?? 0;
+
+  if (count === 0) {
+    return "未计算";
+  }
+
+  return `已按${count}个大限宫干建立四化骨架`;
+}
+
+function formatCurrentMajorPeriodTransformations(chart) {
+  const currentTransformations = chart.currentMajorPeriod?.transformations;
+
+  if (!currentTransformations) {
+    return "未计算";
+  }
+
+  const periodText = `${currentTransformations.startAge}-${currentTransformations.endAge}岁${currentTransformations.palaceName}${currentTransformations.branch}`;
+  const transformationText = currentTransformations.transformations.map((item) => {
+    const targetText = item.targetPalaceName
+      ? `在本命${item.targetPalaceName}`
+      : "未落入已安星曜宫位";
+
+    return `${item.star}${item.name}${targetText}`;
+  }).join("；");
+
+  return `${periodText}，${currentTransformations.palaceStem}干：${transformationText}`;
 }
 
 function formatCurrentMajorPeriodSummary(chart) {

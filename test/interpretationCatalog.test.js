@@ -45,7 +45,7 @@ test("findInterpretations includes current major period boundary item", () => {
   ]);
 
   assert.equal(interpretations[0].topic, "current-major-period");
-  assert.ok(interpretations[0].text.includes("不能代表该阶段的具体吉凶"));
+  assert.ok(interpretations[0].text.includes("不能直接代表具体年份事件"));
 });
 
 test("findStarRoleInterpretationRefs maps palace stars to controlled items", () => {

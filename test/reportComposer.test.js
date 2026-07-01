@@ -145,7 +145,7 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections
       .find((section) => section.id === "birth-year-transformations")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
-      .text.includes("只能写本命盘结构")
+      .text.includes("本命结构")
   );
   assert.ok(
     reportDraft.sections
@@ -157,7 +157,7 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections
       .find((section) => section.id === "major-periods")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
-      .text.includes("不能据此断具体年份吉凶")
+      .text.includes("具体年份与事件仍需等待流年盘")
   );
   assert.ok(reportDraft.closing.some((line) => line.includes("已经生成的证据")));
 });
@@ -258,7 +258,7 @@ test("createReportDraft writes current major period as locator-only", () => {
 
   assert.ok(paragraph.text.includes("2026-06-30按虚岁37岁定位"));
   assert.ok(paragraph.text.includes("34-43岁子女宫寅"));
-  assert.ok(paragraph.text.includes("还不能代表该阶段的具体吉凶"));
+  assert.ok(paragraph.text.includes("不能直接代表具体年份事件"));
   assert.deepEqual(paragraph.interpretationRefs, [
     "interpretation.current-major-period.locator-only"
   ]);
@@ -283,9 +283,13 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("当前阶段定位：2026-06-30按虚岁37岁定位"));
   assert.ok(paragraph.text.includes("阶段大限宫位：34-43岁子女宫寅"));
   assert.ok(paragraph.text.includes("生年四化参照"));
+  assert.ok(paragraph.text.includes("当前大限四化骨架"));
+  assert.ok(paragraph.text.includes("贪狼化禄在本命迁移宫"));
+  assert.ok(paragraph.text.includes("阶段的禄、权、科、忌牵引骨架"));
   assert.ok(paragraph.text.includes("不能推今年具体事件"));
   assert.deepEqual(paragraph.interpretationRefs, [
-    "interpretation.current-stage.static-only"
+    "interpretation.current-stage.static-only",
+    "interpretation.four-transformations.major-period-stage-only"
   ]);
 });
 

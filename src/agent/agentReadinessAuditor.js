@@ -82,6 +82,13 @@ const READINESS_ITEMS = [
     weight: 12,
     evaluate: ({ pipelineResult }) => {
       const hasCurrentMajorPeriod = Boolean(pipelineResult.buildResult.chart?.currentMajorPeriod);
+      const hasMajorPeriodTransformations = Boolean(
+        pipelineResult.buildResult.chart?.currentMajorPeriod?.transformations
+      );
+
+      if (hasCurrentMajorPeriod && hasMajorPeriodTransformations) {
+        return partial("已支持当前大限定位和大限四化骨架，但尚未接入流年盘和事件触发规则。", 0.55);
+      }
 
       if (hasCurrentMajorPeriod) {
         return partial("已支持当前大限定位，但尚未接入大限四化、流年盘和事件触发规则。", 0.35);
