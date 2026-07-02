@@ -12,6 +12,7 @@ npm run validate:knowledge
 node --env-file=.env src/validateRuntimeConfig.js
 node --env-file=.env src/validateDeployment.js
 npm run validate:release
+npm run validate:release:summary
 ```
 
 门禁含义：
@@ -21,6 +22,7 @@ npm run validate:release
 - `validateRuntimeConfig.js`：验证端口、请求体上限、限流、观测模式和生产鉴权配置。
 - `validateDeployment.js`：复用运行时门禁，审计知识库，并临时启动同一个 HTTP server 请求 `/`、`/health`、`/v1/reports`。
 - `validate:release`：串联全量测试、知识库、运行时、部署、`.env.example` 部署校验和 `git diff --check`；GitHub Actions 在 push/PR 上执行同一条 release gate，并额外跑 Compose 配置检查和 Docker build。
+- `validate:release:summary`：运行同一条 release gate，并写出 `.runtime/release-summary.json`，供 CI artifact、部署平台或人工发布审计读取。也可以直接执行 `node src/validateRelease.js --summary <path>` 或设置 `ZIWEI_RELEASE_SUMMARY_PATH=<path>`。
 
 任何一项返回非零退出码，都不应继续发布。
 
@@ -257,6 +259,7 @@ curl http://localhost:3000/ready
 npm run smoke:api
 node --env-file=.env src/validateDeployment.js
 npm run validate:release
+npm run validate:release:summary
 ```
 
 同时人工确认：

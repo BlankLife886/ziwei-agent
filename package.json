@@ -9,6 +9,7 @@
     "test": "node --test",
     "smoke:api": "node src/smokeApi.js",
     "validate:release": "node src/validateRelease.js",
+    "validate:release:summary": "node src/validateRelease.js --summary .runtime/release-summary.json",
     "validate:deploy": "node src/validateDeployment.js",
     "validate:runtime": "node src/validateRuntimeConfig.js",
     "validate:knowledge": "node src/validateKnowledgeStore.js data/knowledge-snippets.example.json"
