@@ -61,6 +61,12 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_QUAN_STRUCTURE: "interpretation.four-transformations.quan-structure",
   FOUR_TRANSFORMATION_KE_STRUCTURE: "interpretation.four-transformations.ke-structure",
   FOUR_TRANSFORMATION_JI_STRUCTURE: "interpretation.four-transformations.ji-structure",
+  FOUR_TRANSFORMATION_ON_LIFE_PALACE: "interpretation.four-transformations.on-life-palace",
+  FOUR_TRANSFORMATION_ON_SPOUSE_PALACE: "interpretation.four-transformations.on-spouse-palace",
+  FOUR_TRANSFORMATION_ON_WEALTH_PALACE: "interpretation.four-transformations.on-wealth-palace",
+  FOUR_TRANSFORMATION_ON_CAREER_PALACE: "interpretation.four-transformations.on-career-palace",
+  FOUR_TRANSFORMATION_ON_TRAVEL_PALACE: "interpretation.four-transformations.on-travel-palace",
+  FOUR_TRANSFORMATION_ON_WELLBEING_PALACE: "interpretation.four-transformations.on-wellbeing-palace",
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY: "interpretation.four-transformations.major-period-stage-only",
   ANNUAL_PERIOD_STRUCTURE_ONLY: "interpretation.annual-period.structure-only",
   ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY: "interpretation.four-transformations.annual-structure-only",
@@ -272,6 +278,33 @@ const FOUR_TRANSFORMATION_TYPE_RULES = [
   {
     transformationName: "化忌",
     interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE
+  }
+];
+
+const FOUR_TRANSFORMATION_TARGET_PALACE_RULES = [
+  {
+    palaceName: "命宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE
+  },
+  {
+    palaceName: "夫妻宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SPOUSE_PALACE
+  },
+  {
+    palaceName: "财帛宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WEALTH_PALACE
+  },
+  {
+    palaceName: "官禄宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CAREER_PALACE
+  },
+  {
+    palaceName: "迁移宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_TRAVEL_PALACE
+  },
+  {
+    palaceName: "福德宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE
   }
 ];
 
@@ -831,6 +864,66 @@ const INTERPRETATIONS = [
     text: "化忌在本系统中先作为牵挂、约束、摩擦、滞留或需要修正的结构信号；它不能单独写成灾祸、失败或不可改变的坏结果。"
   },
   {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
+    title: "四化落命宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "命宫",
+    synthesis: "主体气质被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落命宫时，只能说明主体气质、自我选择或命盘中心议题被相应四化牵引；仍需合看星曜、三方四正和运限，不能写成人生命定结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SPOUSE_PALACE,
+    title: "四化落夫妻宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "夫妻宫",
+    synthesis: "关系互动被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落夫妻宫时，只能说明关系互动、合作牵动或伴侣议题被相应四化标记；它不是婚姻结果判断，不能写成结婚、分合或伴侣身份结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WEALTH_PALACE,
+    title: "四化落财帛宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "财帛宫",
+    synthesis: "资源经营被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落财帛宫时，只能说明资源经营、取用方式或现实资源议题被相应四化标记；它不是财富结果判断，不能写成得财、破财、金额或投资结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CAREER_PALACE,
+    title: "四化落官禄宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "官禄宫",
+    synthesis: "职责路径被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落官禄宫时，只能说明职责承担、职业路径或社会角色议题被相应四化标记；它不是事业结果判断，不能写成升迁、职位高低或确定职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_TRAVEL_PALACE,
+    title: "四化落迁移宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "迁移宫",
+    synthesis: "外部环境被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落迁移宫时，只能说明外部环境、出行变动或对外表现议题被相应四化标记；它不能直接写成外出事件、迁动应期或外部成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE,
+    title: "四化落福德宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "福德宫",
+    synthesis: "内在感受被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落福德宫时，只能说明内在感受、精神满足或承压恢复议题被相应四化标记；它不能直接写成心理定论、福分高低或吉凶结果。"
+  },
+  {
     id: INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,
     title: "大限四化的阶段解释边界",
     topic: "four-transformations",
@@ -1024,6 +1117,21 @@ export function findFourTransformationTypeInterpretationRefs(transformations = [
   }));
   const refs = FOUR_TRANSFORMATION_TYPE_RULES.flatMap((rule) => {
     if (!transformationNames.has(rule.transformationName)) {
+      return [];
+    }
+
+    return [rule.interpretationId];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationTargetPalaceInterpretationRefs(transformations = []) {
+  const palaceNames = new Set(transformations.flatMap((transformation) => {
+    return transformation?.targetPalaceName ? [transformation.targetPalaceName] : [];
+  }));
+  const refs = FOUR_TRANSFORMATION_TARGET_PALACE_RULES.flatMap((rule) => {
+    if (!palaceNames.has(rule.palaceName)) {
       return [];
     }
 

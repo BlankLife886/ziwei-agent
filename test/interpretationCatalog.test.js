@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   INTERPRETATION_IDS,
+  findFourTransformationTargetPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findInterpretations,
   findStarRoleInterpretationRefs
@@ -107,6 +108,37 @@ test("findFourTransformationTypeInterpretationRefs maps transformation names to 
   assert.ok(interpretations[1].text.includes("不能单独写成掌权"));
   assert.ok(interpretations[2].text.includes("不能单独写成成名"));
   assert.ok(interpretations[3].text.includes("不能单独写成灾祸"));
+});
+
+test("findFourTransformationTargetPalaceInterpretationRefs maps supported target palaces", () => {
+  const interpretationRefs = findFourTransformationTargetPalaceInterpretationRefs([
+    { name: "化禄", star: "紫微", targetPalaceName: "命宫" },
+    { name: "化权", star: "武曲", targetPalaceName: "夫妻宫" },
+    { name: "化科", star: "太阴", targetPalaceName: "财帛宫" },
+    { name: "化忌", star: "天机", targetPalaceName: "官禄宫" },
+    { name: "化禄", star: "贪狼", targetPalaceName: "迁移宫" },
+    { name: "化科", star: "天梁", targetPalaceName: "福德宫" },
+    { name: "化忌", star: "天同", targetPalaceName: "子女宫" }
+  ]);
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SPOUSE_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WEALTH_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CAREER_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_TRAVEL_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.palaceName),
+    ["命宫", "夫妻宫", "财帛宫", "官禄宫", "迁移宫", "福德宫"]
+  );
+  assert.ok(interpretations[1].text.includes("不是婚姻结果判断"));
+  assert.ok(interpretations[2].text.includes("不是财富结果判断"));
+  assert.ok(interpretations[3].text.includes("不是事业结果判断"));
 });
 
 test("findStarRoleInterpretationRefs maps life palace stars for personality analysis", () => {

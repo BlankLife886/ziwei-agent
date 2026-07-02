@@ -290,10 +290,10 @@ test("transformation sections include four transformation type boundaries from m
       text: "生年四化：太阳化禄在兄弟宫辰；武曲化权在夫妻宫卯；太阴化科在财帛宫丑；天同化忌在子女宫寅",
       metadata: {
         transformations: [
-          { name: "化禄", star: "太阳" },
-          { name: "化权", star: "武曲" },
-          { name: "化科", star: "太阴" },
-          { name: "化忌", star: "天同" }
+          { name: "化禄", star: "太阳", targetPalaceName: "兄弟宫" },
+          { name: "化权", star: "武曲", targetPalaceName: "夫妻宫" },
+          { name: "化科", star: "太阴", targetPalaceName: "财帛宫" },
+          { name: "化忌", star: "天同", targetPalaceName: "子女宫" }
         ]
       }
     }
@@ -315,12 +315,14 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.lu-structure",
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
-    "interpretation.four-transformations.ji-structure"
+    "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.on-spouse-palace",
+    "interpretation.four-transformations.on-wealth-palace"
   ]);
   assert.deepEqual(buildSectionInterpretationRefs(
     "current-stage",
     currentStageEvidenceItems
-  ).slice(0, 8), [
+  ).slice(0, 10), [
     "interpretation.current-stage.static-only",
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
@@ -328,7 +330,9 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.lu-structure",
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
-    "interpretation.four-transformations.ji-structure"
+    "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.on-spouse-palace",
+    "interpretation.four-transformations.on-wealth-palace"
   ]);
 });
 

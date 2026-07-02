@@ -1,5 +1,6 @@
 import {
   INTERPRETATION_IDS,
+  findFourTransformationTargetPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findStarRoleInterpretationRefs
 } from "./interpretationCatalog.js";
@@ -281,6 +282,7 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY,
     INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY,
     ...getFourTransformationTypeInterpretationRefs(evidenceItems),
+    ...getFourTransformationTargetPalaceInterpretationRefs(evidenceItems),
     ...getMonthlyPeriodInterpretationRefs(evidenceItems),
     ...getTimingTriggerInterpretationRefs(evidenceItems),
     ...getTimingCombinationInterpretationRefs(evidenceItems),
@@ -294,7 +296,8 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
 function buildBirthYearTransformationInterpretationRefs(evidenceItems) {
   return [
     INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY,
-    ...getFourTransformationTypeInterpretationRefs(evidenceItems)
+    ...getFourTransformationTypeInterpretationRefs(evidenceItems),
+    ...getFourTransformationTargetPalaceInterpretationRefs(evidenceItems)
   ];
 }
 
@@ -304,6 +307,14 @@ function getFourTransformationTypeInterpretationRefs(evidenceItems) {
   });
 
   return findFourTransformationTypeInterpretationRefs(transformations);
+}
+
+function getFourTransformationTargetPalaceInterpretationRefs(evidenceItems) {
+  const transformations = evidenceItems.flatMap((item) => {
+    return item.metadata?.transformations ?? [];
+  });
+
+  return findFourTransformationTargetPalaceInterpretationRefs(transformations);
 }
 
 function getMonthlyPeriodInterpretationRefs(evidenceItems) {

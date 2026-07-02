@@ -370,7 +370,8 @@ function composeBirthYearTransformationsParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
     section.evidence[0],
     boundaryText,
-    ...getFourTransformationTypeInterpretationTexts(section)
+    ...getFourTransformationTypeInterpretationTexts(section),
+    ...getFourTransformationTargetPalaceInterpretationTexts(section)
   ])}`;
 }
 
@@ -444,6 +445,7 @@ function composeCurrentStageParagraph(section) {
     annualPeriodText,
     annualTransformationText,
     ...getFourTransformationTypeInterpretationTexts(section),
+    ...getFourTransformationTargetPalaceInterpretationTexts(section),
     monthlyPeriodText,
     composeTimingTriggerCandidateSynthesis(section),
     timingTriggerText,
@@ -469,6 +471,20 @@ function getFourTransformationTypeInterpretationTexts(section) {
     }
 
     return [getInterpretationText(section, interpretationId)];
+  });
+}
+
+function getFourTransformationTargetPalaceInterpretationTexts(section) {
+  return (section.interpretations ?? []).flatMap((interpretation) => {
+    if (interpretation.topic !== "four-transformation-palace") {
+      return [];
+    }
+
+    if (!section.interpretationRefs?.includes(interpretation.id)) {
+      return [];
+    }
+
+    return [interpretation.text];
   });
 }
 

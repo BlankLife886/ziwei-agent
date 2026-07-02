@@ -239,7 +239,7 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "birth-year-transformations")
       .referenceRefs,
-    ["rule.birth-year-four-transformations"]
+    ["rule.birth-year-four-transformations", "framework.palace-role"]
   );
   assert.deepEqual(
     reportPlan.sections
@@ -250,7 +250,8 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "interpretation.four-transformations.lu-structure",
       "interpretation.four-transformations.quan-structure",
       "interpretation.four-transformations.ke-structure",
-      "interpretation.four-transformations.ji-structure"
+      "interpretation.four-transformations.ji-structure",
+      "interpretation.four-transformations.on-spouse-palace"
     ]
   );
   assert.ok(
@@ -379,7 +380,8 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "framework.timing-trigger-candidate",
     "framework.timing-combination-verification",
     "framework.timing-combination-theme",
-    "framework.timing-cross-layer-analysis"
+    "framework.timing-cross-layer-analysis",
+    "framework.palace-role"
   ]);
   assert.deepEqual(section.interpretationRefs, [
     "interpretation.current-stage.static-only",
@@ -390,6 +392,9 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.on-spouse-palace",
+    "interpretation.four-transformations.on-travel-palace",
+    "interpretation.four-transformations.on-wellbeing-palace",
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",
