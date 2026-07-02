@@ -33,6 +33,34 @@ test("handleZiweiApiRequest requires bearer token when configured", async () => 
   assert.equal(response.statusCode, 401);
   assert.equal(response.body.status, "unauthorized");
   assert.equal(response.headers["www-authenticate"], "Bearer");
+  assert.equal(response.body.authorization.status, "unauthorized");
+});
+
+test("handleZiweiApiRequest rejects scoped credentials without report access", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {
+      authorization: "Bearer read-token"
+    },
+    body: JSON.stringify({
+      profile: createSampleProfile()
+    })
+  }, {
+    apiCredentials: [
+      {
+        id: "read-only-client",
+        token: "read-token",
+        scopes: ["health:read"]
+      }
+    ],
+    requestId: "forbidden-request"
+  });
+
+  assert.equal(response.statusCode, 403);
+  assert.equal(response.body.status, "forbidden");
+  assert.equal(response.body.authorization.principalId, "read-only-client");
+  assert.equal(JSON.stringify(response.body).includes("read-token"), false);
 });
 
 test("handleZiweiApiRequest runs the full agent pipeline and returns a user report", async () => {
@@ -66,6 +94,7 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.ok(response.body.queryIntent.topics.includes("运势"));
   assert.equal(response.body.diagnostics.buildStatus, "complete");
   assert.equal(response.body.diagnostics.reportOutputStatus, "published");
+  assert.equal(response.body.diagnostics.authorization.principalId, "legacy-token");
 });
 
 test("handleZiweiApiRequest rejects incomplete profile through the agent chain", async () => {

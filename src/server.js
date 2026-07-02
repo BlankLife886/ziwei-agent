@@ -1,4 +1,8 @@
 import { createServer } from "node:http";
+import {
+  createApiAuthenticator,
+  parseApiCredentialsFromRuntime
+} from "./agent/apiCredentials.js";
 import { createApiObserver } from "./agent/apiObservability.js";
 import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
@@ -12,6 +16,12 @@ const DEFAULT_RATE_LIMIT_MAX = 60;
 
 export function createZiweiHttpServer(options = {}) {
   const env = options.env ?? process.env;
+  const authenticator = options.authenticator ?? createApiAuthenticator({
+    credentials: options.apiCredentials ?? parseApiCredentialsFromRuntime({
+      env,
+      legacyApiToken: options.apiToken
+    })
+  });
   const observer = options.observer ?? createApiObserver({
     mode: options.observabilityMode ?? env.ZIWEI_API_OBSERVABILITY,
     logger: options.logger
@@ -111,7 +121,7 @@ export function createZiweiHttpServer(options = {}) {
         body: bodyRead.body
       }, {
         env,
-        apiToken: options.apiToken,
+        authenticator,
         knowledgeSnippets: options.knowledgeSnippets,
         maxBodyBytes: options.maxBodyBytes ?? DEFAULT_MAX_REQUEST_BYTES,
         requestId
@@ -166,7 +176,6 @@ async function main() {
     DEFAULT_MAX_REQUEST_BYTES;
   const server = createZiweiHttpServer({
     env,
-    apiToken: env.ZIWEI_API_TOKEN,
     knowledgeSnippets: knowledgeStore.snippets,
     maxBodyBytes
   });
@@ -246,6 +255,7 @@ function summarizeDiagnostics(diagnostics) {
 
   return {
     durationMs: diagnostics.durationMs,
+    authorization: diagnostics.authorization,
     buildStatus: diagnostics.buildStatus,
     reportPlanStatus: diagnostics.reportPlanStatus,
     reportGenerationStatus: diagnostics.reportGenerationStatus,

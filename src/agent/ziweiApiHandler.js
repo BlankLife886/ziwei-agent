@@ -1,6 +1,12 @@
 import { buildChart } from "../chartBuilder.js";
 import { buildPipelineOptionsFromRuntime } from "../runtimeOptions.js";
 import {
+  API_SCOPES,
+  createApiAuthenticator,
+  parseApiCredentialsFromRuntime,
+  summarizeAuthResult
+} from "./apiCredentials.js";
+import {
   normalizeQueryIntent,
   parseQueryIntentFromText
 } from "./queryIntentParser.js";
@@ -13,6 +19,13 @@ export async function handleZiweiApiRequest(request, options = {}) {
   const requestId = options.requestId ?? createRequestId();
   const method = String(request.method ?? "GET").toUpperCase();
   const path = normalizePath(request.path ?? request.url ?? "/");
+  const env = options.env ?? process.env;
+  const authenticator = options.authenticator ?? createApiAuthenticator({
+    credentials: options.apiCredentials ?? parseApiCredentialsFromRuntime({
+      env,
+      legacyApiToken: options.apiToken
+    })
+  });
 
   if (method === "GET" && path === "/health") {
     return jsonResponse(200, {
@@ -40,13 +53,28 @@ export async function handleZiweiApiRequest(request, options = {}) {
     });
   }
 
-  if (!isAuthorized(request.headers, options.apiToken)) {
+  const authResult = authenticator.authenticate({
+    headers: request.headers,
+    requiredScope: API_SCOPES.REPORTS_WRITE
+  });
+
+  if (authResult.status === "unauthorized") {
     return jsonResponse(401, {
       status: "unauthorized",
       requestId,
-      messages: ["缺少或错误的 bearer token。"]
+      messages: [authResult.message],
+      authorization: summarizeAuthResult(authResult)
     }, {
       "www-authenticate": "Bearer"
+    });
+  }
+
+  if (authResult.status === "forbidden") {
+    return jsonResponse(403, {
+      status: "forbidden",
+      requestId,
+      messages: [authResult.message],
+      authorization: summarizeAuthResult(authResult)
     });
   }
 
@@ -77,7 +105,7 @@ export async function handleZiweiApiRequest(request, options = {}) {
   const pipelineOptions = {
     ...buildPipelineOptionsFromRuntime({
       knowledgeSnippets: options.knowledgeSnippets ?? [],
-      env: options.env ?? process.env
+      env
     }),
     queryIntent
   };
@@ -98,6 +126,7 @@ export async function handleZiweiApiRequest(request, options = {}) {
     },
     diagnostics: {
       durationMs: Date.now() - startedAt,
+      authorization: summarizeAuthResult(authResult),
       buildStatus: buildResult.status,
       reportPlanStatus: pipelineResult.reportPlan.status,
       reportGenerationStatus: pipelineResult.reportGeneration.status,
@@ -148,22 +177,6 @@ function chooseReportStatusCode(buildResult, pipelineResult) {
   }
 
   return pipelineResult.status === "published" ? 200 : 409;
-}
-
-function isAuthorized(headers = {}, apiToken) {
-  if (!apiToken) {
-    return true;
-  }
-
-  return getHeader(headers, "authorization") === `Bearer ${apiToken}`;
-}
-
-function getHeader(headers, headerName) {
-  const matchedHeaderName = Object.keys(headers).find((key) => {
-    return key.toLowerCase() === headerName.toLowerCase();
-  });
-
-  return matchedHeaderName ? headers[matchedHeaderName] : undefined;
 }
 
 function jsonResponse(statusCode, body, headers = {}) {
