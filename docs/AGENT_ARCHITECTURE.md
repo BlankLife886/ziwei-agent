@@ -127,6 +127,8 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 `NODE_ENV=production` 或 `ZIWEI_REQUIRE_API_AUTH=true` 时，服务启动前会执行运行时配置校验。没有 API credential、credential JSON 不合法、没有任一当前可用的 `reports:write` 或 `*` scope、生命周期字段非法、端口/限流/请求体上限非法、观测模式非法，都会阻止服务启动。`npm run validate:runtime` 可在部署前单独执行同一套校验；`npm run smoke:api` 会启动临时 HTTP 服务并真实请求 `/health` 与 `/v1/reports`，用于验证入口到用户报告发布的链路；`npm run validate:deploy` 会进一步串联运行时门禁、知识库审计和 API smoke。
 
+生产发布、credential 轮换、健康检查、观测诊断和回滚流程记录在 `docs/OPERATIONS.md`。该文档属于工程运行边界，不改变排盘、解释、报告规划或发布门禁。
+
 服务层默认给每个请求生成 `requestId`，并同时写入响应体和 `x-request-id` 响应头。`GET /health` 是轻量 liveness 探针，不读取请求体、不消耗业务限流配额，并返回 HTTP、agent 入口和已加载知识片段数量；Docker healthcheck 使用这条路径。设置 `ZIWEI_API_OBSERVABILITY=stdout` 后，服务会输出 `api.request.started`、`api.request.completed`、`api.request.blocked` 和 `api.request.failed` 事件，事件只包含路由、状态码、耗时、鉴权 principal 摘要、报告生成状态和限流摘要，不记录完整请求体或密钥。`ZIWEI_API_RATE_LIMIT_WINDOW_MS` 和 `ZIWEI_API_RATE_LIMIT_MAX` 控制业务 API 限流窗口和配额，默认是 60 秒 60 次；bearer token 会先哈希再作为限流分桶 key。设置 `ZIWEI_API_QUOTA_STORE` 后，配额窗口会写入 JSON 文件，服务重启后仍沿用尚未过期的窗口；配额文件读取或写入失败时，限流器会阻断请求，避免异常状态下无限放行。
 
 ## 当前已支持的报告底稿
@@ -172,7 +174,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有报告发布门禁。
 - 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
 - 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、请求追踪、结构化观测、脱敏日志、健康检查、内存限流和可选文件持久化配额。
-- 有运行时配置校验、部署校验、API smoke 校验、Dockerfile、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
+- 有运行时配置校验、部署校验、API smoke 校验、运维手册、Dockerfile、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
 - 有安全触发观察点、组合验证层、组合主题解释层、跨宫跨限运关系解释层和专题细分任务单，能把多层运限和四化重叠宫位列为待验证主题，筛出证据层数达标的合参主题，把已验证宫位转成阶段合参领域，整理当前大限、流年、流月之间的同宫或分宫关系，并把报告章节拆成可审计的专题角度，但不会输出事件断语。
@@ -181,7 +183,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、请求大小限制、请求追踪、结构化观测、健康检查、内存限流、可选文件持久化配额、运行时配置校验、部署校验和容器部署工件，但集中式密钥管理平台和真实环境部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、请求大小限制、请求追踪、结构化观测、健康检查、内存限流、可选文件持久化配额、运行时配置校验、部署校验、运维手册和容器部署工件，但集中式密钥管理平台和真实环境部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
