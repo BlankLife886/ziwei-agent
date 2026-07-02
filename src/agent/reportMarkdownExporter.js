@@ -4,7 +4,7 @@
 // 它不重新生成命理内容，也不放宽报告审计；如果 reportOutput 没有发布，
 // 这里最多输出阻断说明，不能伪装成最终报告。
 
-export function formatReportOutputMarkdown(reportOutput) {
+export function formatReportOutputMarkdown(reportOutput, options = {}) {
   if (reportOutput?.status !== "published") {
     return formatBlockedReportMarkdown(reportOutput);
   }
@@ -19,6 +19,8 @@ export function formatReportOutputMarkdown(reportOutput) {
     "## 开篇",
     "",
     ...formatTextList(reportOutput.introduction),
+    "",
+    ...formatChartSnapshot(options.chart),
     "",
     "## 正文章节",
     "",
@@ -101,6 +103,107 @@ function formatSection(section) {
     ...formatParagraphs(section.paragraphs ?? []),
     ""
   ];
+}
+
+function formatChartSnapshot(chart) {
+  if (!chart) {
+    return [];
+  }
+
+  return [
+    "## 命盘图",
+    "",
+    ...formatChartProfile(chart),
+    "",
+    "| 宫位 | 地支 | 宫干 | 主星 | 辅星 | 煞曜 | 空曜 | 四化 |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...(chart.palaces ?? []).map(formatPalaceRow)
+  ];
+}
+
+function formatChartProfile(chart) {
+  const profile = chart.profileSummary ?? {};
+
+  return [
+    `- 命主：${profile.name ?? "未命名"}`,
+    `- 出生资料：${profile.calendar ?? "未提供"} ${profile.birthDate ?? "未提供"} ${profile.birthTime ?? ""}`.trim(),
+    `- 农历换算：${profile.lunarYear ?? "未提供"}年 ${profile.lunarMonth ?? "未提供"}月 ${profile.lunarDay ?? "未提供"}日`,
+    `- 命宫：${formatPalaceLabel(chart.lifePalace)}`,
+    `- 身宫：${formatPalaceLabel(chart.bodyPalace)}`,
+    `- 五行局：${chart.fiveElementClass?.name ?? "未计算"}`,
+    `- 当前大限：${formatCurrentMajorPeriod(chart.currentMajorPeriod)}`,
+    `- 当前流年：${formatAnnualPeriod(chart.annualPeriod)}`,
+    `- 当前流月：${formatMonthlyPeriod(chart.monthlyPeriod)}`
+  ];
+}
+
+function formatPalaceRow(palace) {
+  return [
+    palace.name,
+    palace.branch ?? "未排",
+    palace.stem ?? "未排",
+    formatList(palace.mainStars),
+    formatList(palace.auxiliaryStars),
+    formatList(palace.maleficStars),
+    formatList(palace.voidStars),
+    formatTransformations(palace.transformations)
+  ].map(formatTableCell).join(" | ").replace(/^/u, "| ").replace(/$/u, " |");
+}
+
+function formatPalaceLabel(palace) {
+  if (!palace) {
+    return "未计算";
+  }
+
+  return `${palace.name}${palace.branch ? `（${palace.branch}）` : ""}`;
+}
+
+function formatCurrentMajorPeriod(currentMajorPeriod) {
+  const period = currentMajorPeriod?.period;
+
+  if (!period) {
+    return "未定位";
+  }
+
+  return `${period.startAge}-${period.endAge}岁 ${period.palaceName}${period.branch ? `（${period.branch}）` : ""}`;
+}
+
+function formatAnnualPeriod(annualPeriod) {
+  if (!annualPeriod) {
+    return "未定位";
+  }
+
+  return `${annualPeriod.yearStem}${annualPeriod.yearBranch}年 ${annualPeriod.palaceName}`;
+}
+
+function formatMonthlyPeriod(monthlyPeriod) {
+  if (!monthlyPeriod) {
+    return "未定位";
+  }
+
+  return `${monthlyPeriod.lunarMonth}月 ${monthlyPeriod.monthBranch}月建 ${monthlyPeriod.palaceName}`;
+}
+
+function formatTransformations(transformations = []) {
+  if (transformations.length === 0) {
+    return "无";
+  }
+
+  return transformations.map((transformation) => {
+    if (typeof transformation === "string") {
+      return transformation;
+    }
+
+    return `${transformation.star}${transformation.name}`;
+  }).join("、");
+}
+
+function formatList(items = []) {
+  return items.length > 0 ? items.join("、") : "无";
+}
+
+function formatTableCell(value) {
+  return String(value).replaceAll("|", "\\|");
 }
 
 function formatSectionTrace(section) {

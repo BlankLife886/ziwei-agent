@@ -72,7 +72,9 @@ export async function runReportMarkdownExportCommand(argv = [], env = process.en
   await mkdir(dirname(options.output), { recursive: true });
   await writeFile(
     options.output,
-    formatReportOutputMarkdown(pipelineResult.reportOutput),
+    formatReportOutputMarkdown(pipelineResult.reportOutput, {
+      chart: buildResult.chart
+    }),
     "utf8"
   );
 
@@ -83,6 +85,7 @@ export async function runReportMarkdownExportCommand(argv = [], env = process.en
       output: options.output,
       reportOutputStatus: pipelineResult.reportOutput.status,
       sectionCount: pipelineResult.reportOutput.sections.length,
+      chartIncluded: Boolean(buildResult.chart),
       evidenceRefCount: pipelineResult.reportOutput.metadata.evidenceRefs.length,
       knowledgeSnippetRefCount: pipelineResult.reportOutput.metadata.knowledgeSnippetRefs.length,
       interpretationRefCount: pipelineResult.reportOutput.metadata.interpretationRefs.length

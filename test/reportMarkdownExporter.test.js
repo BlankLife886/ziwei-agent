@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { formatReportOutputMarkdown } from "../src/agent/reportMarkdownExporter.js";
 import { runReportMarkdownExportCommand } from "../src/exportReportMarkdown.js";
+import { buildChart } from "../src/chartBuilder.js";
 
 test("formatReportOutputMarkdown renders a published report with traceability", () => {
   const markdown = formatReportOutputMarkdown(createReportOutput());
@@ -22,6 +23,21 @@ test("formatReportOutputMarkdown renders a published report with traceability", 
   assert.ok(markdown.includes("### Traceability 汇总"));
   assert.ok(markdown.includes("- knowledgeSnippetRefs：无"));
   assert.ok(markdown.includes("## 发布门禁"));
+});
+
+test("formatReportOutputMarkdown can include a chart snapshot without adding interpretation", () => {
+  const buildResult = buildChart(createSampleProfile());
+  const markdown = formatReportOutputMarkdown(createReportOutput(), {
+    chart: buildResult.chart
+  });
+
+  assert.ok(markdown.includes("## 命盘图"));
+  assert.ok(markdown.includes("- 命宫：命宫（巳）"));
+  assert.ok(markdown.includes("- 当前大限：34-43岁 子女宫（寅）"));
+  assert.ok(!markdown.includes("undefined"));
+  assert.ok(markdown.includes("| 宫位 | 地支 | 宫干 | 主星 | 辅星 | 煞曜 | 空曜 | 四化 |"));
+  assert.ok(markdown.includes("| 命宫 | 巳 | 辛 |"));
+  assert.ok(!markdown.includes("## 命盘图解读"));
 });
 
 test("formatReportOutputMarkdown does not present blocked reports as final output", () => {
@@ -56,8 +72,10 @@ test("runReportMarkdownExportCommand writes markdown only after report publicati
   assert.equal(result.exitCode, 0);
   assert.equal(payload.status, "exported");
   assert.equal(payload.reportOutputStatus, "published");
+  assert.equal(payload.chartIncluded, true);
   assert.equal(existsSync(outputPath), true);
   assert.ok(markdown.includes("# 示例命主的紫微斗数本命盘分析报告"));
+  assert.ok(markdown.includes("## 命盘图"));
   assert.ok(markdown.includes("婚姻"));
   assert.ok(markdown.includes("## 可追溯附录"));
 });

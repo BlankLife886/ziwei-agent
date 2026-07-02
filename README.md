@@ -35,7 +35,7 @@ npm run knowledge:promote-batch -- --input .runtime/knowledge-drafts.json --outp
 npm run knowledge:append-batch -- --input .runtime/knowledge-verified-batch.json --store data/knowledge-snippets.example.json --output .runtime/knowledge-snippets.batch.next.json
 ```
 
-`npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。`npm run report:markdown` 会运行同一条 agent pipeline，并且只有 `reportOutput` 已通过审计和发布门禁时才写出 Markdown 用户报告；它不是绕过审计的单独生成器。`npm run validate:knowledge` 会同时输出 schema 校验和全局覆盖审计，按来源、主题和规则引用统计当前知识库是否足以支撑主要报告领域。这个示例知识库目前包含本地审校分析框架样本和专题知识笔记，覆盖命宫、性格、婚姻、财富、事业和当前阶段运势；它不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
+`npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。`npm run report:markdown` 会运行同一条 agent pipeline，并且只有 `reportOutput` 已通过审计和发布门禁时才写出包含命盘图、正文和可追溯附录的 Markdown 用户报告；它不是绕过审计的单独生成器。`npm run validate:knowledge` 会同时输出 schema 校验和全局覆盖审计，按来源、主题和规则引用统计当前知识库是否足以支撑主要报告领域。这个示例知识库目前包含本地审校分析框架样本和专题知识笔记，覆盖命宫、性格、婚姻、财富、事业和当前阶段运势；它不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
 
 书籍、PDF、OCR 或研读笔记进入 agent 时，先整理为 candidate JSON，再用 `knowledge:audit-candidate` 检查来源定位、摘录长度、topic/reference 匹配和风险语言；通过后用 `knowledge:draft` 标准化为 draft；人工复核字段、来源、主题和规则引用后，用 `knowledge:promote` 晋升为 verified；最后用 `knowledge:append` 追加到知识库。批量资料可用 `knowledge:audit-candidates`、`knowledge:draft-batch`、`knowledge:promote-batch` 和 `knowledge:append-batch` 处理 `{ "candidates": [...] }` 或 `{ "snippets": [...] }` 队列。`draft` 和 `draft-batch` 会拒绝未通过 candidate 质量审计的输入；`append` 和 `append-batch` 会拒绝 draft、重复 id 和追加后无法通过全库审计的 store。示例里把追加结果写到 `.runtime/knowledge-snippets.next.json`，便于先审计，再决定是否覆盖正式知识库。
 
@@ -183,7 +183,7 @@ kubectl apply -f deploy/kubernetes.yml
 - `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能通过 `evidenceRefs` 回指到已有证据，并通过 `referenceRefs` 回指到规则/分析框架。
 - `src/agent/reportAuditor.js`: 审计报告草稿是否遵守章节引用契约，并扫描未被边界约束的高风险断语。
 - `src/agent/reportPublisher.js`: 作为最终发布门禁，只有审计通过的草稿才会转换成可交付的用户报告。
-- `src/agent/reportMarkdownExporter.js`: 把已发布的 `reportOutput` 转成 Markdown 用户报告，保留证据、规则、来源、知识片段和解释条目的可追溯附录。
+- `src/agent/reportMarkdownExporter.js`: 把已发布的 `reportOutput` 和可选命盘结构转成 Markdown 用户报告，保留命盘图、证据、规则、来源、知识片段和解释条目的可追溯附录。
 - `src/formatters.js`: 把结构化排盘结果转换为 CLI 展示文本，避免展示逻辑混入排盘流程。
 - `src/palaceCalculator.js`: 根据农历月份和出生时辰计算命宫、身宫。
 - `src/fiveElementClassCalculator.js`: 根据出生年干、命宫干支和纳音计算五行局。
