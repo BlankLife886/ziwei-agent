@@ -2,6 +2,7 @@ const form = document.querySelector("#profile-form");
 const statusLine = document.querySelector("#status-line");
 const chartView = document.querySelector("#chart-view");
 const reportView = document.querySelector("#report-view");
+let currentMarkdownObjectUrl = null;
 
 const PALACE_ORDER = [
   "命宫",
@@ -32,7 +33,8 @@ form.addEventListener("submit", async (event) => {
       headers: buildHeaders(payload.apiToken),
       body: JSON.stringify({
         profile: payload.profile,
-        query: payload.query
+        query: payload.query,
+        outputFormats: ["markdown"]
       })
     });
     const body = await response.json();
@@ -44,7 +46,7 @@ form.addEventListener("submit", async (event) => {
     }
 
     renderChart(body.chart);
-    renderReport(body.report);
+    renderReport(body.report, body.artifacts);
     setStatus(`已发布 · ${body.requestId}`, "ready");
   } catch (error) {
     chartView.innerHTML = "";
@@ -92,6 +94,7 @@ function buildHeaders(apiToken) {
 }
 
 function renderEmptyState() {
+  resetMarkdownDownloadUrl();
   chartView.innerHTML = "";
   reportView.innerHTML = `
     <div class="empty-state">暂无报告</div>
@@ -99,6 +102,7 @@ function renderEmptyState() {
 }
 
 function renderBlocked(body) {
+  resetMarkdownDownloadUrl();
   chartView.innerHTML = "";
   reportView.innerHTML = `
     <div class="report-section">
@@ -171,10 +175,15 @@ function renderTransformations(transformations = []) {
   return `四化：${escapeHtml(transformations.map((item) => `${item.type ?? ""}${item.starName ?? ""}`).join("、"))}`;
 }
 
-function renderReport(report) {
+function renderReport(report, artifacts = {}) {
+  resetMarkdownDownloadUrl();
+
   reportView.innerHTML = `
     <section class="report-intro">
-      <h2>${escapeHtml(report.title)}</h2>
+      <div class="report-title-row">
+        <h2>${escapeHtml(report.title)}</h2>
+        ${renderMarkdownDownload(artifacts.markdown)}
+      </div>
       <p>${escapeHtml(report.introduction)}</p>
       <div class="ref-line">审计：${escapeHtml(report.audit?.status ?? "")} · 输出：${escapeHtml(report.metadata?.outputType ?? "")}</div>
     </section>
@@ -185,6 +194,27 @@ function renderReport(report) {
       <p>${escapeHtml(report.closing)}</p>
     </section>
   `;
+}
+
+function renderMarkdownDownload(markdownArtifact) {
+  if (!markdownArtifact?.content) {
+    return "";
+  }
+
+  currentMarkdownObjectUrl = URL.createObjectURL(new Blob([markdownArtifact.content], {
+    type: markdownArtifact.contentType ?? "text/markdown;charset=utf-8"
+  }));
+
+  return `
+    <a class="download-action" href="${currentMarkdownObjectUrl}" download="${escapeHtml(markdownArtifact.fileName ?? "ziwei-report.md")}">下载报告</a>
+  `;
+}
+
+function resetMarkdownDownloadUrl() {
+  if (currentMarkdownObjectUrl) {
+    URL.revokeObjectURL(currentMarkdownObjectUrl);
+    currentMarkdownObjectUrl = null;
+  }
 }
 
 function renderReportBrief(brief) {

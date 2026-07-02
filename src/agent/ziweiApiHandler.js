@@ -14,6 +14,7 @@ import {
   REPORT_APPROVAL_DECISIONS,
   REPORT_APPROVAL_MODES
 } from "./reportApprovalGate.js";
+import { formatReportOutputMarkdown } from "./reportMarkdownExporter.js";
 import { runZiweiPipelineAsync } from "./ziweiPipeline.js";
 
 const DEFAULT_MAX_BODY_BYTES = 100_000;
@@ -106,12 +107,21 @@ export async function handleZiweiApiRequest(request, options = {}) {
 
   const queryIntent = resolveApiQueryIntent(apiPayload);
   const reportApprovalOptions = resolveApiReportApprovalOptions(apiPayload);
+  const outputOptions = resolveApiOutputOptions(apiPayload);
 
   if (reportApprovalOptions.status !== "ready") {
     return jsonResponse(400, {
       status: "invalid_request",
       requestId,
       messages: reportApprovalOptions.messages
+    });
+  }
+
+  if (outputOptions.status !== "ready") {
+    return jsonResponse(400, {
+      status: "invalid_request",
+      requestId,
+      messages: outputOptions.messages
     });
   }
 
@@ -132,6 +142,11 @@ export async function handleZiweiApiRequest(request, options = {}) {
     requestId,
     chart: buildResult.chart,
     report: pipelineResult.reportOutput,
+    artifacts: buildReportArtifacts({
+      outputFormats: outputOptions.value.outputFormats,
+      reportOutput: pipelineResult.reportOutput,
+      chart: buildResult.chart
+    }),
     validation: buildResult.validation,
     queryIntent: pipelineResult.queryIntent,
     audits: {
@@ -148,7 +163,8 @@ export async function handleZiweiApiRequest(request, options = {}) {
       buildStatus: buildResult.status,
       reportPlanStatus: pipelineResult.reportPlan.status,
       reportGenerationStatus: pipelineResult.reportGeneration.status,
-      reportOutputStatus: pipelineResult.reportOutput.status
+      reportOutputStatus: pipelineResult.reportOutput.status,
+      requestedOutputFormats: outputOptions.value.outputFormats
     }
   });
 }
@@ -238,6 +254,67 @@ function invalidReportApproval(message) {
   return {
     status: "invalid_request",
     messages: [message]
+  };
+}
+
+function resolveApiOutputOptions(apiPayload) {
+  const outputFormats = apiPayload.outputFormats;
+
+  if (outputFormats === undefined) {
+    return {
+      status: "ready",
+      value: {
+        outputFormats: []
+      }
+    };
+  }
+
+  if (!Array.isArray(outputFormats)) {
+    return invalidOutputOptions("outputFormats 必须是数组。");
+  }
+
+  const supportedFormats = new Set(["markdown"]);
+  const invalidFormat = outputFormats.find((format) => {
+    return typeof format !== "string" || !supportedFormats.has(format);
+  });
+
+  if (invalidFormat !== undefined) {
+    return invalidOutputOptions("outputFormats 目前只支持 markdown。");
+  }
+
+  return {
+    status: "ready",
+    value: {
+      outputFormats: [...new Set(outputFormats)]
+    }
+  };
+}
+
+function invalidOutputOptions(message) {
+  return {
+    status: "invalid_request",
+    messages: [message]
+  };
+}
+
+function buildReportArtifacts({
+  outputFormats,
+  reportOutput,
+  chart
+}) {
+  if (!outputFormats.includes("markdown") || reportOutput.status !== "published") {
+    return {};
+  }
+
+  return {
+    markdown: {
+      status: "ready",
+      contentType: "text/markdown; charset=utf-8",
+      fileName: "ziwei-report.md",
+      content: formatReportOutputMarkdown(reportOutput, {
+        chart
+      })
+    }
   };
 }
 

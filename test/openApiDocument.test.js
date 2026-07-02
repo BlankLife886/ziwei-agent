@@ -20,9 +20,21 @@ test("buildOpenApiDocument describes the public HTTP contract", () => {
     document.components.schemas.ReportRequest.properties.reportApproval.properties.mode.enum,
     ["auto", "require-review"]
   );
+  assert.deepEqual(
+    document.components.schemas.ReportRequest.properties.outputFormats.items.enum,
+    ["markdown"]
+  );
   assert.equal(
     document.components.schemas.ReportResponse.properties.report.$ref,
     "#/components/schemas/ReportOutput"
+  );
+  assert.equal(
+    document.components.schemas.ReportResponse.properties.artifacts.$ref,
+    "#/components/schemas/ReportArtifacts"
+  );
+  assert.equal(
+    document.components.schemas.ReportArtifacts.properties.markdown.properties.contentType.const,
+    "text/markdown; charset=utf-8"
   );
   assert.ok(document.components.schemas.ReportOutput.properties.appendix);
   assert.equal(

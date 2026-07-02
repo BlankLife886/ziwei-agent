@@ -135,6 +135,36 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.equal(response.body.diagnostics.authorization.principalId, "legacy-token");
 });
 
+test("handleZiweiApiRequest can return a Markdown report artifact after publication", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {},
+    body: JSON.stringify({
+      profile: {
+        ...createSampleProfile(),
+        analysis_date: "2026-07-01"
+      },
+      query: "我想看婚姻、财富、事业和当前运势。",
+      outputFormats: ["markdown"]
+    })
+  }, {
+    requestId: "markdown-artifact-request",
+    env: {},
+    knowledgeSnippets: []
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.status, "published");
+  assert.equal(response.body.artifacts.markdown.status, "ready");
+  assert.equal(response.body.artifacts.markdown.contentType, "text/markdown; charset=utf-8");
+  assert.equal(response.body.artifacts.markdown.fileName, "ziwei-report.md");
+  assert.ok(response.body.artifacts.markdown.content.includes("# 示例命主的紫微斗数本命盘分析报告"));
+  assert.ok(response.body.artifacts.markdown.content.includes("## 命盘图"));
+  assert.ok(response.body.artifacts.markdown.content.includes("## 可追溯附录"));
+  assert.deepEqual(response.body.diagnostics.requestedOutputFormats, ["markdown"]);
+});
+
 test("handleZiweiApiRequest blocks publishing when API requires human approval", async () => {
   const response = await handleZiweiApiRequest({
     method: "POST",
@@ -142,6 +172,7 @@ test("handleZiweiApiRequest blocks publishing when API requires human approval",
     headers: {},
     body: JSON.stringify({
       profile: createSampleProfile(),
+      outputFormats: ["markdown"],
       reportApproval: {
         mode: "require-review"
       }
@@ -157,6 +188,7 @@ test("handleZiweiApiRequest blocks publishing when API requires human approval",
   assert.equal(response.body.audits.report.status, "passed");
   assert.equal(response.body.audits.approval.status, "blocked");
   assert.equal(response.body.report.status, "blocked");
+  assert.deepEqual(response.body.artifacts, {});
   assert.ok(
     response.body.recovery.actions.some((action) => {
       return action.id === "recover.report-approval.collect-human-decision";
@@ -232,6 +264,24 @@ test("handleZiweiApiRequest rejects invalid report approval payloads", async () 
   assert.equal(response.statusCode, 400);
   assert.equal(response.body.status, "invalid_request");
   assert.ok(response.body.messages[0].includes("reportApproval.mode"));
+});
+
+test("handleZiweiApiRequest rejects unsupported output formats", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {},
+    body: JSON.stringify({
+      profile: createSampleProfile(),
+      outputFormats: ["pdf"]
+    })
+  }, {
+    requestId: "invalid-output-format-request"
+  });
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(response.body.status, "invalid_request");
+  assert.ok(response.body.messages[0].includes("outputFormats"));
 });
 
 test("handleZiweiApiRequest blocks invalid JSON and oversized payloads", async () => {

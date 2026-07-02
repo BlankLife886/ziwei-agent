@@ -222,6 +222,14 @@ export function buildOpenApiDocument() {
               type: "object",
               additionalProperties: true
             },
+            outputFormats: {
+              type: "array",
+              items: {
+                type: "string",
+                enum: ["markdown"]
+              },
+              description: "可选交付物格式。默认只返回 JSON；传入 markdown 时，报告发布成功后返回 artifacts.markdown。"
+            },
             reportApproval: {
               type: "object",
               additionalProperties: false,
@@ -268,6 +276,9 @@ export function buildOpenApiDocument() {
           },
           report: {
             $ref: "#/components/schemas/ReportOutput"
+          },
+          artifacts: {
+            $ref: "#/components/schemas/ReportArtifacts"
           },
           validation: {
             type: "object",
@@ -326,6 +337,32 @@ export function buildOpenApiDocument() {
             audit: {
               type: "object",
               additionalProperties: true
+            }
+          }
+        },
+        ReportArtifacts: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            markdown: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                status: {
+                  type: "string",
+                  const: "ready"
+                },
+                contentType: {
+                  type: "string",
+                  const: "text/markdown; charset=utf-8"
+                },
+                fileName: {
+                  type: "string"
+                },
+                content: {
+                  type: "string"
+                }
+              }
             }
           }
         },

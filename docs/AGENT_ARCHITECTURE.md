@@ -55,7 +55,7 @@ birth/profile input
 
 CLI 和 HTTP API 都必须进入这条链路。`ziweiApiHandler` 只负责接收 `profile`、`query` 或显式 `queryIntent`，然后调用 `buildChart` 和 `runZiweiPipelineAsync`；它不会直接调用报告 composer，也不会跳过审计发布门禁。`server`、`serverRuntimeConfig`、`apiCredentials`、`apiObservability`、`apiQuotaStore` 和 `apiRateLimiter` 只负责服务入口治理，例如运行时配置校验、scoped 鉴权、请求追踪、脱敏日志、限流、配额窗口持久化、请求体大小限制和响应封装，不负责命理解释。
 
-Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和咨询问题，调用 `POST /v1/reports`，再把返回的 `chart` 与 `report` 渲染为命盘图和用户报告；它不在前端重新排盘、不生成解释、不跳过报告审计。
+Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和咨询问题，调用 `POST /v1/reports`，再把返回的 `chart` 与 `report` 渲染为命盘图和用户报告；需要下载时请求 `outputFormats:["markdown"]` 并使用同次响应里的 `artifacts.markdown`。它不在前端重新排盘、不生成解释、不跳过报告审计。
 
 各层职责如下：
 
@@ -132,12 +132,14 @@ HTTP API 的 `POST /v1/reports` 请求体支持：
 
 - `profile`：出生资料。
 - `query` 或 `queryIntent`：用户咨询主题或已解析意图。
+- `outputFormats`：可选交付物格式，目前只支持 `markdown`；该格式只在报告发布成功后返回。
 - `reportApproval`：可选发布确认策略；`mode: "auto"` 允许审计通过后自动发布，`mode: "require-review"` 要求同时提供 `decision.status: "approved"` 才能发布。`rejected` 或 `changes_requested` 会保留 blocked 状态并进入恢复计划。
 
 HTTP API 的 `POST /v1/reports` 会返回：
 
 - `chart`：本次输入生成的结构化命盘；资料不完整或非法时为 `null`。
 - `report`：经过发布门禁后的用户报告；未通过时为 blocked 状态。
+- `artifacts`：可选交付物集合；请求 `outputFormats:["markdown"]` 且报告发布成功时包含 `artifacts.markdown`，内容与 CLI Markdown 导出同源，未发布时为空对象。
 - `report.brief`：面向用户的报告开头结构，包含报告模式、命盘摘要、章节路径、每个章节的证据/解释/知识片段数量和交付边界。
 - `report.appendix`：面向审计和二次生成的可追溯附录，集中列出本报告使用的证据、规则/框架、来源、知识片段、解释条目和 traceability 汇总。
 - `validation`：出生资料校验结果和缺失字段。
