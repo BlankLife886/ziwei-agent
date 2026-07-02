@@ -81,6 +81,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `toolRuntime`：提供通用 Tool Registry 和执行审计，当前报告 provider 也通过 `report-draft-provider:*` 工具调用，保留 toolId、执行模式、输入/输出合同、耗时和阻断原因。
 - `externalLLMReportProvider`：把 generation context 包装为通用 HTTP 大模型请求，并把响应解析为 `reportDraft`；缺配置、HTTP 失败、请求超时、响应过大或响应不可解析都会阻断发布，并返回不含密钥和请求体的诊断信息。
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
+- `reportComposer` 同时生成 `brief` 顶层摘要，包含报告总览、命盘摘要、章节路径和交付边界；该层只汇总已规划章节和证据数量，不新增不可追溯断语。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 - `reportApprovalGate`：产品侧人工确认门禁；默认 auto 策略保持本地和自动化链路可发布，`require-review` 策略下必须提供 `approved` 人工决策，否则报告只能返回 blocked 和恢复动作。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
@@ -135,6 +136,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - `chart`：本次输入生成的结构化命盘；资料不完整或非法时为 `null`。
 - `report`：经过发布门禁后的用户报告；未通过时为 blocked 状态。
+- `report.brief`：面向用户的报告开头结构，包含报告模式、命盘摘要、章节路径、每个章节的证据/解释/知识片段数量和交付边界。
 - `validation`：出生资料校验结果和缺失字段。
 - `queryIntent`：本轮用户问题解析结果。
 - `audits`：知识覆盖、报告审计、发布确认和完整度审计。

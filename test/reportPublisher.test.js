@@ -49,6 +49,14 @@ test("publishReportOutput publishes only audited report drafts", () => {
       return guardrail.includes("所有结论必须能回指");
     })
   );
+  assert.equal(reportOutput.brief.kind, "report-brief");
+  assert.equal(reportOutput.brief.mode, "foundation");
+  assert.ok(
+    reportOutput.brief.paragraphs.some((paragraph) => {
+      return paragraph.kind === "report-path" &&
+        paragraph.text.includes("命宫与三方四正");
+    })
+  );
   assert.ok(reportOutput.sections.length > 0);
   assert.ok(reportOutput.sections[0].evidenceRefs.includes("life-triad.life-palace"));
   assert.ok(reportOutput.sections[0].referenceRefs.includes("framework.life-triad"));

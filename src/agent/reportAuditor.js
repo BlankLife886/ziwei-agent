@@ -240,6 +240,13 @@ function auditTimingTriggerFraming(reportDraft, warnings) {
 }
 
 function collectDraftTexts(reportDraft) {
+  const briefTexts = (reportDraft.brief?.paragraphs ?? []).map((paragraph) => {
+    return {
+      sectionId: "brief",
+      paragraphKind: paragraph.kind,
+      text: paragraph.text
+    };
+  });
   const sectionTexts = reportDraft.sections.flatMap((section) => {
     return section.paragraphs.map((paragraph) => {
       return {
@@ -257,7 +264,7 @@ function collectDraftTexts(reportDraft) {
     };
   });
 
-  return [...sectionTexts, ...closingTexts];
+  return [...briefTexts, ...sectionTexts, ...closingTexts];
 }
 
 function findMissingRefs(actualRefs = [], allowedRefs = []) {

@@ -45,6 +45,8 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.equal(pipelineResult.reportGeneration.status, "generated");
   assert.equal(pipelineResult.reportApproval.status, "approved");
   assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "deterministic-template");
+  assert.equal(pipelineResult.reportOutput.brief.kind, "report-brief");
+  assert.equal(pipelineResult.reportOutput.brief.sectionSummaries.length, 8);
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.equal(pipelineResult.readinessAudit.status, "in_progress");
   assert.equal(pipelineResult.recoveryPlan.status, "advisory");

@@ -37,6 +37,7 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit, report
     subject: reportDraft.subject,
     metadata: buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApproval),
     introduction: reportDraft.introduction,
+    brief: publishBrief(reportDraft.brief),
     sections: reportDraft.sections.map(publishSection),
     closing: reportDraft.closing,
     approval: summarizeApproval(reportApproval),
@@ -78,6 +79,28 @@ function buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApprova
     ),
     generation: reportDraft.generation ?? null,
     guardrails: reportPlan.guardrails ?? []
+  };
+}
+
+function publishBrief(brief) {
+  if (!brief) {
+    return null;
+  }
+
+  return {
+    kind: brief.kind,
+    mode: brief.mode,
+    subject: brief.subject,
+    sectionSummaries: brief.sectionSummaries ?? [],
+    paragraphs: (brief.paragraphs ?? []).map((paragraph) => {
+      return {
+        kind: paragraph.kind,
+        text: paragraph.text,
+        evidenceRefs: paragraph.evidenceRefs ?? [],
+        referenceRefs: paragraph.referenceRefs ?? [],
+        interpretationRefs: paragraph.interpretationRefs ?? []
+      };
+    })
   };
 }
 

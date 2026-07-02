@@ -23,9 +23,80 @@ export function createReportDraft(reportPlan) {
     title: `${reportPlan.subject.name}的紫微斗数本命盘分析草稿`,
     subject: reportPlan.subject,
     introduction: reportPlan.opening,
+    brief: composeReportBrief(reportPlan),
     sections: reportPlan.sections.map(composeSectionDraft),
     closing: composeClosing(reportPlan)
   };
+}
+
+function composeReportBrief(reportPlan) {
+  const sectionSummaries = reportPlan.sections.map((section) => {
+    return {
+      id: section.id,
+      title: section.title,
+      evidenceCount: section.evidenceRefs?.length ?? 0,
+      interpretationCount: section.interpretationRefs?.length ?? 0,
+      knowledgeSnippetCount: section.knowledgeSnippetRefs?.length ?? 0,
+      topicTitles: (section.topicRefinements ?? []).map((item) => item.topicTitle)
+    };
+  });
+
+  return {
+    kind: "report-brief",
+    mode: reportPlan.queryIntent?.hasIntent ? "focused" : "foundation",
+    subject: reportPlan.subject,
+    sectionSummaries,
+    paragraphs: [
+      createParagraph(
+        "brief-scope",
+        composeBriefScopeParagraph(reportPlan, sectionSummaries),
+        [],
+        []
+      ),
+      createParagraph(
+        "chart-summary",
+        composeChartSummaryParagraph(reportPlan.subject),
+        [],
+        []
+      ),
+      createParagraph(
+        "report-path",
+        composeReportPathParagraph(sectionSummaries),
+        [],
+        []
+      ),
+      createParagraph(
+        "delivery-boundary",
+        "【交付边界】本报告输出命盘结构、章节证据、解释依据和可继续咨询的线索；不能输出具体年份事件、婚姻结果、财富金额、职业结果或吉凶定论。",
+        [],
+        []
+      )
+    ]
+  };
+}
+
+function composeBriefScopeParagraph(reportPlan, sectionSummaries) {
+  if (reportPlan.queryIntent?.hasIntent) {
+    return `【报告总览】本次按用户咨询的${reportPlan.queryIntent.topics.join("、")}聚焦分析，共生成${sectionSummaries.length}个专题章节；每个章节都必须回到本次命盘证据、解释目录和知识片段。`;
+  }
+
+  return `【报告总览】本次生成基础版命盘报告，共生成${sectionSummaries.length}个基础章节；先建立命宫、事业、财富、婚姻、身宫、星曜分布和运限骨架的结构底稿。`;
+}
+
+function composeChartSummaryParagraph(subject) {
+  const analysisDate = subject.analysisDate
+    ? `，分析日期为${subject.analysisDate}`
+    : "";
+
+  return `【命盘摘要】命主${subject.name}，出生资料使用${subject.calendar}历${subject.birthDate}${analysisDate}；当前换算到${subject.lunarYearStem}${subject.lunarYearBranch}年、农历${subject.lunarMonth}月${subject.lunarDay}日、${subject.chineseHour}时。`;
+}
+
+function composeReportPathParagraph(sectionSummaries) {
+  const sectionText = sectionSummaries.map((section) => {
+    return `${section.title}（${section.evidenceCount}组证据、${section.interpretationCount}条解释、${section.knowledgeSnippetCount}条知识片段）`;
+  }).join("；");
+
+  return `【章节路径】${sectionText}。`;
 }
 
 function composeSectionDraft(section) {

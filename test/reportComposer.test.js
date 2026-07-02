@@ -14,6 +14,27 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
 
   assert.equal(reportDraft.status, "drafted");
   assert.equal(reportDraft.title, "示例命主的紫微斗数本命盘分析草稿");
+  assert.equal(reportDraft.brief.kind, "report-brief");
+  assert.equal(reportDraft.brief.mode, "foundation");
+  assert.ok(
+    reportDraft.brief.paragraphs.some((paragraph) => {
+      return paragraph.kind === "brief-scope" &&
+        paragraph.text.includes("基础版命盘报告");
+    })
+  );
+  assert.ok(
+    reportDraft.brief.paragraphs.some((paragraph) => {
+      return paragraph.kind === "chart-summary" &&
+        paragraph.text.includes("农历");
+    })
+  );
+  assert.ok(
+    reportDraft.brief.paragraphs.some((paragraph) => {
+      return paragraph.kind === "delivery-boundary" &&
+        paragraph.text.includes("不能输出具体年份事件");
+    })
+  );
+  assert.equal(reportDraft.brief.sectionSummaries.length, 8);
   assert.deepEqual(
     reportDraft.sections.map((section) => section.id),
     [
@@ -258,6 +279,9 @@ test("createReportDraft writes spouse palace as conservative marriage draft", ()
     return item.kind === "interpretation-basis";
   });
 
+  assert.equal(reportDraft.brief.mode, "focused");
+  assert.ok(reportDraft.brief.paragraphs[0].text.includes("婚姻"));
+  assert.equal(reportDraft.brief.sectionSummaries.length, 1);
   assert.equal(section.id, "spouse-palace");
   assert.equal(section.title, "婚姻专题：夫妻宫三方四正");
   assert.ok(paragraph.text.includes("不应只看夫妻宫单点"));
