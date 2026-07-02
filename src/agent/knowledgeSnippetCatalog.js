@@ -11,7 +11,8 @@ import {
 
 export const KNOWLEDGE_SOURCE_IDS = {
   PENDING_ZIWEI_CORPUS: "knowledge-source.pending-ziwei-corpus",
-  LOCAL_REVIEWED_FRAMEWORK_NOTES: "knowledge-source.local-reviewed-framework-notes"
+  LOCAL_REVIEWED_FRAMEWORK_NOTES: "knowledge-source.local-reviewed-framework-notes",
+  LOCAL_REVIEWED_TOPIC_NOTES: "knowledge-source.local-reviewed-topic-notes"
 };
 
 export const KNOWLEDGE_SNIPPET_STATUS = {
@@ -42,6 +43,14 @@ const KNOWLEDGE_SOURCES = [
     status: "verified",
     citation: "当前代码库的分析框架、测试用例和人工审校样本。",
     note: "用于验证知识片段闭环和报告引用链；不是外部书籍或 PDF 的完整结构化成果。"
+  },
+  {
+    id: KNOWLEDGE_SOURCE_IDS.LOCAL_REVIEWED_TOPIC_NOTES,
+    title: "本地审校专题知识笔记",
+    type: "local-reviewed-topic-notes",
+    status: "verified",
+    citation: "当前代码库按婚姻、财富、事业、性格和运势专题整理的审校笔记。",
+    note: "用于补强专题报告的知识检索密度；仍属于本地审校材料，不替代后续书籍、PDF和案例库的结构化录入。"
   }
 ];
 

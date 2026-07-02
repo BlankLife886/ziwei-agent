@@ -12,6 +12,7 @@ import {
   buildKnowledgeSnippetStore,
   loadKnowledgeSnippetStore
 } from "../src/agent/knowledgeSnippetStore.js";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
@@ -82,7 +83,7 @@ test("example knowledge store covers the default report pipeline", async () => {
   assert.equal(store.status, "ready");
   assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
   assert.equal(pipelineResult.knowledgeMemory.retrieval.kind, "local-sparse-vector-index");
-  assert.equal(pipelineResult.knowledgeMemory.retrieval.snippetCount, 10);
+  assert.equal(pipelineResult.knowledgeMemory.retrieval.snippetCount, 20);
   assert.equal(pipelineResult.readinessAudit.percent >= 85, true);
   assert.deepEqual(pipelineResult.knowledgeCoverageAudit.missingSectionIds, []);
   assert.equal(
@@ -90,6 +91,45 @@ test("example knowledge store covers the default report pipeline", async () => {
       return section.knowledgeSnippetRefs.length > 0;
     }),
     true
+  );
+});
+
+test("example knowledge store provides layered topic snippets for focused reports", async () => {
+  const store = await loadKnowledgeSnippetStore("data/knowledge-snippets.example.json");
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    knowledgeSnippets: store.snippets,
+    queryIntent: parseQueryIntentFromText("我想看婚姻、财富、事业和当前运势。")
+  });
+  const sectionsById = new Map(
+    pipelineResult.reportPlan.sections.map((section) => [section.id, section])
+  );
+
+  assert.equal(store.status, "ready");
+  assert.equal(store.snippets.length, 20);
+  assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
+  assert.deepEqual(
+    pipelineResult.knowledgeCoverageAudit.missingSectionIds,
+    []
+  );
+  assert.ok(
+    sectionsById
+      .get("career-palace")
+      .knowledgeSnippetRefs.includes("knowledge-snippet.local.career-responsibility-layer")
+  );
+  assert.ok(
+    sectionsById
+      .get("wealth-palace")
+      .knowledgeSnippetRefs.includes("knowledge-snippet.local.wealth-resource-layer")
+  );
+  assert.ok(
+    sectionsById
+      .get("spouse-palace")
+      .knowledgeSnippetRefs.includes("knowledge-snippet.local.spouse-interaction-layer")
+  );
+  assert.ok(
+    sectionsById
+      .get("current-stage")
+      .knowledgeSnippetRefs.includes("knowledge-snippet.local.current-stage-layering")
   );
 });
 

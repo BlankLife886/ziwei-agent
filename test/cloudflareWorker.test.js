@@ -28,10 +28,12 @@ test("Cloudflare Worker serves health, readiness, and OpenAPI responses", async 
   assert.equal(healthResponse.status, 200);
   assert.equal(healthBody.status, "ok");
   assert.equal(healthBody.checks.platform, "cloudflare-workers");
+  assert.equal(healthBody.checks.knowledgeSnippetCount, 20);
   assert.equal(healthBody.release.source, "cloudflare-workers");
   assert.equal(readyResponse.status, 200);
   assert.equal(readyBody.status, "ready");
   assert.equal(readyBody.checks.runtime.platform, "cloudflare-workers");
+  assert.equal(readyBody.checks.knowledge.count, 20);
   assert.match(readyBody.checks.agentEntry.pipeline, /reportPublisher/u);
   assert.equal(openApiResponse.status, 200);
   assert.equal(openApiBody.openapi, "3.1.0");
@@ -94,6 +96,7 @@ test("Cloudflare Worker runs the full agent report route with bearer auth", asyn
   assert.equal(response.status, 200);
   assert.equal(body.status, "published");
   assert.equal(body.report.status, "published");
+  assert.ok(body.report.appendix.knowledgeSnippets.length > 0);
   assert.ok(body.chart);
   assert.equal(body.diagnostics.authorization.principalId, "worker-client");
   assert.equal(response.headers.get("x-request-id"), body.requestId);

@@ -112,6 +112,125 @@
       "citation": "本地审校分析框架样本 / 当前阶段合参",
       "status": "verified",
       "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.life-triad-topic-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "命宫三方四正专题层次笔记",
+      "topicIds": ["life", "personality"],
+      "referenceRefs": ["framework.life-triad"],
+      "excerpt": "命宫专题先区分本宫、三方与对宫的角色：本宫描述主体基调，财帛和官禄用于观察资源与职责承接，迁移用于观察外部互动；报告应写成层次关系，不把单一星曜扩大成完整人格结论。",
+      "citation": "本地审校专题知识笔记 / 命宫三方四正层次",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.life-star-balance-topic-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "性格基础与星曜类别合参笔记",
+      "topicIds": ["life", "personality"],
+      "referenceRefs": ["framework.star-balance"],
+      "excerpt": "基础性格分析需要把主星、辅星、煞曜和空曜分层书写：主星给出主要结构，辅星提供辅助资源，煞曜提示压力点，空曜提示不宜过度坐实的区域；这些只构成观察角度，不构成绝对评价。",
+      "citation": "本地审校专题知识笔记 / 星曜类别合参",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.career-responsibility-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "事业责任结构专题笔记",
+      "topicIds": ["career"],
+      "referenceRefs": ["framework.career-palace"],
+      "excerpt": "事业专题写作应先把官禄宫作为职责和工作方式的主轴，再以命宫观察主体承载，以财帛宫观察资源承接，以夫妻宫观察合作牵动；当前只可描述责任结构和协作线索。",
+      "citation": "本地审校专题知识笔记 / 事业责任结构",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.career-boundary-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "事业专题边界控制笔记",
+      "topicIds": ["career"],
+      "referenceRefs": ["framework.career-palace"],
+      "excerpt": "事业报告即使命中官禄宫星曜，也不能直接写成职位高低、行业定向、录用结果或晋升时间；应保留为能力结构、压力来源、协作方式和后续需要补充资料的方向。",
+      "citation": "本地审校专题知识笔记 / 事业边界控制",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.wealth-resource-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "财富资源结构专题笔记",
+      "topicIds": ["wealth"],
+      "referenceRefs": ["framework.wealth-palace"],
+      "excerpt": "财富专题以财帛宫观察资源经营方式，以命宫观察主体偏好，以官禄宫观察事业承接，以福德宫观察取舍和消费倾向；报告应聚焦资源结构、风险意识和决策风格。",
+      "citation": "本地审校专题知识笔记 / 财富资源结构",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.wealth-risk-boundary-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "财富专题风险边界笔记",
+      "topicIds": ["wealth"],
+      "referenceRefs": ["framework.wealth-palace"],
+      "excerpt": "财富分析不能把星曜组合写成收益承诺、亏损结论、投资建议或金额判断；更适合输出资源流动方式、决策偏好、需要谨慎核验的风险点和咨询追问。",
+      "citation": "本地审校专题知识笔记 / 财富风险边界",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.spouse-interaction-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "婚姻互动结构专题笔记",
+      "topicIds": ["marriage"],
+      "referenceRefs": ["framework.spouse-palace"],
+      "excerpt": "婚姻专题以夫妻宫观察关系互动主轴，以迁移宫观察外部相处和边界，以官禄宫观察现实责任，以福德宫观察内在感受；报告应写互动结构和沟通重点。",
+      "citation": "本地审校专题知识笔记 / 婚姻互动结构",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.spouse-boundary-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "婚姻专题边界控制笔记",
+      "topicIds": ["marriage"],
+      "referenceRefs": ["framework.spouse-palace"],
+      "excerpt": "婚姻感情报告不能把夫妻宫星曜直接写成结婚时间、伴侣身份、分合事件或关系结局；当前适合描述相处模式、现实压力、沟通资源和需要进一步合参的条件。",
+      "citation": "本地审校专题知识笔记 / 婚姻边界控制",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.current-stage-layering",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "当前阶段多层合参专题笔记",
+      "topicIds": ["fortune", "timing", "transformation"],
+      "referenceRefs": [
+        "framework.current-stage",
+        "rule.current-major-period",
+        "rule.annual-four-transformations",
+        "framework.timing-combination-verification"
+      ],
+      "excerpt": "当前阶段运势写作需要按层次排列：先定位当前大限，再列出生年四化、大限四化、流年四化和流月骨架，最后只把通过组合验证的观察点写入主题；未验证的层次只能作为后续追问。",
+      "citation": "本地审校专题知识笔记 / 当前阶段多层合参",
+      "status": "verified",
+      "riskLevel": "low"
+    },
+    {
+      "id": "knowledge-snippet.local.timing-trigger-boundary-layer",
+      "sourceRef": "knowledge-source.local-reviewed-topic-notes",
+      "title": "运限触发观察点边界笔记",
+      "topicIds": ["fortune", "timing"],
+      "referenceRefs": [
+        "framework.timing-trigger-candidate",
+        "framework.timing-combination-theme",
+        "framework.timing-cross-layer-analysis"
+      ],
+      "excerpt": "运限触发候选只能说明多层结构在某些宫位形成观察点，组合主题也只能转成关系、资源、外部环境或内在承压等领域提示；它不是事件预测，也不应写成发生时间。",
+      "citation": "本地审校专题知识笔记 / 运限触发边界",
+      "status": "verified",
+      "riskLevel": "low"
     }
   ]
 }

@@ -224,7 +224,7 @@ test("runApiSmokeCheck uses resolved runtime secrets for bearer auth", async () 
     });
 
     assert.equal(result.status, "ready");
-    assert.equal(result.knowledgeSnippetCount, 10);
+    assert.equal(result.knowledgeSnippetCount, 20);
   } finally {
     await rm(tempDir, {
       force: true,
@@ -258,7 +258,7 @@ test("runApiSmokeCheck supports hashed credentials with a smoke-only token", asy
     });
 
     assert.equal(result.status, "ready");
-    assert.equal(result.knowledgeSnippetCount, 10);
+    assert.equal(result.knowledgeSnippetCount, 20);
   } finally {
     await rm(tempDir, {
       force: true,

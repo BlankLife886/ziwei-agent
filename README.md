@@ -26,7 +26,7 @@ node src/cli.js examples/profile.example.json data/knowledge-snippets.example.js
 npm run validate:knowledge
 ```
 
-`npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。这个示例知识库目前是本地审校分析框架样本，不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
+`npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。这个示例知识库目前包含本地审校分析框架样本和专题知识笔记，覆盖命宫、性格、婚姻、财富、事业和当前阶段运势；它不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
 
 如果要让 CLI 走外部大模型报告 provider，可设置以下环境变量：
 
@@ -155,7 +155,7 @@ kubectl apply -f deploy/kubernetes.yml
 - `src/agent/timingCombinationThemeInterpreter.js`: 把已通过组合验证的宫位转成当前阶段合参主题，例如关系、资源、外部环境或制度支持，仍不输出事件、应期或结果。
 - `src/agent/timingCrossLayerInterpreter.js`: 把已验证阶段主题与当前大限、流年、流月定位之间的同宫或分宫关系整理为跨层合参结构，仍不输出事件、应期或结果。
 - `src/agent/topicRefinementInterpreter.js`: 把报告章节整理为专题角度、证据范围和禁止断语，供确定性报告器和未来大模型按任务单写作。
-- `src/agent/knowledgeSnippetCatalog.js`: 定义外部书籍、PDF、笔记和知识库片段的 schema、审计和检索接口；只有字段完整、来源已登记且 `status` 为 `verified` 的片段才允许进入报告规划，当前示例只包含本地审校框架样本，不把未录入内容作为报告依据。
+- `src/agent/knowledgeSnippetCatalog.js`: 定义外部书籍、PDF、笔记和知识库片段的 schema、审计和检索接口；只有字段完整、来源已登记且 `status` 为 `verified` 的片段才允许进入报告规划，当前示例包含本地审校框架样本和专题知识笔记，不把未录入内容作为报告依据。
 - `src/agent/knowledgeSnippetIngestor.js`: 把候选摘录或研读笔记标准化为 draft 知识片段，并提供晋升为 verified 的门禁，避免未复核材料直接进入报告依据。
 - `src/agent/knowledgeSnippetStore.js`: 从 JSON 文件加载 verified 知识片段，逐条审计后只把通过的片段交给报告规划。
 - `src/agent/interpretationCatalog.js`: 定义当前可用的命理解释条目，让报告正文引用受控解释，而不是直接散写断语。

@@ -9,6 +9,7 @@ import {
   buildReleaseMetadata,
   buildServerRuntimeConfig
 } from "./serverRuntimeConfig.js";
+import defaultKnowledgeSnippetStore from "../data/knowledge-snippets.example.json" with { type: "json" };
 
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
@@ -185,48 +186,14 @@ function normalizeWorkerEnv(env) {
 
 function parseKnowledgeSnippetsFromWorkerEnv(env) {
   if (!env.ZIWEI_KNOWLEDGE_SNIPPETS) {
-    return {
-      status: "ready",
-      snippets: [],
-      issues: []
-    };
+    return parseKnowledgeSnippetPayload(defaultKnowledgeSnippetStore, "bundled-default");
   }
 
   try {
-    const payload = JSON.parse(env.ZIWEI_KNOWLEDGE_SNIPPETS);
-    const snippets = Array.isArray(payload) ? payload : payload?.snippets;
-
-    if (!Array.isArray(snippets)) {
-      return {
-        status: "invalid",
-        snippets: [],
-        issues: [
-          {
-            id: "cloudflare-knowledge.snippets.required",
-            message: "ZIWEI_KNOWLEDGE_SNIPPETS 必须是 snippets 数组或包含 snippets 数组的 JSON object。"
-          }
-        ]
-      };
-    }
-
-    const audits = snippets.map((snippet) => {
-      return {
-        snippetId: snippet?.id ?? null,
-        audit: auditKnowledgeSnippet(snippet)
-      };
-    });
-    const issues = audits.flatMap((item) => {
-      return item.audit.issues.map((issue) => ({
-        ...issue,
-        snippetId: item.snippetId
-      }));
-    });
-
-    return {
-      status: issues.length === 0 ? "ready" : "invalid",
-      snippets: snippets.filter((_, index) => audits[index].audit.status === "passed"),
-      issues
-    };
+    return parseKnowledgeSnippetPayload(
+      JSON.parse(env.ZIWEI_KNOWLEDGE_SNIPPETS),
+      "env"
+    );
   } catch {
     return {
       status: "invalid",
@@ -239,6 +206,44 @@ function parseKnowledgeSnippetsFromWorkerEnv(env) {
       ]
     };
   }
+}
+
+function parseKnowledgeSnippetPayload(payload, source) {
+  const snippets = Array.isArray(payload) ? payload : payload?.snippets;
+
+  if (!Array.isArray(snippets)) {
+    return {
+      status: "invalid",
+      source,
+      snippets: [],
+      issues: [
+        {
+          id: "cloudflare-knowledge.snippets.required",
+          message: "ZIWEI_KNOWLEDGE_SNIPPETS 必须是 snippets 数组或包含 snippets 数组的 JSON object。"
+        }
+      ]
+    };
+  }
+
+  const audits = snippets.map((snippet) => {
+    return {
+      snippetId: snippet?.id ?? null,
+      audit: auditKnowledgeSnippet(snippet)
+    };
+  });
+  const issues = audits.flatMap((item) => {
+    return item.audit.issues.map((issue) => ({
+      ...issue,
+      snippetId: item.snippetId
+    }));
+  });
+
+  return {
+    status: issues.length === 0 ? "ready" : "invalid",
+    source,
+    snippets: snippets.filter((_, index) => audits[index].audit.status === "passed"),
+    issues
+  };
 }
 
 function createWorkerRateLimiter(env) {
