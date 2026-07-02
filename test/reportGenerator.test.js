@@ -77,6 +77,14 @@ test("generateReportDraft uses the deterministic provider without bypassing draf
   assert.equal(reportGeneration.status, "generated");
   assert.equal(reportGeneration.providerId, REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE);
   assert.equal(reportGeneration.providerResolution.mode, "deterministic");
+  assert.equal(reportGeneration.toolRuntime.status, "ready");
+  assert.ok(
+    reportGeneration.toolRuntime.toolIds.includes(
+      `report-draft-provider:${REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE}`
+    )
+  );
+  assert.equal(reportGeneration.toolExecution.status, "succeeded");
+  assert.equal(reportGeneration.toolExecution.kind, "report-draft-provider");
   assert.equal(reportGeneration.reportDraft.status, "drafted");
   assert.equal(
     reportGeneration.reportDraft.generation.providerId,
@@ -149,6 +157,8 @@ test("generateReportDraft runs a configured external LLM provider inside the rep
   assert.equal(reportGeneration.generationContext.providerMode, "external-llm");
   assert.equal(reportGeneration.providerResolution.mode, "external-llm");
   assert.equal(reportGeneration.providerId, "configured-external-llm");
+  assert.equal(reportGeneration.toolExecution.status, "succeeded");
+  assert.equal(reportGeneration.toolExecution.outputContract.auditGate, "reportAuditor");
   assert.equal(reportGeneration.reportDraft.generation.providerId, "configured-external-llm");
   assert.equal(
     reportGeneration.reportDraft.generation.outputContract.publishGate,
@@ -182,6 +192,8 @@ test("generateReportDraft blocks promise-returning providers on the sync path", 
 
   assert.equal(reportGeneration.status, "blocked");
   assert.equal(reportGeneration.providerId, "async-provider");
+  assert.equal(reportGeneration.toolExecution.status, "blocked");
+  assert.equal(reportGeneration.toolExecution.reason, "async-handler-on-sync-path");
   assert.equal(asyncProviderCalled, false);
   assert.ok(reportGeneration.messages[0].includes("同步 pipeline 已阻断"));
 });

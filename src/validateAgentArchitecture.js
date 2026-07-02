@@ -17,7 +17,6 @@ async function main() {
       cloudflareDeployment: true,
       ciReleaseGate: true,
       humanKnowledgeReview: true,
-      genericToolRegistry: false,
       longTermMemory: false,
       vectorStore: false,
       webSessionAuth: false

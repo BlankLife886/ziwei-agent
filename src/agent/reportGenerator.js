@@ -1,4 +1,11 @@
 import { createReportDraft } from "./reportComposer.js";
+import {
+  createToolDefinition,
+  createToolRegistry,
+  executeTool,
+  executeToolAsync,
+  summarizeToolExecution
+} from "./toolRuntime.js";
 
 // 报告生成器抽象层。
 //
@@ -24,7 +31,7 @@ export function generateReportDraft(reportPlan, options = {}) {
     return preparedGeneration.blockedResult;
   }
 
-  const providerResult = callReportDraftProvider(preparedGeneration.providerResolution.provider, {
+  const toolRun = runReportDraftProviderTool(preparedGeneration.providerResolution, {
     reportPlan,
     generationContext: preparedGeneration.generationContext
   });
@@ -32,7 +39,9 @@ export function generateReportDraft(reportPlan, options = {}) {
   return finalizeReportGeneration({
     generationContext: preparedGeneration.generationContext,
     providerResolution: preparedGeneration.providerResolution,
-    providerResult
+    providerResult: toolRun.providerResult,
+    toolRuntime: toolRun.toolRuntime,
+    toolExecution: toolRun.toolExecution
   });
 }
 
@@ -43,7 +52,7 @@ export async function generateReportDraftAsync(reportPlan, options = {}) {
     return preparedGeneration.blockedResult;
   }
 
-  const providerResult = await callReportDraftProviderAsync(preparedGeneration.providerResolution.provider, {
+  const toolRun = await runReportDraftProviderToolAsync(preparedGeneration.providerResolution, {
     reportPlan,
     generationContext: preparedGeneration.generationContext
   });
@@ -51,7 +60,9 @@ export async function generateReportDraftAsync(reportPlan, options = {}) {
   return finalizeReportGeneration({
     generationContext: preparedGeneration.generationContext,
     providerResolution: preparedGeneration.providerResolution,
-    providerResult
+    providerResult: toolRun.providerResult,
+    toolRuntime: toolRun.toolRuntime,
+    toolExecution: toolRun.toolExecution
   });
 }
 
@@ -101,7 +112,9 @@ function prepareReportGeneration(reportPlan, options) {
 function finalizeReportGeneration({
   generationContext,
   providerResolution,
-  providerResult
+  providerResult,
+  toolRuntime,
+  toolExecution
 }) {
   if (!providerResult?.reportDraft) {
     const failureMessages = [
@@ -116,6 +129,8 @@ function finalizeReportGeneration({
       messages: failureMessages,
       generationContext,
       providerResolution,
+      toolRuntime,
+      toolExecution,
       reportDraft: {
         status: "blocked",
         messages: failureMessages,
@@ -138,6 +153,8 @@ function finalizeReportGeneration({
     messages: providerResult.messages ?? [],
     generationContext,
     providerResolution,
+    toolRuntime,
+    toolExecution,
     reportDraft
   };
 }
@@ -239,54 +256,93 @@ export function createDeterministicDraftProvider() {
   };
 }
 
-function callReportDraftProvider(provider, input) {
-  if (isAsyncFunction(provider)) {
+function runReportDraftProviderTool(providerResolution, input) {
+  const preparedTool = createReportDraftProviderTool(providerResolution);
+  const execution = executeTool(preparedTool.registry, preparedTool.toolId, input);
+
+  return {
+    toolRuntime: preparedTool.summary,
+    toolExecution: summarizeToolExecution(execution),
+    providerResult: normalizeToolExecutionProviderResult(execution)
+  };
+}
+
+async function runReportDraftProviderToolAsync(providerResolution, input) {
+  const preparedTool = createReportDraftProviderTool(providerResolution);
+  const execution = await executeToolAsync(preparedTool.registry, preparedTool.toolId, input);
+
+  return {
+    toolRuntime: preparedTool.summary,
+    toolExecution: summarizeToolExecution(execution),
+    providerResult: normalizeToolExecutionProviderResult(execution)
+  };
+}
+
+function createReportDraftProviderTool(providerResolution) {
+  const toolId = `report-draft-provider:${providerResolution.providerId}`;
+  const registry = createToolRegistry([
+    createToolDefinition({
+      id: toolId,
+      kind: "report-draft-provider",
+      owner: "agent",
+      description: "执行受控报告草稿 provider。",
+      inputContract: {
+        requiredFields: ["reportPlan", "generationContext"]
+      },
+      outputContract: {
+        requiredFields: ["providerId", "reportDraft"],
+        auditGate: "reportAuditor",
+        publishGate: "reportPublisher"
+      },
+      handler: providerResolution.provider
+    })
+  ]);
+
+  return {
+    toolId,
+    registry,
+    summary: {
+      status: registry.status,
+      version: registry.version,
+      toolIds: registry.toolIds,
+      issues: registry.issues,
+      selectedToolId: toolId
+    }
+  };
+}
+
+function normalizeToolExecutionProviderResult(execution) {
+  if (execution.status === "succeeded") {
+    return execution.output;
+  }
+
+  if (execution.reason === "async-handler-on-sync-path") {
     return {
       providerId: "async-provider",
       messages: ["报告生成 provider 是 async function；同步 pipeline 已阻断，请使用 generateReportDraftAsync 或 runZiweiPipelineAsync。"]
     };
   }
 
-  try {
-    const providerResult = provider(input);
-
-    if (isPromiseLike(providerResult)) {
-      return {
-        providerId: "async-provider",
-        messages: ["报告生成 provider 返回 Promise；同步 pipeline 已阻断，请使用 generateReportDraftAsync 或 runZiweiPipelineAsync。"]
-      };
-    }
-
-    return providerResult;
-  } catch (error) {
+  if (execution.reason === "promise-output-on-sync-path") {
     return {
-      providerId: "provider-error",
-      messages: [
-        `报告生成 provider 执行失败：${error instanceof Error ? error.message : String(error)}`
-      ]
+      providerId: "async-provider",
+      messages: ["报告生成 provider 返回 Promise；同步 pipeline 已阻断，请使用 generateReportDraftAsync 或 runZiweiPipelineAsync。"]
     };
   }
-}
 
-async function callReportDraftProviderAsync(provider, input) {
-  try {
-    return await provider(input);
-  } catch (error) {
+  if (execution.reason === "tool-execution-error") {
     return {
       providerId: "provider-error",
-      messages: [
-        `报告生成 provider 执行失败：${error instanceof Error ? error.message : String(error)}`
-      ]
+      messages: execution.messages.map((message) => {
+        return message.replace("工具执行失败", "报告生成 provider 执行失败");
+      })
     };
   }
-}
 
-function isPromiseLike(value) {
-  return Boolean(value) && typeof value.then === "function";
-}
-
-function isAsyncFunction(value) {
-  return value?.constructor?.name === "AsyncFunction";
+  return {
+    providerId: "tool-runtime-blocked",
+    messages: execution.messages
+  };
 }
 
 function buildGenerationSectionInput(section) {

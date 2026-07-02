@@ -30,8 +30,8 @@ test("auditAgentArchitectureCompliance confirms the current complex agent skelet
   assert.ok(
     audit.items.some((item) => {
       return item.id === "tool-runtime" &&
-        item.status === "partial" &&
-        item.message.includes("通用 Tool Registry");
+        item.status === "aligned" &&
+        item.message.includes("工具执行审计");
     })
   );
   assert.ok(

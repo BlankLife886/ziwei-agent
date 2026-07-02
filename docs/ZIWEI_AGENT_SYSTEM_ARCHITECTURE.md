@@ -15,6 +15,7 @@
   + 知识库检索与审计
   + 报告规划
   + 报告生成器合同
+  + Tool Runtime
   + 确定性或外部大模型写作 provider
   + 报告审计
   + 发布门禁
@@ -27,6 +28,7 @@
 - 排盘计算层只负责结构化命盘，不写报告。
 - 报告层只使用 pipeline 提供的证据、引用和知识片段，不重新排盘。
 - 外部大模型只能作为报告写作 provider，不能绕过证据链、知识审计和发布门禁。
+- 报告 provider 必须通过 `toolRuntime` 登记和执行，不能在 pipeline 中裸调用不可审计函数。
 - 用户最终拿到的是 `reportOutput` 用户报告，而不是模型自由聊天文本。
 - 未通过 `reportAuditor` 的草稿不能发布。
 - 阻断、审计失败和能力缺口必须进入 `recoveryPlan`，不能只停留在散落的错误文案。
@@ -46,6 +48,7 @@
   -> reportPlanner 规划报告章节
   -> knowledgeCoverageAuditor 审计知识覆盖
   -> reportGenerator 构建 generationContext
+  -> toolRuntime 登记并执行报告 provider
   -> deterministic-template 或 external-llm provider 生成草稿
   -> reportAuditor 审计断语、证据链和引用链
   -> reportPublisher 发布用户报告
@@ -77,6 +80,7 @@
 | Agent 上下文层 | `ziweiAgent` | 把命盘转为证据、重点、限制、追问 |
 | 规划层 | `reportPlanner`, `topicRefinementInterpreter` | 生成章节计划和专题任务单 |
 | 知识层 | `knowledgeSnippetCatalog`, `knowledgeSnippetStore`, `knowledgeCoverageAuditor` | 管理 verified 知识片段，审计章节知识覆盖 |
+| 工具执行层 | `toolRuntime` | 登记工具、执行工具、记录 toolId/合同/耗时/阻断原因 |
 | 生成层 | `reportGenerator`, `reportComposer`, `externalLLMReportProvider` | 用受控 generation context 生成报告草稿 |
 | 审计发布层 | `reportAuditor`, `reportPublisher` | 阻断越权断语，发布合格用户报告 |
 | 恢复层 | `recoveryPlanner` | 把阻断、审计失败和能力缺口转换为 owner/priority/nextStep 明确的恢复计划 |
@@ -101,8 +105,9 @@ flowchart TD
     AGENT --> PLAN["reportPlanner<br/>报告章节规划"]
     PLAN --> KCHECK["knowledgeCoverageAuditor<br/>知识覆盖审计"]
     KCHECK --> GENCTX["reportGenerator<br/>generationContext 合同"]
+    GENCTX --> TOOLS["toolRuntime<br/>Tool Registry / 执行审计"]
 
-    GENCTX --> PROVIDER{"报告 Provider"}
+    TOOLS --> PROVIDER{"报告 Provider"}
     PROVIDER --> DET["deterministic-template<br/>确定性保守草稿"]
     PROVIDER --> LLM["external-llm<br/>外部大模型写作器"]
 

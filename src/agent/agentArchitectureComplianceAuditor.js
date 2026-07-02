@@ -17,7 +17,6 @@ const DEFAULT_CAPABILITIES = {
   cloudflareDeployment: true,
   ciReleaseGate: true,
   humanKnowledgeReview: true,
-  genericToolRegistry: false,
   longTermMemory: false,
   vectorStore: false,
   webSessionAuth: false
@@ -99,16 +98,24 @@ const ARCHITECTURE_ITEMS = [
     title: "Tool Runtime 工具系统",
     weight: 8,
     critical: false,
-    evaluate: ({ pipelineResult, capabilities }) => {
+    evaluate: ({ pipelineResult }) => {
       const providerResolution = pipelineResult.reportGeneration?.providerResolution;
       const providerReady = providerResolution?.status === "ready";
+      const toolRuntime = pipelineResult.reportGeneration?.toolRuntime;
+      const toolExecution = pipelineResult.reportGeneration?.toolExecution;
+      const hasRegistry = toolRuntime?.status === "ready" &&
+        Array.isArray(toolRuntime.toolIds) &&
+        toolRuntime.toolIds.length > 0;
+      const hasExecutionAudit = toolExecution &&
+        ["succeeded", "blocked"].includes(toolExecution.status) &&
+        typeof toolExecution.toolId === "string";
 
-      if (providerReady && capabilities.genericToolRegistry) {
-        return aligned("已具备 provider 边界和通用 Tool Registry。");
+      if (providerReady && hasRegistry && hasExecutionAudit) {
+        return aligned("已具备 provider 边界、通用 Tool Registry 和工具执行审计。");
       }
 
       if (providerReady) {
-        return partial("已具备 deterministic/external-llm provider 边界，但还不是通用 Tool Registry。", 0.65);
+        return partial("已具备 deterministic/external-llm provider 边界，但工具执行审计尚未完整接入。", 0.65);
       }
 
       return missing("缺少可审计的工具/provider 执行边界。");

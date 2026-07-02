@@ -75,6 +75,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `topicRefinementInterpreter`：把报告章节整理成专题角度、证据范围和禁止断语，作为确定性报告器和未来大模型的可审计任务单。
 - `knowledgeCoverageAuditor`：审计每个报告章节是否已有 verified 外部知识片段，用于判断能否升级为文献/知识库支撑的深入报告；该审计不阻塞当前保守底稿发布。
 - `reportGenerator`：建立报告生成器合同，把章节、证据、引用、知识片段、解释条目、专题细分任务单和 guardrails 组织成可交给报告 provider 的 generation context；当前默认 provider 调用确定性模板，也支持选择同步或异步外部大模型 provider。若选择 `external-llm` 但未配置可调用 provider，会在生成前阻断。
+- `toolRuntime`：提供通用 Tool Registry 和执行审计，当前报告 provider 也通过 `report-draft-provider:*` 工具调用，保留 toolId、执行模式、输入/输出合同、耗时和阻断原因。
 - `externalLLMReportProvider`：把 generation context 包装为通用 HTTP 大模型请求，并把响应解析为 `reportDraft`；缺配置、HTTP 失败、请求超时、响应过大或响应不可解析都会阻断发布，并返回不含密钥和请求体的诊断信息。
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
@@ -136,7 +137,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 `NODE_ENV=production` 或 `ZIWEI_REQUIRE_API_AUTH=true` 时，服务启动前会执行运行时配置校验。没有 API credential、credential JSON 不合法、没有任一当前可用的 `reports:write` 或 `*` scope、生命周期字段非法、端口/限流/请求体上限非法、观测模式非法、secret 文件不合法，都会阻止服务启动。`npm run validate:runtime` 可在部署前单独执行同一套校验；`npm run smoke:api` 会启动临时 HTTP 服务并真实请求 `/health`、`/ready` 与 `/v1/reports`，用于验证入口到用户报告发布的链路；`npm run validate:deploy` 会进一步串联运行时门禁、知识库审计和 API smoke；`npm run validate:architecture` 会按复杂 Agent 架构审计 Router、Context Builder、Planner、State Machine、Executor、Reviewer、Guardrails、Observability 和 Deployment 等核心层；`npm run validate:release` 会把测试、知识库、运行时、部署、Cloudflare dry-run、架构合规审计、示例环境和 diff 检查串成发布总门禁。`npm run validate:release:summary` 或 `node src/validateRelease.js --summary <path>` 会执行同一条门禁并输出机器可读 release summary，供 CI artifact、部署平台或人工审计留证。
 
-当前架构合规审计状态为 `aligned_with_gaps`，说明核心 agent 骨架成立，但通用 Tool Registry、长期记忆、向量库、产品侧审批流和复杂自动恢复仍是后续 gap。
+当前架构合规审计状态为 `aligned_with_gaps`，说明核心 agent 骨架成立；剩余主要 gap 是长期记忆、向量库、知识覆盖扩充和产品侧审批流。
 
 生产发布、credential 轮换、健康检查、观测诊断和回滚流程记录在 `docs/OPERATIONS.md`。该文档属于工程运行边界，不改变排盘、解释、报告规划或发布门禁。
 
@@ -180,6 +181,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有 agent 分析上下文层。
 - 有报告规划层。
 - 有报告生成器合同层。
+- 有通用 Tool Runtime，能登记工具、区分同步/异步执行路径，并记录不含输入正文的执行摘要。
 - 有正文草稿生成层。
 - 有报告审计层。
 - 有报告发布门禁。
@@ -197,7 +199,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、结构化恢复计划、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权、长期记忆、向量检索和通用 Tool Registry。
+- 报告生成器合同、provider 选择边界、通用 Tool Runtime、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、结构化恢复计划、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权、长期记忆和向量检索。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
