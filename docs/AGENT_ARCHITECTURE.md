@@ -56,6 +56,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 
 - `buildChart`：只负责排盘计算，输出结构化命盘。
 - `queryIntentParser`：把用户问题转换成可审计的专题意图。
+- `runtimeEnv`：在服务启动前汇合托管密钥命令、mounted secret 文件和单项 secret 文件，只允许白名单运行时键，失败时阻断部署校验。
 - `serverRuntimeConfig`：在服务启动前校验端口、请求体上限、限流、观测模式和生产鉴权配置；生产模式下没有当前可用的可写报告 scope 时不会启动。
 - `smokeApi`：临时启动同一个 HTTP server，依次调用 `/health` 和 `/v1/reports`，证明部署环境中的 API 入口、鉴权、知识库加载、pipeline 和报告发布门禁可以串起来。
 - `validateDeployment`：部署前串联运行时配置、知识库 store 审计和 API smoke；配置了知识库但未通过审计时会阻断部署校验。
@@ -125,7 +126,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 当设置 `ZIWEI_API_TOKEN` 时，API 只接受 `authorization: Bearer <token>`，该 legacy token 自动获得 `reports:write`。生产式配置可使用 `ZIWEI_API_CREDENTIALS` JSON 数组登记多个 credential，每个 credential 包含 `id`、`token` 和 `scopes`，并可选 `disabled`、`notBefore`、`expiresAt` 做禁用、生效时间和过期控制；`POST /v1/reports` 必须具备当前可用的 `reports:write`。该鉴权只保护 API 入口，不改变 agent 内部证据、报告规划和审计逻辑。
 
-启动边界先经过 `runtimeEnv` 解析。`ZIWEI_RUNTIME_SECRETS_FILE` 可从 mounted JSON secret 中补齐 API credential、外部 LLM key 和 provider 配置；`ZIWEI_API_CREDENTIALS_FILE`、`ZIWEI_API_TOKEN_FILE`、`ZIWEI_LLM_API_KEY_FILE` 可从单项 secret 文件补齐对应环境变量。显式环境变量优先于文件内容，文件读取或解析失败会进入运行时/部署校验问题列表，不会静默降级为匿名服务。
+启动边界先经过 `runtimeEnv` 解析。`ZIWEI_MANAGED_SECRET_COMMAND` 可用无 shell 子进程从托管密钥平台 CLI 或内部 sidecar 拉取运行时 secret，输出支持运行时 JSON object、AWS `SecretString`、Azure `value` 或 GCP `payload.data`。`ZIWEI_RUNTIME_SECRETS_FILE` 可从 mounted JSON secret 中补齐 API credential、外部 LLM key 和 provider 配置；`ZIWEI_API_CREDENTIALS_FILE`、`ZIWEI_API_TOKEN_FILE`、`ZIWEI_LLM_API_KEY_FILE` 可从单项 secret 文件补齐对应环境变量。显式环境变量优先于托管密钥命令，托管密钥命令优先于文件内容；命令失败、文件读取或解析失败会进入运行时/部署校验问题列表，不会静默降级为匿名服务。
 
 `NODE_ENV=production` 或 `ZIWEI_REQUIRE_API_AUTH=true` 时，服务启动前会执行运行时配置校验。没有 API credential、credential JSON 不合法、没有任一当前可用的 `reports:write` 或 `*` scope、生命周期字段非法、端口/限流/请求体上限非法、观测模式非法、secret 文件不合法，都会阻止服务启动。`npm run validate:runtime` 可在部署前单独执行同一套校验；`npm run smoke:api` 会启动临时 HTTP 服务并真实请求 `/health`、`/ready` 与 `/v1/reports`，用于验证入口到用户报告发布的链路；`npm run validate:deploy` 会进一步串联运行时门禁、知识库审计和 API smoke；`npm run validate:release` 会把测试、知识库、运行时、部署、示例环境和 diff 检查串成发布总门禁。
 
@@ -175,7 +176,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有报告审计层。
 - 有报告发布门禁。
 - 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
-- 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、secret 文件载入、请求追踪、结构化观测、脱敏日志、liveness/readiness 探针、内存限流和可选文件持久化配额。
+- 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、托管密钥命令桥接、secret 文件载入、请求追踪、结构化观测、脱敏日志、liveness/readiness 探针、内存限流和可选文件持久化配额。
 - 有运行时配置校验、部署校验、发布总门禁、GitHub Actions CI、API smoke 校验、运维手册、Dockerfile、Compose/Kubernetes 部署模板、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
@@ -185,7 +186,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、CI 工作流、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但托管密钥平台和真实环境部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、CI 工作流、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但真实环境部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。

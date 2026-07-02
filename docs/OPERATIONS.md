@@ -40,16 +40,18 @@ ZIWEI_API_QUOTA_STORE=.runtime/api-quota.json
 ZIWEI_KNOWLEDGE_STORE=data/knowledge-snippets.example.json
 ```
 
-生产中可把密钥放进 mounted secret 文件，避免直接写在 `.env`：
+生产中可把密钥放进托管密钥平台或 mounted secret 文件，避免直接写在 `.env`：
 
 ```bash
+ZIWEI_MANAGED_SECRET_COMMAND='["aws","secretsmanager","get-secret-value","--secret-id","ziwei-agent/runtime"]'
+ZIWEI_MANAGED_SECRET_TIMEOUT_MS=5000
 ZIWEI_RUNTIME_SECRETS_FILE=/run/secrets/ziwei-runtime.json
 ZIWEI_API_CREDENTIALS_FILE=/run/secrets/ziwei-api-credentials
 ZIWEI_API_TOKEN_FILE=/run/secrets/ziwei-api-token
 ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
 ```
 
-`ZIWEI_RUNTIME_SECRETS_FILE` 必须是 JSON object，键名沿用环境变量名，例如：
+`ZIWEI_MANAGED_SECRET_COMMAND` 必须是 JSON 字符串数组，运行时用无 shell 子进程执行。命令可以对接 AWS Secrets Manager、GCP Secret Manager、Azure Key Vault CLI 或内部 sidecar；输出必须能解析为运行时 JSON object，也支持 AWS `SecretString`、Azure `value` 和 GCP `payload.data` 包装。`ZIWEI_RUNTIME_SECRETS_FILE` 必须是 JSON object，键名沿用环境变量名，例如：
 
 ```json
 {
@@ -64,7 +66,7 @@ ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
 }
 ```
 
-直接环境变量优先于 secret 文件。secret 文件读取失败、JSON 不合法或包含未支持键时，启动校验和部署校验会失败。
+直接环境变量优先于托管密钥命令，托管密钥命令优先于 mounted secret 文件。命令超时、命令非零退出、secret 文件读取失败、JSON 不合法或包含未支持键时，启动校验和部署校验会失败。
 
 ## 部署模板
 

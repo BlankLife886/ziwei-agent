@@ -67,6 +67,79 @@ test("resolveRuntimeEnv lets explicit env values override runtime secrets file v
   }
 });
 
+test("resolveRuntimeEnv loads managed secret command output without a shell", () => {
+  const secretPayload = {
+    SecretString: JSON.stringify({
+      ZIWEI_API_CREDENTIALS: [
+        {
+          id: "managed-client",
+          token: "managed-secret",
+          scopes: ["reports:write"]
+        }
+      ],
+      ZIWEI_LLM_API_KEY: "managed-model-secret"
+    })
+  };
+  const command = JSON.stringify([
+    process.execPath,
+    "-e",
+    `process.stdout.write(${JSON.stringify(JSON.stringify(secretPayload))})`
+  ]);
+  const runtimeEnv = resolveRuntimeEnv({
+    NODE_ENV: "production",
+    ZIWEI_MANAGED_SECRET_COMMAND: command
+  });
+  const config = buildServerRuntimeConfig(runtimeEnv.env);
+
+  assert.equal(runtimeEnv.status, "ready");
+  assert.equal(config.status, "ready");
+  assert.match(runtimeEnv.env.ZIWEI_API_CREDENTIALS, /managed-client/u);
+  assert.equal(runtimeEnv.env.ZIWEI_LLM_API_KEY, "managed-model-secret");
+  assert.deepEqual(runtimeEnv.secretSources, [
+    {
+      name: "ZIWEI_API_CREDENTIALS",
+      source: "managed-secret-command"
+    },
+    {
+      name: "ZIWEI_LLM_API_KEY",
+      source: "managed-secret-command"
+    }
+  ]);
+});
+
+test("resolveRuntimeEnv keeps direct env values ahead of managed secret command output", () => {
+  const command = JSON.stringify([
+    process.execPath,
+    "-e",
+    "process.stdout.write(JSON.stringify({ ZIWEI_API_TOKEN: 'managed-token' }))"
+  ]);
+  const runtimeEnv = resolveRuntimeEnv({
+    ZIWEI_MANAGED_SECRET_COMMAND: command,
+    ZIWEI_API_TOKEN: "direct-token"
+  });
+
+  assert.equal(runtimeEnv.status, "ready");
+  assert.equal(runtimeEnv.env.ZIWEI_API_TOKEN, "direct-token");
+  assert.equal(runtimeEnv.secretSources.length, 0);
+});
+
+test("resolveRuntimeEnv fails closed for invalid managed secret command output", () => {
+  const command = JSON.stringify([
+    process.execPath,
+    "-e",
+    "process.stdout.write(JSON.stringify({ UNSUPPORTED_SECRET: 'value' }))"
+  ]);
+  const runtimeEnv = resolveRuntimeEnv({
+    NODE_ENV: "production",
+    ZIWEI_MANAGED_SECRET_COMMAND: command
+  });
+
+  assert.equal(runtimeEnv.status, "invalid");
+  assert.ok(runtimeEnv.issues.some((issue) => {
+    return issue.includes("ZIWEI_MANAGED_SECRET_COMMAND 返回不支持的键");
+  }));
+});
+
 test("resolveRuntimeEnv loads single secret values from *_FILE paths", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "ziwei-runtime-env-"));
 
