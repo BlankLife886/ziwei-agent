@@ -240,25 +240,34 @@ function buildFocusAreas(chart, palaceByName) {
       id: "career-palace",
       title: "官禄宫三方四正",
       reason: "官禄宫用于建立事业发展报告的静态职业线索；当前合看官禄、命宫、财帛、夫妻四宫，不推职位高低或升迁时间。",
-      evidenceItems: careerTriadPalaces.map((palace) => {
-        return createPalaceEvidenceItem("career-palace", palace);
-      })
+      evidenceItems: [
+        ...careerTriadPalaces.map((palace) => {
+          return createPalaceEvidenceItem("career-palace", palace);
+        }),
+        ...buildTopicPalaceTransformationEvidenceItems(chart, "career-palace", "官禄宫")
+      ]
     },
     {
       id: "wealth-palace",
       title: "财帛宫三方四正",
       reason: "财帛宫用于建立财富资源报告的静态资源线索；当前合看财帛、命宫、官禄、福德四宫，不推具体金额或投资结果。",
-      evidenceItems: wealthTriadPalaces.map((palace) => {
-        return createPalaceEvidenceItem("wealth-palace", palace);
-      })
+      evidenceItems: [
+        ...wealthTriadPalaces.map((palace) => {
+          return createPalaceEvidenceItem("wealth-palace", palace);
+        }),
+        ...buildTopicPalaceTransformationEvidenceItems(chart, "wealth-palace", "财帛宫")
+      ]
     },
     {
       id: "spouse-palace",
       title: "夫妻宫三方四正",
       reason: "夫妻宫用于建立婚姻感情报告的静态关系线索；当前合看夫妻、迁移、官禄、福德四宫，不推具体婚恋事件。",
-      evidenceItems: spouseTriadPalaces.map((palace) => {
-        return createPalaceEvidenceItem("spouse-palace", palace);
-      })
+      evidenceItems: [
+        ...spouseTriadPalaces.map((palace) => {
+          return createPalaceEvidenceItem("spouse-palace", palace);
+        }),
+        ...buildTopicPalaceTransformationEvidenceItems(chart, "spouse-palace", "夫妻宫")
+      ]
     },
     {
       id: "body-palace",
@@ -464,6 +473,33 @@ function buildBirthYearTransformationEvidenceItems(chart) {
       "chart.starAnchors.birthYearTransformations",
       [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
       buildBirthYearTransformationEvidenceMetadata(chart)
+    )
+  ];
+}
+
+function buildTopicPalaceTransformationEvidenceItems(chart, scope, palaceName) {
+  const metadata = buildBirthYearTransformationEvidenceMetadata(chart);
+  const transformations = metadata.transformations.filter((transformation) => {
+    return transformation.targetPalaceName === palaceName;
+  });
+
+  if (transformations.length === 0) {
+    return [];
+  }
+
+  const palaceId = PALACE_EVIDENCE_IDS[palaceName] ?? palaceName;
+
+  return [
+    createEvidenceItem(
+      `${scope}.four-transformations.${palaceId}`,
+      `${palaceName}四化参照：${formatTransformationItems(transformations)}`,
+      "chart.starAnchors.birthYearTransformations",
+      getTopicPalaceTransformationReferenceRefs(palaceName),
+      {
+        transformationScope: "birth-year-topic-palace",
+        topicPalaceName: palaceName,
+        transformations
+      }
     )
   ];
 }
@@ -732,6 +768,19 @@ function getPalaceEvidenceReferenceRefs(scope) {
   return [REFERENCE_IDS.STAR_PLACEMENT];
 }
 
+function getTopicPalaceTransformationReferenceRefs(palaceName) {
+  const topicReferenceRefs = {
+    夫妻宫: REFERENCE_IDS.SPOUSE_PALACE,
+    财帛宫: REFERENCE_IDS.WEALTH_PALACE,
+    官禄宫: REFERENCE_IDS.CAREER_PALACE
+  };
+
+  return [
+    REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+    topicReferenceRefs[palaceName]
+  ].filter(Boolean);
+}
+
 function formatEvidenceText(evidenceItem) {
   return evidenceItem.text;
 }
@@ -777,6 +826,16 @@ function formatBirthYearFourTransformations(chart) {
       return `${star}${name}${palaceText}`;
     })
     .join("；");
+}
+
+function formatTransformationItems(transformations) {
+  return transformations.map((transformation) => {
+    const palaceText = transformation.targetPalaceName
+      ? `在${transformation.targetPalaceName}${transformation.targetPalaceBranch ?? ""}`
+      : "未落入已安星曜宫位";
+
+    return `${transformation.star}${transformation.name}${palaceText}`;
+  }).join("；");
 }
 
 function findPalaceContainingStar(chart, starName) {

@@ -192,7 +192,12 @@ test("createReportPlan turns ready agent context into report sections", () => {
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
       .referenceRefs,
-    ["framework.spouse-palace", "rule.star-placement", "framework.palace-role"]
+    [
+      "framework.spouse-palace",
+      "rule.star-placement",
+      "rule.birth-year-four-transformations",
+      "framework.palace-role"
+    ]
   );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
@@ -217,13 +222,19 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "interpretation.star.zuo-fu.wellbeing",
       "interpretation.star.you-bi.wellbeing",
       "interpretation.star.tian-yue.wellbeing",
-      "interpretation.star.tuo-luo.wellbeing"
+      "interpretation.star.tuo-luo.wellbeing",
+      "interpretation.four-transformations.topic.spouse-quan"
     ]
   );
   assert.ok(
     reportPlan.sections
       .find((section) => section.id === "spouse-palace")
       .evidence.some((item) => item.includes("夫妻宫卯"))
+  );
+  assert.ok(
+    reportPlan.sections
+      .find((section) => section.id === "spouse-palace")
+      .evidence.some((item) => item.includes("夫妻宫四化参照：武曲化权在夫妻宫卯"))
   );
   assert.deepEqual(
     reportPlan.sections.find((section) => section.id === "spouse-palace")
@@ -232,7 +243,8 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "spouse-palace.spouse-palace",
       "spouse-palace.travel-palace",
       "spouse-palace.career-palace",
-      "spouse-palace.wellbeing-palace"
+      "spouse-palace.wellbeing-palace",
+      "spouse-palace.four-transformations.spouse-palace"
     ]
   );
   assert.deepEqual(

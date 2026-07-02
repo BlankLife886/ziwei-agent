@@ -6,6 +6,7 @@ import {
   findFourTransformationStarPalaceInterpretationRefs,
   findFourTransformationStarRoleInterpretationRefs,
   findFourTransformationTargetPalaceInterpretationRefs,
+  findFourTransformationTopicPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findInterpretations,
   findStarRoleInterpretationRefs
@@ -288,6 +289,43 @@ test("findFourTransformationTargetPalaceInterpretationRefs maps supported target
   assert.ok(interpretations[7].text.includes("不能直接写成生育结果"));
   assert.ok(interpretations[8].text.includes("不能直接写成疾病诊断"));
   assert.ok(interpretations[9].text.includes("不能直接写成置业结果"));
+});
+
+test("findFourTransformationTopicPalaceInterpretationRefs maps topic palace transformation boundaries", () => {
+  const interpretationRefs = findFourTransformationTopicPalaceInterpretationRefs([
+    { name: "化权", targetPalaceName: "夫妻宫" },
+    { name: "化科", targetPalaceName: "财帛宫" },
+    { name: "化忌", targetPalaceName: "官禄宫" },
+    { name: "化禄", targetPalaceName: "迁移宫" },
+    { name: "化权" }
+  ]);
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_QUAN,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_KE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_JI
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.topic),
+    [
+      "four-transformation-topic-palace",
+      "four-transformation-topic-palace",
+      "four-transformation-topic-palace"
+    ]
+  );
+  assert.ok(interpretations[0].text.includes("婚姻感情专题中"));
+  assert.ok(interpretations[0].text.includes("不能直接写成谁掌控关系、婚姻结果或分合走向"));
+  assert.ok(interpretations[1].text.includes("财富资源专题中"));
+  assert.ok(interpretations[1].text.includes("不能直接写成名利、信用提升"));
+  assert.ok(interpretations[2].text.includes("事业发展专题中"));
+  assert.ok(interpretations[2].text.includes("不能直接写成失业、降职"));
+
+  assert.deepEqual(findFourTransformationTopicPalaceInterpretationRefs([
+    { name: "化禄", targetPalaceName: "迁移宫" }
+  ]), []);
 });
 
 test("findStarRoleInterpretationRefs maps life palace stars for personality analysis", () => {

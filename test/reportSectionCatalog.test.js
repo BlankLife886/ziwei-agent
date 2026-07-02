@@ -368,6 +368,50 @@ test("transformation sections include four transformation type boundaries from m
   ]);
 });
 
+test("topic palace sections include matching four transformation topic boundaries", () => {
+  assert.ok(buildSectionInterpretationRefs("spouse-palace", [
+    createPalaceEvidence("夫妻宫", {
+      mainStars: ["武曲"],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createTransformationEvidence([
+      { name: "化权", star: "武曲", targetPalaceName: "夫妻宫" }
+    ])
+  ]).includes("interpretation.four-transformations.topic.spouse-quan"));
+
+  assert.ok(buildSectionInterpretationRefs("wealth-palace", [
+    createPalaceEvidence("财帛宫", {
+      mainStars: ["天相"],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createTransformationEvidence([
+      { name: "化科", star: "太阴", targetPalaceName: "财帛宫" }
+    ])
+  ]).includes("interpretation.four-transformations.topic.wealth-ke"));
+
+  assert.ok(buildSectionInterpretationRefs("career-palace", [
+    createPalaceEvidence("官禄宫", {
+      mainStars: ["天府"],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createTransformationEvidence([
+      { name: "化忌", star: "天机", targetPalaceName: "官禄宫" }
+    ])
+  ]).includes("interpretation.four-transformations.topic.career-ji"));
+
+  assert.ok(!buildSectionInterpretationRefs("wealth-palace", [
+    createTransformationEvidence([
+      { name: "化禄", star: "贪狼", targetPalaceName: "迁移宫" }
+    ])
+  ]).includes("interpretation.four-transformations.topic.wealth-lu"));
+});
+
 function createPalaceEvidence(palaceName, starGroups) {
   return {
     id: `test.${palaceName}`,
@@ -375,6 +419,16 @@ function createPalaceEvidence(palaceName, starGroups) {
     metadata: {
       palaceName,
       starGroups
+    }
+  };
+}
+
+function createTransformationEvidence(transformations) {
+  return {
+    id: "test.transformations",
+    text: "四化测试证据",
+    metadata: {
+      transformations
     }
   };
 }

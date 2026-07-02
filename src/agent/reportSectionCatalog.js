@@ -4,6 +4,7 @@ import {
   findFourTransformationStarPalaceInterpretationRefs,
   findFourTransformationStarRoleInterpretationRefs,
   findFourTransformationTargetPalaceInterpretationRefs,
+  findFourTransformationTopicPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findStarRoleInterpretationRefs
 } from "./interpretationCatalog.js";
@@ -238,7 +239,8 @@ function buildSpouseTriadInterpretationRefs(evidenceItems) {
     INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY,
-    ...getStarRoleInterpretationRefs(evidenceItems)
+    ...getStarRoleInterpretationRefs(evidenceItems),
+    ...getFourTransformationTopicPalaceInterpretationRefs(evidenceItems)
   ];
 }
 
@@ -250,7 +252,8 @@ function buildCareerTriadInterpretationRefs(evidenceItems) {
     ...getStarRoleInterpretationRefsForPalaces(evidenceItems, [
       "官禄宫",
       "财帛宫"
-    ])
+    ]),
+    ...getFourTransformationTopicPalaceInterpretationRefs(evidenceItems)
   ];
 }
 
@@ -262,7 +265,8 @@ function buildWealthTriadInterpretationRefs(evidenceItems) {
     ...getStarRoleInterpretationRefsForPalaces(evidenceItems, [
       "财帛宫",
       "官禄宫"
-    ])
+    ]),
+    ...getFourTransformationTopicPalaceInterpretationRefs(evidenceItems)
   ];
 }
 
@@ -348,6 +352,14 @@ function getFourTransformationStarRoleInterpretationRefs(evidenceItems) {
   });
 
   return findFourTransformationStarRoleInterpretationRefs(transformations);
+}
+
+function getFourTransformationTopicPalaceInterpretationRefs(evidenceItems) {
+  const transformations = evidenceItems.flatMap((item) => {
+    return item.metadata?.transformations ?? [];
+  });
+
+  return findFourTransformationTopicPalaceInterpretationRefs(transformations);
 }
 
 function getMonthlyPeriodInterpretationRefs(evidenceItems) {

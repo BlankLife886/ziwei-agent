@@ -86,6 +86,18 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_STAR_ROLE_WEN_QU: "interpretation.four-transformations.star-role.wen-qu",
   FOUR_TRANSFORMATION_STAR_ROLE_ZUO_FU: "interpretation.four-transformations.star-role.zuo-fu",
   FOUR_TRANSFORMATION_STAR_ROLE_YOU_BI: "interpretation.four-transformations.star-role.you-bi",
+  FOUR_TRANSFORMATION_TOPIC_SPOUSE_LU: "interpretation.four-transformations.topic.spouse-lu",
+  FOUR_TRANSFORMATION_TOPIC_SPOUSE_QUAN: "interpretation.four-transformations.topic.spouse-quan",
+  FOUR_TRANSFORMATION_TOPIC_SPOUSE_KE: "interpretation.four-transformations.topic.spouse-ke",
+  FOUR_TRANSFORMATION_TOPIC_SPOUSE_JI: "interpretation.four-transformations.topic.spouse-ji",
+  FOUR_TRANSFORMATION_TOPIC_WEALTH_LU: "interpretation.four-transformations.topic.wealth-lu",
+  FOUR_TRANSFORMATION_TOPIC_WEALTH_QUAN: "interpretation.four-transformations.topic.wealth-quan",
+  FOUR_TRANSFORMATION_TOPIC_WEALTH_KE: "interpretation.four-transformations.topic.wealth-ke",
+  FOUR_TRANSFORMATION_TOPIC_WEALTH_JI: "interpretation.four-transformations.topic.wealth-ji",
+  FOUR_TRANSFORMATION_TOPIC_CAREER_LU: "interpretation.four-transformations.topic.career-lu",
+  FOUR_TRANSFORMATION_TOPIC_CAREER_QUAN: "interpretation.four-transformations.topic.career-quan",
+  FOUR_TRANSFORMATION_TOPIC_CAREER_KE: "interpretation.four-transformations.topic.career-ke",
+  FOUR_TRANSFORMATION_TOPIC_CAREER_JI: "interpretation.four-transformations.topic.career-ji",
   FOUR_TRANSFORMATION_ON_LIFE_PALACE: "interpretation.four-transformations.on-life-palace",
   FOUR_TRANSFORMATION_ON_SPOUSE_PALACE: "interpretation.four-transformations.on-spouse-palace",
   FOUR_TRANSFORMATION_ON_WEALTH_PALACE: "interpretation.four-transformations.on-wealth-palace",
@@ -421,6 +433,69 @@ const FOUR_TRANSFORMATION_STAR_ROLE_RULES = [
   }
 ];
 
+const FOUR_TRANSFORMATION_TOPIC_PALACE_RULES = [
+  {
+    palaceName: "夫妻宫",
+    transformationName: "化禄",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_LU
+  },
+  {
+    palaceName: "夫妻宫",
+    transformationName: "化权",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_QUAN
+  },
+  {
+    palaceName: "夫妻宫",
+    transformationName: "化科",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_KE
+  },
+  {
+    palaceName: "夫妻宫",
+    transformationName: "化忌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_JI
+  },
+  {
+    palaceName: "财帛宫",
+    transformationName: "化禄",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_LU
+  },
+  {
+    palaceName: "财帛宫",
+    transformationName: "化权",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_QUAN
+  },
+  {
+    palaceName: "财帛宫",
+    transformationName: "化科",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_KE
+  },
+  {
+    palaceName: "财帛宫",
+    transformationName: "化忌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_JI
+  },
+  {
+    palaceName: "官禄宫",
+    transformationName: "化禄",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_LU
+  },
+  {
+    palaceName: "官禄宫",
+    transformationName: "化权",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_QUAN
+  },
+  {
+    palaceName: "官禄宫",
+    transformationName: "化科",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_KE
+  },
+  {
+    palaceName: "官禄宫",
+    transformationName: "化忌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_JI
+  }
+];
+
 const FOUR_TRANSFORMATION_TARGET_PALACE_RULES = [
   {
     palaceName: "命宫",
@@ -572,6 +647,128 @@ const FOUR_TRANSFORMATION_STAR_ROLE_INTERPRETATIONS = [
     sourceRefs: [
       REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
       REFERENCE_IDS.STAR_PLACEMENT
+    ]
+  };
+});
+
+const FOUR_TRANSFORMATION_TOPIC_PALACE_INTERPRETATIONS = [
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_LU,
+    palaceName: "夫妻宫",
+    transformationName: "化禄",
+    topicTitle: "婚姻感情",
+    synthesis: "关系资源可用性",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    text: "婚姻感情专题中，夫妻宫见化禄时，只能说明关系互动里有资源可用性、吸引力、互相承接或相处意愿的信号；仍需合看星曜、三方四正和限运，不能直接写成结婚、复合或关系顺利。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_QUAN,
+    palaceName: "夫妻宫",
+    transformationName: "化权",
+    topicTitle: "婚姻感情",
+    synthesis: "关系责任与控制需求",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    text: "婚姻感情专题中，夫妻宫见化权时，只能说明关系互动里责任承担、主导需求、边界协商或压力上升需要被看见；不能直接写成谁掌控关系、婚姻结果或分合走向。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_KE,
+    palaceName: "夫妻宫",
+    transformationName: "化科",
+    topicTitle: "婚姻感情",
+    synthesis: "关系表达与修饰缓冲",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    text: "婚姻感情专题中，夫妻宫见化科时，只能说明关系表达、沟通修饰、秩序整理或缓冲修复方式被凸显；不能直接写成矛盾自动化解、关系名分确定或婚恋结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_SPOUSE_JI,
+    palaceName: "夫妻宫",
+    transformationName: "化忌",
+    topicTitle: "婚姻感情",
+    synthesis: "关系牵挂与修正课题",
+    sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE],
+    text: "婚姻感情专题中，夫妻宫见化忌时，只能说明关系互动里牵挂、约束、反复沟通或需要修正的课题较明显；不能直接写成分离、离婚、关系失败或不可改变的坏结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_LU,
+    palaceName: "财帛宫",
+    transformationName: "化禄",
+    topicTitle: "财富资源",
+    synthesis: "资源承接与取用机会",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE],
+    text: "财富资源专题中，财帛宫见化禄时，只能说明资源承接、取用机会、吸引力或经营空间被凸显；仍需合看星曜和现实条件，不能直接写成得财、收益增加或投资结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_QUAN,
+    palaceName: "财帛宫",
+    transformationName: "化权",
+    topicTitle: "财富资源",
+    synthesis: "资源执行与掌控压力",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE],
+    text: "财富资源专题中，财帛宫见化权时，只能说明资源管理、执行力度、控制需求或现实压力被凸显；不能直接写成掌财、收入提高、投资获利或资源结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_KE,
+    palaceName: "财帛宫",
+    transformationName: "化科",
+    topicTitle: "财富资源",
+    synthesis: "资源秩序与可见度整理",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE],
+    text: "财富资源专题中，财帛宫见化科时，只能说明资源账目、表达包装、规则秩序或可见度整理被凸显；不能直接写成名利、信用提升、财务问题自动化解或具体收益。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_WEALTH_JI,
+    palaceName: "财帛宫",
+    transformationName: "化忌",
+    topicTitle: "财富资源",
+    synthesis: "资源牵挂与取用代价",
+    sourceRefs: [REFERENCE_IDS.WEALTH_PALACE],
+    text: "财富资源专题中，财帛宫见化忌时，只能说明资源取用、成本感、牵挂、滞留或修正课题较明显；不能直接写成破财、亏损、债务或财富失败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_LU,
+    palaceName: "官禄宫",
+    transformationName: "化禄",
+    topicTitle: "事业发展",
+    synthesis: "职责资源与承接空间",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE],
+    text: "事业发展专题中，官禄宫见化禄时，只能说明职责承接、资源可用性、工作吸引力或发展空间被凸显；不能直接写成升职、事业成功、机会确定到位或职位结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_QUAN,
+    palaceName: "官禄宫",
+    transformationName: "化权",
+    topicTitle: "事业发展",
+    synthesis: "职责推动与责任压力",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE],
+    text: "事业发展专题中，官禄宫见化权时，只能说明职责推动、执行压力、主导需求或管理边界被凸显；不能直接写成掌权、升迁、职位高低或职业结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_KE,
+    palaceName: "官禄宫",
+    transformationName: "化科",
+    topicTitle: "事业发展",
+    synthesis: "职业表达与秩序整理",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE],
+    text: "事业发展专题中，官禄宫见化科时，只能说明职业表达、流程秩序、名分呈现或规则化整理被凸显；不能直接写成成名、考核通过、升迁确认或问题自动解决。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_TOPIC_CAREER_JI,
+    palaceName: "官禄宫",
+    transformationName: "化忌",
+    topicTitle: "事业发展",
+    synthesis: "职责牵挂与流程修正",
+    sourceRefs: [REFERENCE_IDS.CAREER_PALACE],
+    text: "事业发展专题中，官禄宫见化忌时，只能说明职责牵挂、流程卡点、压力滞留或需要修正的工作课题较明显；不能直接写成失业、降职、事业失败或不可逆结果。"
+  }
+].map((item) => {
+  return {
+    ...item,
+    title: `${item.topicTitle}${item.transformationName}专题合参边界`,
+    topic: "four-transformation-topic-palace",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      ...item.sourceRefs
     ]
   };
 });
@@ -824,7 +1021,7 @@ const INTERPRETATIONS = [
     palaceName: "官禄宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.CAREER_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前事业专题只使用本命盘静态宫位和星曜，适合描述职业结构、职责压力、资源配合与合作参照；尚未接入大限四化、流年和职业知识库，因此不能推职位高低、升迁时间或具体职业结果。"
+    text: "当前事业专题以本命盘基础结构为主，适合描述职业结构、职责压力、资源配合与合作参照；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和职业知识库，因此不能推职位高低、升迁时间或具体职业结果。"
   },
   {
     id: INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE,
@@ -841,7 +1038,7 @@ const INTERPRETATIONS = [
     palaceName: "财帛宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.WEALTH_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前财富专题只使用本命盘静态宫位和星曜，适合描述资源经营方式、助力、压力与内在取舍；尚未接入大限四化、流年和风险分级规则，因此不能推具体金额、投资结果或特定年份。"
+    text: "当前财富专题以本命盘基础结构为主，适合描述资源经营方式、助力、压力与内在取舍；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和风险分级规则，因此不能推具体金额、投资结果或特定年份。"
   },
   {
     id: INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
@@ -858,7 +1055,7 @@ const INTERPRETATIONS = [
     palaceName: "夫妻宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前婚姻专题只使用本命盘静态宫位和星曜，适合描述关系互动倾向与结构参照；尚未接入大限四化、流年和触发规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
+    text: "当前婚姻专题以本命盘基础结构为主，适合描述关系互动倾向与结构参照；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和触发规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
   },
   {
     id: INTERPRETATION_IDS.STAR_WU_QU_SPOUSE,
@@ -1244,6 +1441,7 @@ const INTERPRETATIONS = [
     text: "星曜化忌同宫合参时，应先看该星曜在目标宫位承担的角色，再把化忌作为牵挂、约束、摩擦、滞留或修正课题的加权信号；不能脱离星曜与宫位直接写成灾祸、失败或不可改变的坏结果。"
   },
   ...FOUR_TRANSFORMATION_STAR_ROLE_INTERPRETATIONS,
+  ...FOUR_TRANSFORMATION_TOPIC_PALACE_INTERPRETATIONS,
   {
     id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
     title: "四化落命宫的结构解释边界",
@@ -1611,6 +1809,27 @@ export function findFourTransformationStarRoleInterpretationRefs(transformations
   }));
   const refs = FOUR_TRANSFORMATION_STAR_ROLE_RULES.flatMap((rule) => {
     if (!starNames.has(rule.starName)) {
+      return [];
+    }
+
+    return [rule.interpretationId];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationTopicPalaceInterpretationRefs(transformations = []) {
+  const transformationKeys = new Set(transformations.flatMap((transformation) => {
+    if (!transformation?.name || !transformation?.targetPalaceName) {
+      return [];
+    }
+
+    return [`${transformation.targetPalaceName}:${transformation.name}`];
+  }));
+  const refs = FOUR_TRANSFORMATION_TOPIC_PALACE_RULES.flatMap((rule) => {
+    const ruleKey = `${rule.palaceName}:${rule.transformationName}`;
+
+    if (!transformationKeys.has(ruleKey)) {
       return [];
     }
 

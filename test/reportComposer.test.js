@@ -341,18 +341,23 @@ test("createReportDraft writes spouse palace as conservative marriage draft", ()
   assert.ok(paragraph.text.includes("官禄宫见天府、擎羊"));
   assert.ok(paragraph.text.includes("福德宫见紫微、破军、左辅、右弼、天钺、陀罗"));
   assert.ok(paragraph.text.includes("关系中的现实责任和边界感"));
+  assert.ok(paragraph.text.includes("婚姻感情专题中，夫妻宫见化权时"));
+  assert.ok(paragraph.text.includes("不能直接写成谁掌控关系、婚姻结果或分合走向"));
   assert.ok(basisParagraph.text.includes("夫妻宫的分析角色"));
   assert.ok(basisParagraph.text.includes("福德宫的分析角色"));
   assert.ok(basisParagraph.text.includes("武曲在夫妻宫的保守解释"));
+  assert.ok(basisParagraph.text.includes("婚姻感情化权专题合参边界"));
   assert.deepEqual(paragraph.evidenceRefs, [
     "spouse-palace.spouse-palace",
     "spouse-palace.travel-palace",
     "spouse-palace.career-palace",
-    "spouse-palace.wellbeing-palace"
+    "spouse-palace.wellbeing-palace",
+    "spouse-palace.four-transformations.spouse-palace"
   ]);
   assert.deepEqual(paragraph.referenceRefs, [
     "framework.spouse-palace",
     "rule.star-placement",
+    "rule.birth-year-four-transformations",
     "framework.palace-role"
   ]);
   assert.deepEqual(paragraph.interpretationRefs, [
@@ -375,7 +380,8 @@ test("createReportDraft writes spouse palace as conservative marriage draft", ()
     "interpretation.star.zuo-fu.wellbeing",
     "interpretation.star.you-bi.wellbeing",
     "interpretation.star.tian-yue.wellbeing",
-    "interpretation.star.tuo-luo.wellbeing"
+    "interpretation.star.tuo-luo.wellbeing",
+    "interpretation.four-transformations.topic.spouse-quan"
   ]);
 });
 

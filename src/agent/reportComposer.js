@@ -337,7 +337,8 @@ function composeSpousePalaceParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
     getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE),
     getInterpretationText(section, INTERPRETATION_IDS.SPOUSE_PALACE_STATIC_ONLY),
-    composeStarRoleSynthesis(section)
+    composeStarRoleSynthesis(section),
+    ...getFourTransformationTopicPalaceInterpretationTexts(section)
   ])}`;
 }
 
@@ -345,7 +346,8 @@ function composeCareerPalaceParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
     getInterpretationText(section, INTERPRETATION_IDS.CAREER_TRIAD_STRUCTURE),
     getInterpretationText(section, INTERPRETATION_IDS.CAREER_PALACE_STATIC_ONLY),
-    composeStarRoleSynthesis(section)
+    composeStarRoleSynthesis(section),
+    ...getFourTransformationTopicPalaceInterpretationTexts(section)
   ])}`;
 }
 
@@ -353,7 +355,8 @@ function composeWealthPalaceParagraph(section) {
   return `【草稿判断】${joinJudgmentParts([
     getInterpretationText(section, INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE),
     getInterpretationText(section, INTERPRETATION_IDS.WEALTH_PALACE_STATIC_ONLY),
-    composeStarRoleSynthesis(section)
+    composeStarRoleSynthesis(section),
+    ...getFourTransformationTopicPalaceInterpretationTexts(section)
   ])}`;
 }
 
@@ -525,6 +528,20 @@ function getFourTransformationStarRoleInterpretationTexts(section) {
 function getFourTransformationStarPalaceInterpretationTexts(section) {
   return (section.interpretations ?? []).flatMap((interpretation) => {
     if (interpretation.topic !== "four-transformation-star-palace") {
+      return [];
+    }
+
+    if (!section.interpretationRefs?.includes(interpretation.id)) {
+      return [];
+    }
+
+    return [interpretation.text];
+  });
+}
+
+function getFourTransformationTopicPalaceInterpretationTexts(section) {
+  return (section.interpretations ?? []).flatMap((interpretation) => {
+    if (interpretation.topic !== "four-transformation-topic-palace") {
       return [];
     }
 
