@@ -32,6 +32,7 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
       "report-generation",
       "report-draft",
       "report-audit",
+      "report-approval",
       "report-output",
       "agent-readiness"
     ]
@@ -42,6 +43,7 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
     pipelineResult.knowledgeCoverageAudit.summary.includes("verified 外部知识片段")
   );
   assert.equal(pipelineResult.reportGeneration.status, "generated");
+  assert.equal(pipelineResult.reportApproval.status, "approved");
   assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "deterministic-template");
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.equal(pipelineResult.readinessAudit.status, "in_progress");
@@ -241,6 +243,39 @@ test("runZiweiPipeline blocks the external LLM generator when no provider is con
   assert.equal(pipelineResult.reportOutput.status, "blocked");
   assert.equal(pipelineResult.recoveryPlan.status, "recoverable");
   assert.ok(pipelineResult.nextAction.includes("生成报告正文草稿"));
+});
+
+test("runZiweiPipeline blocks publishing when human approval is required but missing", () => {
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    reportApprovalMode: "require-review"
+  });
+
+  assert.equal(pipelineResult.reportAudit.status, "passed");
+  assert.equal(pipelineResult.reportApproval.status, "blocked");
+  assert.equal(pipelineResult.reportOutput.status, "blocked");
+  assert.equal(pipelineResult.recoveryPlan.status, "recoverable");
+  assert.ok(
+    pipelineResult.recoveryPlan.actions.some((action) => {
+      return action.id === "recover.report-approval.collect-human-decision";
+    })
+  );
+});
+
+test("runZiweiPipeline publishes when required human approval is provided", () => {
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    reportApprovalMode: "require-review",
+    reportApprovalDecision: {
+      status: "approved",
+      reviewerId: "reviewer-1",
+      reason: "已复核。",
+      reviewedAt: "2026-07-02T00:00:00.000Z"
+    }
+  });
+
+  assert.equal(pipelineResult.reportApproval.status, "approved");
+  assert.equal(pipelineResult.reportApproval.required, true);
+  assert.equal(pipelineResult.reportOutput.status, "published");
+  assert.equal(pipelineResult.reportOutput.metadata.approvalMode, "require-review");
 });
 
 test("runZiweiPipeline drafts a conservative marriage report section", () => {

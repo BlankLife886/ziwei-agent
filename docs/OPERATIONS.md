@@ -20,7 +20,7 @@ npm run validate:release:summary
 
 - `npm test`：验证排盘、agent pipeline、报告审计、HTTP API、限流、鉴权、Web UI 静态入口和部署校验。
 - `validate:knowledge`：验证示例知识库 JSON store；生产若使用自定义知识库，应把 `ZIWEI_KNOWLEDGE_STORE` 指到对应文件后再跑部署校验。
-- `validate:architecture`：按复杂 Agent 架构审计 Router、Context Builder、Planner、State Machine、Executor、Tool Runtime、Memory/Knowledge、Reviewer、Human-in-the-loop、Guardrails、Observability 和 Deployment；核心层缺失会阻断发布，产品侧人工确认和真实资料规模化录入等未完成能力会列为 gaps。
+- `validate:architecture`：按复杂 Agent 架构审计 Router、Context Builder、Planner、State Machine、Executor、Tool Runtime、Memory/Knowledge、Reviewer、Human-in-the-loop、Guardrails、Observability 和 Deployment；核心层缺失会阻断发布，当前底层应达到 `aligned`，后续真实资料规模化录入属于能力扩展而非架构缺口。
 - `validateRuntimeConfig.js`：验证端口、请求体上限、限流、观测模式和生产鉴权配置。
 - `validateDeployment.js`：复用运行时门禁，审计知识库，并临时启动同一个 HTTP server 请求 `/`、`/health`、`/v1/reports`。
 - `validate:release`：串联全量测试、知识库、运行时、部署、Cloudflare dry-run、架构合规审计、`.env.example` 部署校验和 `git diff --check`；GitHub Actions 在 push/PR 上执行同一条 release gate，并额外跑 Compose 配置检查和 Docker build。

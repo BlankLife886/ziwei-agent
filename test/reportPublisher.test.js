@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { auditReportOutput } from "../src/agent/reportAuditor.js";
+import {
+  REPORT_APPROVAL_MODES,
+  evaluateReportApproval
+} from "../src/agent/reportApprovalGate.js";
 import { createReportDraft } from "../src/agent/reportComposer.js";
 import { createReportPlan } from "../src/agent/reportPlanner.js";
 import { publishReportOutput } from "../src/agent/reportPublisher.js";
@@ -22,6 +26,9 @@ test("publishReportOutput publishes only audited report drafts", () => {
   assert.equal(reportOutput.metadata.outputType, "ziwei-user-report");
   assert.equal(reportOutput.metadata.reportStatus, "published");
   assert.equal(reportOutput.metadata.auditStatus, "passed");
+  assert.equal(reportOutput.metadata.approvalStatus, "approved");
+  assert.equal(reportOutput.metadata.approvalMode, "auto");
+  assert.equal(reportOutput.approval.status, "approved");
   assert.ok(reportOutput.metadata.sectionIds.includes("life-triad"));
   assert.ok(reportOutput.metadata.evidenceRefs.includes("life-triad.life-palace"));
   assert.ok(reportOutput.metadata.referenceRefs.includes("framework.life-triad"));
@@ -115,6 +122,26 @@ test("publishReportOutput blocks drafts that did not pass audit", () => {
   assert.deepEqual(reportOutput.sections, []);
   assert.ok(reportOutput.messages[0].includes("审计未通过"));
   assert.ok(reportOutput.messages[1].includes("evidenceRefs"));
+});
+
+test("publishReportOutput blocks audited drafts without required human approval", () => {
+  const reportPlan = createReportPlan(
+    createZiweiAgentResponse(buildChart(createSampleProfile()))
+  );
+  const reportDraft = createReportDraft(reportPlan);
+  const reportAudit = auditReportOutput(reportPlan, reportDraft);
+  const reportApproval = evaluateReportApproval({
+    reportPlan,
+    reportDraft,
+    reportAudit
+  }, {
+    mode: REPORT_APPROVAL_MODES.REQUIRE_REVIEW
+  });
+  const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit, reportApproval);
+
+  assert.equal(reportOutput.status, "blocked");
+  assert.equal(reportOutput.approval.status, "blocked");
+  assert.ok(reportOutput.messages[0].includes("发布确认"));
 });
 
 test("publishReportOutput carries query intent metadata into the user report", () => {

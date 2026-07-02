@@ -18,6 +18,7 @@
   + Tool Runtime
   + 确定性或外部大模型写作 provider
   + 报告审计
+  + 产品侧发布确认
   + 发布门禁
   + 恢复计划
   + API 鉴权、限流、观测、部署验证
@@ -31,6 +32,7 @@
 - 报告 provider 必须通过 `toolRuntime` 登记和执行，不能在 pipeline 中裸调用不可审计函数。
 - 用户最终拿到的是 `reportOutput` 用户报告，而不是模型自由聊天文本。
 - 未通过 `reportAuditor` 的草稿不能发布。
+- 在 `require-review` 策略下，未通过人工发布确认的草稿不能发布。
 - 阻断、审计失败和能力缺口必须进入 `recoveryPlan`，不能只停留在散落的错误文案。
 - 生产环境缺少 `reports:write` credential 时必须 fail-closed。
 
@@ -51,6 +53,7 @@
   -> toolRuntime 登记并执行报告 provider
   -> deterministic-template 或 external-llm provider 生成草稿
   -> reportAuditor 审计断语、证据链和引用链
+  -> reportApprovalGate 执行自动或人工发布确认
   -> reportPublisher 发布用户报告
   -> recoveryPlanner 生成恢复动作或非阻断补强建议
 ```
@@ -82,7 +85,7 @@
 | 知识层 | `knowledgeSnippetCatalog`, `knowledgeSnippetStore`, `knowledgeCoverageAuditor` | 管理 verified 知识片段，审计章节知识覆盖 |
 | 工具执行层 | `toolRuntime` | 登记工具、执行工具、记录 toolId/合同/耗时/阻断原因 |
 | 生成层 | `reportGenerator`, `reportComposer`, `externalLLMReportProvider` | 用受控 generation context 生成报告草稿 |
-| 审计发布层 | `reportAuditor`, `reportPublisher` | 阻断越权断语，发布合格用户报告 |
+| 审计发布层 | `reportAuditor`, `reportApprovalGate`, `reportPublisher` | 阻断越权断语、执行发布确认，发布合格用户报告 |
 | 恢复层 | `recoveryPlanner` | 把阻断、审计失败和能力缺口转换为 owner/priority/nextStep 明确的恢复计划 |
 | 部署运维层 | `validateRelease`, `validateDeployment`, `validateCloudflare`, `smokeApi`, `docs/OPERATIONS.md` | 本地、CI、Cloudflare、容器和运维验证 |
 
@@ -115,8 +118,10 @@ flowchart TD
     LLM --> DRAFT
 
     DRAFT --> AUDIT["reportAuditor<br/>证据链 / 引用链 / 风险断语审计"]
-    AUDIT -->|通过| PUB["reportPublisher<br/>发布用户报告"]
+    AUDIT -->|通过| APPROVAL["reportApprovalGate<br/>自动 / 人工发布确认"]
     AUDIT -->|失败| BLOCK["blocked<br/>不发布，仅返回诊断"]
+    APPROVAL -->|通过| PUB["reportPublisher<br/>发布用户报告"]
+    APPROVAL -->|阻断| BLOCK
     BLOCK --> RECOVERY["recoveryPlanner<br/>恢复动作"]
 
     PUB --> OUT["reportOutput<br/>用户可读命理报告"]

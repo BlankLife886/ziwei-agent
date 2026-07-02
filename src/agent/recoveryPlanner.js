@@ -10,6 +10,7 @@ export function createRecoveryPlan(input = {}) {
     ...buildReportPlanRecoveryActions(input),
     ...buildReportGenerationRecoveryActions(input),
     ...buildReportAuditRecoveryActions(input),
+    ...buildReportApprovalRecoveryActions(input),
     ...buildReportOutputRecoveryActions(input)
   ];
   const advisoryActions = buildAdvisoryActions(input);
@@ -143,6 +144,23 @@ function buildReportAuditRecoveryActions({ reportAudit }) {
         ? `报告审计失败：${issueIds.join("、")}。`
         : "报告审计失败。",
       nextStep: "按 reportPlan 重新生成或修订草稿，补齐 evidenceRefs、referenceRefs、sourceRefs、knowledgeSnippetRefs、interpretationRefs，并移除越界断语。"
+    })
+  ];
+}
+
+function buildReportApprovalRecoveryActions({ reportApproval }) {
+  if (reportApproval?.status !== "blocked") {
+    return [];
+  }
+
+  return [
+    buildAction({
+      id: "recover.report-approval.collect-human-decision",
+      title: "补齐报告发布人工确认",
+      owner: "operator",
+      priority: "high",
+      reason: reportApproval.messages?.join("；") ?? "报告尚未通过人工确认。",
+      nextStep: "由具备发布权限的复核人审阅 reportDraft、reportAudit、knowledgeMemory 和 guardrails，提交 approved、rejected 或 changes_requested 决策后重新执行发布链路。"
     })
   ];
 }

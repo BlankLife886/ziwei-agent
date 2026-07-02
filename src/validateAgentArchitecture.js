@@ -29,7 +29,7 @@ async function main() {
 
   printArchitectureAudit(audit);
 
-  if (audit.status !== "aligned_with_gaps") {
+  if (!["aligned", "aligned_with_gaps"].includes(audit.status)) {
     process.exitCode = 2;
   }
 }

@@ -19,14 +19,14 @@ test("auditAgentArchitectureCompliance confirms the current complex agent skelet
     pipelineResult
   });
 
-  assert.equal(audit.status, "aligned_with_gaps");
+  assert.equal(audit.status, "aligned");
   assert.ok(audit.percent >= 80);
   assert.deepEqual(audit.criticalFailures, []);
   assert.ok(
     audit.items.some((item) => {
       return item.id === "state-machine" &&
         item.status === "aligned" &&
-        item.message.includes("audit -> publish");
+        item.message.includes("audit -> approval -> publish");
     })
   );
   assert.ok(
@@ -48,6 +48,13 @@ test("auditAgentArchitectureCompliance confirms the current complex agent skelet
       return item.id === "memory-knowledge" &&
         item.status === "aligned" &&
         item.message.includes("稀疏向量检索");
+    })
+  );
+  assert.ok(
+    audit.items.some((item) => {
+      return item.id === "human-in-the-loop" &&
+        item.status === "aligned" &&
+        item.message.includes("人工确认门禁");
     })
   );
 });

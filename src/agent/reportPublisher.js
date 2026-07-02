@@ -5,7 +5,7 @@
 // 给用户的 reportOutput。这样未来接入大模型后，也不会把未审计内容
 // 直接当作最终报告输出。
 
-export function publishReportOutput(reportPlan, reportDraft, reportAudit) {
+export function publishReportOutput(reportPlan, reportDraft, reportAudit, reportApproval = createDefaultApproval()) {
   if (reportDraft.status !== "drafted") {
     return {
       status: "blocked",
@@ -22,14 +22,24 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit) {
     };
   }
 
+  if (reportApproval.status !== "approved") {
+    return {
+      status: "blocked",
+      messages: buildApprovalBlockedMessages(reportApproval),
+      approval: summarizeApproval(reportApproval),
+      sections: []
+    };
+  }
+
   return {
     status: "published",
     title: reportDraft.title,
     subject: reportDraft.subject,
-    metadata: buildReportMetadata(reportPlan, reportDraft, reportAudit),
+    metadata: buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApproval),
     introduction: reportDraft.introduction,
     sections: reportDraft.sections.map(publishSection),
     closing: reportDraft.closing,
+    approval: summarizeApproval(reportApproval),
     audit: {
       status: reportAudit.status,
       issues: reportAudit.issues,
@@ -38,7 +48,7 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit) {
   };
 }
 
-function buildReportMetadata(reportPlan, reportDraft, reportAudit) {
+function buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApproval) {
   const sections = reportPlan.sections ?? [];
   const queryIntent = reportPlan.queryIntent ?? {};
 
@@ -47,6 +57,8 @@ function buildReportMetadata(reportPlan, reportDraft, reportAudit) {
     reportStatus: "published",
     draftStatus: reportDraft.status,
     auditStatus: reportAudit.status,
+    approvalStatus: reportApproval.status,
+    approvalMode: reportApproval.mode,
     queryIntent: {
       status: queryIntent.status ?? "none",
       topics: queryIntent.topics ?? [],
@@ -104,6 +116,46 @@ function buildAuditBlockedMessages(reportAudit) {
   }
 
   return ["报告审计状态不明确，不能发布用户报告。"];
+}
+
+function buildApprovalBlockedMessages(reportApproval) {
+  if (reportApproval.status === "skipped") {
+    return ["报告发布确认尚未执行，不能发布用户报告。"];
+  }
+
+  if (reportApproval.status === "blocked") {
+    return [
+      "报告未通过发布确认，不能发布用户报告。",
+      ...(reportApproval.messages ?? [])
+    ];
+  }
+
+  return ["报告发布确认状态不明确，不能发布用户报告。"];
+}
+
+function summarizeApproval(reportApproval) {
+  return {
+    status: reportApproval.status,
+    mode: reportApproval.mode,
+    required: reportApproval.required,
+    decision: reportApproval.decision,
+    messages: reportApproval.messages ?? []
+  };
+}
+
+function createDefaultApproval() {
+  return {
+    status: "approved",
+    mode: "auto",
+    required: false,
+    decision: {
+      status: "approved",
+      reviewerId: "system:auto-approval",
+      reason: "默认发布确认，用于保持旧调用兼容。",
+      reviewedAt: new Date(0).toISOString()
+    },
+    messages: ["报告已通过默认发布确认。"]
+  };
 }
 
 function uniqueInOrder(values) {

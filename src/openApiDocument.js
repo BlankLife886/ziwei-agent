@@ -221,6 +221,40 @@ export function buildOpenApiDocument() {
             queryIntent: {
               type: "object",
               additionalProperties: true
+            },
+            reportApproval: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                mode: {
+                  type: "string",
+                  enum: ["auto", "require-review"]
+                },
+                reviewedAt: {
+                  type: "string",
+                  format: "date-time"
+                },
+                decision: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    status: {
+                      type: "string",
+                      enum: ["approved", "rejected", "changes_requested"]
+                    },
+                    reviewerId: {
+                      type: "string"
+                    },
+                    reason: {
+                      type: "string"
+                    },
+                    reviewedAt: {
+                      type: "string",
+                      format: "date-time"
+                    }
+                  }
+                }
+              }
             }
           }
         },

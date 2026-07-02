@@ -47,6 +47,7 @@ birth/profile input
   -> reportComposer/default provider 或 async external LLM provider
   -> reportDraft
   -> reportAuditor
+  -> reportApprovalGate
   -> reportPublisher
   -> recoveryPlanner
   -> reportOutput
@@ -81,6 +82,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `externalLLMReportProvider`：把 generation context 包装为通用 HTTP 大模型请求，并把响应解析为 `reportDraft`；缺配置、HTTP 失败、请求超时、响应过大或响应不可解析都会阻断发布，并返回不含密钥和请求体的诊断信息。
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
+- `reportApprovalGate`：产品侧人工确认门禁；默认 auto 策略保持本地和自动化链路可发布，`require-review` 策略下必须提供 `approved` 人工决策，否则报告只能返回 blocked 和恢复动作。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
 - `recoveryPlanner`：把缺资料、报告规划阻断、provider 缺配置、报告审计失败、发布门禁阻断和非阻断知识缺口整理成结构化恢复动作，标明 owner、priority、reason 和 nextStep。
 
@@ -123,13 +125,19 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `closing`：报告收束和边界提示。
 - `audit`：发布时使用的审计结果。
 
+HTTP API 的 `POST /v1/reports` 请求体支持：
+
+- `profile`：出生资料。
+- `query` 或 `queryIntent`：用户咨询主题或已解析意图。
+- `reportApproval`：可选发布确认策略；`mode: "auto"` 允许审计通过后自动发布，`mode: "require-review"` 要求同时提供 `decision.status: "approved"` 才能发布。`rejected` 或 `changes_requested` 会保留 blocked 状态并进入恢复计划。
+
 HTTP API 的 `POST /v1/reports` 会返回：
 
 - `chart`：本次输入生成的结构化命盘；资料不完整或非法时为 `null`。
 - `report`：经过发布门禁后的用户报告；未通过时为 blocked 状态。
 - `validation`：出生资料校验结果和缺失字段。
 - `queryIntent`：本轮用户问题解析结果。
-- `audits`：知识覆盖、报告审计和完整度审计。
+- `audits`：知识覆盖、报告审计、发布确认和完整度审计。
 - `knowledgeMemory`：知识记忆与检索索引摘要，包括持久化方式、复核策略、索引类型、片段数量和词表规模。
 - `recovery`：结构化恢复计划；当请求被阻断时给出用户、运营者或 agent 下一步动作，当报告已发布但知识覆盖不足时给出非阻断补强建议。
 - `diagnostics`：请求耗时、排盘状态、报告规划状态、生成状态和发布状态。
@@ -140,7 +148,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 `NODE_ENV=production` 或 `ZIWEI_REQUIRE_API_AUTH=true` 时，服务启动前会执行运行时配置校验。没有 API credential、credential JSON 不合法、没有任一当前可用的 `reports:write` 或 `*` scope、生命周期字段非法、端口/限流/请求体上限非法、观测模式非法、secret 文件不合法，都会阻止服务启动。`npm run validate:runtime` 可在部署前单独执行同一套校验；`npm run smoke:api` 会启动临时 HTTP 服务并真实请求 `/health`、`/ready` 与 `/v1/reports`，用于验证入口到用户报告发布的链路；`npm run validate:deploy` 会进一步串联运行时门禁、知识库审计和 API smoke；`npm run validate:architecture` 会按复杂 Agent 架构审计 Router、Context Builder、Planner、State Machine、Executor、Reviewer、Guardrails、Observability 和 Deployment 等核心层；`npm run validate:release` 会把测试、知识库、运行时、部署、Cloudflare dry-run、架构合规审计、示例环境和 diff 检查串成发布总门禁。`npm run validate:release:summary` 或 `node src/validateRelease.js --summary <path>` 会执行同一条门禁并输出机器可读 release summary，供 CI artifact、部署平台或人工审计留证。
 
-当前架构合规审计状态为 `aligned_with_gaps`，说明核心 agent 骨架成立；剩余主要 gap 是产品侧人工确认流，以及真实书籍/PDF/OCR 资料的规模化录入。
+当前架构合规审计状态为 `aligned`，符合度为 100%。这表示复杂 Agent 底层架构已经闭环；后续工作主要是扩大真实书籍/PDF/OCR资料规模、增强解释目录和提升报告表达，不是修补架构缺口。
 
 生产发布、credential 轮换、健康检查、观测诊断和回滚流程记录在 `docs/OPERATIONS.md`。该文档属于工程运行边界，不改变排盘、解释、报告规划或发布门禁。
 
@@ -187,6 +195,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有通用 Tool Runtime，能登记工具、区分同步/异步执行路径，并记录不含输入正文的执行摘要。
 - 有正文草稿生成层。
 - 有报告审计层。
+- 有产品侧发布确认门禁，支持自动确认和强制人工确认两种策略。
 - 有报告发布门禁。
 - 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
 - 有 OpenAPI 3.1 合同入口，供外部调用方按真实接口集成。
@@ -203,7 +212,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器、JSON store、知识记忆 manifest 和本地稀疏向量检索索引已建立，但尚未接入 OCR/PDF 自动抽取、外部 embedding、外部向量数据库或大规模重排。
-- 报告生成器合同、provider 选择边界、通用 Tool Runtime、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、结构化恢复计划、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权和产品侧人工确认流。
+- 报告生成器合同、provider 选择边界、通用 Tool Runtime、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、产品侧发布确认门禁、结构化恢复计划、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权和更完整的产品化报告体验。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。

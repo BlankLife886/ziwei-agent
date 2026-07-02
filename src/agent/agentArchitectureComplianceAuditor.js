@@ -6,6 +6,7 @@ const REQUIRED_STEP_IDS = [
   "report-generation",
   "report-draft",
   "report-audit",
+  "report-approval",
   "report-output",
   "agent-readiness"
 ];
@@ -75,7 +76,7 @@ const ARCHITECTURE_ITEMS = [
       });
 
       return matchesExpectedOrder
-        ? aligned("pipeline 已按 query -> context -> plan -> generate -> audit -> publish 固定状态链执行。")
+        ? aligned("pipeline 已按 query -> context -> plan -> generate -> audit -> approval -> publish 固定状态链执行。")
         : missing("pipeline 步骤顺序不完整，存在绕过核心状态链的风险。");
     }
   },
@@ -169,10 +170,21 @@ const ARCHITECTURE_ITEMS = [
     title: "Human-in-the-loop 人工确认",
     weight: 6,
     critical: false,
-    evaluate: ({ capabilities }) => {
-      return capabilities.humanKnowledgeReview
-        ? partial("知识片段已设计 draft -> verified 人工复核流程；产品侧审批流尚未实现。", 0.55)
-        : missing("缺少人工复核或人工确认边界。");
+    evaluate: ({ pipelineResult, capabilities }) => {
+      const approval = pipelineResult.reportApproval;
+      const hasApprovalGate = approval &&
+        ["approved", "blocked", "skipped"].includes(approval.status) &&
+        typeof approval.mode === "string";
+
+      if (capabilities.humanKnowledgeReview && hasApprovalGate) {
+        return aligned("已具备知识片段人工复核流程和报告发布人工确认门禁。");
+      }
+
+      if (capabilities.humanKnowledgeReview) {
+        return partial("知识片段已设计 draft -> verified 人工复核流程；产品侧审批流尚未实现。", 0.55);
+      }
+
+      return missing("缺少人工复核或人工确认边界。");
     }
   },
   {
@@ -271,7 +283,10 @@ export function auditAgentArchitectureCompliance(input = {}) {
   });
 
   return {
-    status: criticalFailures.length === 0 ? "aligned_with_gaps" : "not_aligned",
+    status: deriveAuditStatus({
+      criticalFailures,
+      gaps
+    }),
     percent,
     score,
     totalWeight,
@@ -280,6 +295,14 @@ export function auditAgentArchitectureCompliance(input = {}) {
     gaps,
     nextPriorities: buildNextPriorities(items)
   };
+}
+
+function deriveAuditStatus({ criticalFailures, gaps }) {
+  if (criticalFailures.length > 0) {
+    return "not_aligned";
+  }
+
+  return gaps.length === 0 ? "aligned" : "aligned_with_gaps";
 }
 
 function hasStep(pipelineResult, stepId) {

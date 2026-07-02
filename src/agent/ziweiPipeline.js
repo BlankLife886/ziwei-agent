@@ -9,6 +9,7 @@ import {
 } from "./reportGenerator.js";
 import { auditKnowledgeCoverage } from "./knowledgeCoverageAuditor.js";
 import { auditReportOutput } from "./reportAuditor.js";
+import { evaluateReportApproval } from "./reportApprovalGate.js";
 import { createReportPlan } from "./reportPlanner.js";
 import { publishReportOutput } from "./reportPublisher.js";
 import { normalizeQueryIntent } from "./queryIntentParser.js";
@@ -28,7 +29,8 @@ export function runZiweiPipeline(buildResult, options = {}) {
 
   return finalizePipeline({
     ...preparedPipeline,
-    reportGeneration
+    reportGeneration,
+    reportApprovalOptions: buildReportApprovalOptions(options)
   });
 }
 
@@ -41,7 +43,8 @@ export async function runZiweiPipelineAsync(buildResult, options = {}) {
 
   return finalizePipeline({
     ...preparedPipeline,
-    reportGeneration
+    reportGeneration,
+    reportApprovalOptions: buildReportApprovalOptions(options)
   });
 }
 
@@ -81,6 +84,14 @@ function buildReportGenerationOptions(options) {
   };
 }
 
+function buildReportApprovalOptions(options) {
+  return {
+    mode: options.reportApprovalMode,
+    decision: options.reportApprovalDecision,
+    reviewedAt: options.reportApprovalReviewedAt
+  };
+}
+
 function finalizePipeline({
   queryIntent,
   buildResult,
@@ -88,11 +99,17 @@ function finalizePipeline({
   reportPlan,
   knowledgeMemory,
   knowledgeCoverageAudit,
-  reportGeneration
+  reportGeneration,
+  reportApprovalOptions
 }) {
   const reportDraft = reportGeneration.reportDraft;
   const reportAudit = auditReportOutput(reportPlan, reportDraft);
-  const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);
+  const reportApproval = evaluateReportApproval({
+    reportPlan,
+    reportDraft,
+    reportAudit
+  }, reportApprovalOptions);
+  const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit, reportApproval);
   const readinessAudit = auditAgentReadiness({
     queryIntent,
     buildResult,
@@ -103,6 +120,7 @@ function finalizePipeline({
     reportGeneration,
     reportDraft,
     reportAudit,
+    reportApproval,
     reportOutput
   });
   const recoveryPlan = createRecoveryPlan({
@@ -115,6 +133,7 @@ function finalizePipeline({
     reportGeneration,
     reportDraft,
     reportAudit,
+    reportApproval,
     reportOutput,
     readinessAudit
   });
@@ -125,6 +144,7 @@ function finalizePipeline({
       reportPlan,
       reportDraft,
       reportAudit,
+      reportApproval,
       reportOutput
     }),
     nextAction: deriveNextAction({
@@ -132,6 +152,7 @@ function finalizePipeline({
       reportPlan,
       reportDraft,
       reportAudit,
+      reportApproval,
       reportOutput
     }),
     queryIntent,
@@ -143,6 +164,7 @@ function finalizePipeline({
     reportGeneration,
     reportDraft,
     reportAudit,
+    reportApproval,
     reportOutput,
     readinessAudit,
     recoveryPlan,
@@ -154,6 +176,7 @@ function finalizePipeline({
       buildStep("report-generation", reportGeneration.status),
       buildStep("report-draft", reportDraft.status),
       buildStep("report-audit", reportAudit.status),
+      buildStep("report-approval", reportApproval.status),
       buildStep("report-output", reportOutput.status),
       buildStep("agent-readiness", readinessAudit.status)
     ]
@@ -165,6 +188,7 @@ function derivePipelineStatus({
   reportPlan,
   reportDraft,
   reportAudit,
+  reportApproval,
   reportOutput
 }) {
   if (reportOutput.status === "published") {
@@ -173,6 +197,10 @@ function derivePipelineStatus({
 
   if (reportAudit.status === "failed") {
     return "audit_failed";
+  }
+
+  if (reportApproval.status === "blocked") {
+    return "approval_blocked";
   }
 
   if (reportDraft.status === "drafted") {
@@ -195,6 +223,7 @@ function deriveNextAction({
   reportPlan,
   reportDraft,
   reportAudit,
+  reportApproval,
   reportOutput
 }) {
   if (agentResult.status === "invalid_input") {
@@ -219,6 +248,10 @@ function deriveNextAction({
 
   if (reportAudit.status === "failed") {
     return "报告审计未通过，请先修复证据链、引用链或越界断语。";
+  }
+
+  if (reportApproval.status === "blocked") {
+    return "请先完成报告发布人工确认，再输出用户报告。";
   }
 
   if (reportOutput.status !== "published") {

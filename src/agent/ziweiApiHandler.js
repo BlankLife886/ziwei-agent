@@ -10,6 +10,10 @@ import {
   normalizeQueryIntent,
   parseQueryIntentFromText
 } from "./queryIntentParser.js";
+import {
+  REPORT_APPROVAL_DECISIONS,
+  REPORT_APPROVAL_MODES
+} from "./reportApprovalGate.js";
 import { runZiweiPipelineAsync } from "./ziweiPipeline.js";
 
 const DEFAULT_MAX_BODY_BYTES = 100_000;
@@ -101,13 +105,24 @@ export async function handleZiweiApiRequest(request, options = {}) {
   }
 
   const queryIntent = resolveApiQueryIntent(apiPayload);
+  const reportApprovalOptions = resolveApiReportApprovalOptions(apiPayload);
+
+  if (reportApprovalOptions.status !== "ready") {
+    return jsonResponse(400, {
+      status: "invalid_request",
+      requestId,
+      messages: reportApprovalOptions.messages
+    });
+  }
+
   const buildResult = buildChart(apiPayload.profile);
   const pipelineOptions = {
     ...buildPipelineOptionsFromRuntime({
       knowledgeSnippets: options.knowledgeSnippets ?? [],
       env
     }),
-    queryIntent
+    queryIntent,
+    ...reportApprovalOptions.value
   };
   const pipelineResult = await runZiweiPipelineAsync(buildResult, pipelineOptions);
   const statusCode = chooseReportStatusCode(buildResult, pipelineResult);
@@ -122,6 +137,7 @@ export async function handleZiweiApiRequest(request, options = {}) {
     audits: {
       knowledgeCoverage: pipelineResult.knowledgeCoverageAudit,
       report: pipelineResult.reportAudit,
+      approval: pipelineResult.reportApproval,
       readiness: pipelineResult.readinessAudit
     },
     knowledgeMemory: pipelineResult.knowledgeMemory,
@@ -171,6 +187,58 @@ function resolveApiQueryIntent(apiPayload) {
   }
 
   return parseQueryIntentFromText(apiPayload.query ?? "");
+}
+
+function resolveApiReportApprovalOptions(apiPayload) {
+  const approvalPayload = apiPayload.reportApproval;
+
+  if (approvalPayload === undefined) {
+    return {
+      status: "ready",
+      value: {}
+    };
+  }
+
+  if (!approvalPayload || typeof approvalPayload !== "object" || Array.isArray(approvalPayload)) {
+    return invalidReportApproval("reportApproval 必须是对象。");
+  }
+
+  const mode = approvalPayload.mode;
+
+  if (
+    mode !== undefined &&
+    !Object.values(REPORT_APPROVAL_MODES).includes(mode)
+  ) {
+    return invalidReportApproval("reportApproval.mode 只能是 auto 或 require-review。");
+  }
+
+  const decision = approvalPayload.decision;
+
+  if (decision !== undefined) {
+    if (!decision || typeof decision !== "object" || Array.isArray(decision)) {
+      return invalidReportApproval("reportApproval.decision 必须是对象。");
+    }
+
+    if (!Object.values(REPORT_APPROVAL_DECISIONS).includes(decision.status)) {
+      return invalidReportApproval("reportApproval.decision.status 只能是 approved、rejected 或 changes_requested。");
+    }
+  }
+
+  return {
+    status: "ready",
+    value: {
+      reportApprovalMode: mode,
+      reportApprovalDecision: decision,
+      reportApprovalReviewedAt: approvalPayload.reviewedAt
+    }
+  };
+}
+
+function invalidReportApproval(message) {
+  return {
+    status: "invalid_request",
+    messages: [message]
+  };
 }
 
 function chooseReportStatusCode(buildResult, pipelineResult) {

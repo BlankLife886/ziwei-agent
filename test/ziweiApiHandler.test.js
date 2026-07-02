@@ -117,6 +117,7 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.equal(response.body.chart.profileSummary.name, "示例命主");
   assert.equal(response.body.report.metadata.outputType, "ziwei-user-report");
   assert.equal(response.body.audits.report.status, "passed");
+  assert.equal(response.body.audits.approval.status, "approved");
   assert.equal(response.body.knowledgeMemory.persistence, "json-store");
   assert.equal(response.body.knowledgeMemory.retrieval.kind, "local-sparse-vector-index");
   assert.equal(response.body.recovery.status, "advisory");
@@ -126,6 +127,65 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.equal(response.body.diagnostics.buildStatus, "complete");
   assert.equal(response.body.diagnostics.reportOutputStatus, "published");
   assert.equal(response.body.diagnostics.authorization.principalId, "legacy-token");
+});
+
+test("handleZiweiApiRequest blocks publishing when API requires human approval", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {},
+    body: JSON.stringify({
+      profile: createSampleProfile(),
+      reportApproval: {
+        mode: "require-review"
+      }
+    })
+  }, {
+    requestId: "approval-blocked-request",
+    env: {},
+    knowledgeSnippets: []
+  });
+
+  assert.equal(response.statusCode, 409);
+  assert.equal(response.body.status, "approval_blocked");
+  assert.equal(response.body.audits.report.status, "passed");
+  assert.equal(response.body.audits.approval.status, "blocked");
+  assert.equal(response.body.report.status, "blocked");
+  assert.ok(
+    response.body.recovery.actions.some((action) => {
+      return action.id === "recover.report-approval.collect-human-decision";
+    })
+  );
+});
+
+test("handleZiweiApiRequest publishes after API human approval decision", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {},
+    body: JSON.stringify({
+      profile: createSampleProfile(),
+      reportApproval: {
+        mode: "require-review",
+        decision: {
+          status: "approved",
+          reviewerId: "reviewer-1",
+          reason: "已复核。",
+          reviewedAt: "2026-07-02T00:00:00.000Z"
+        }
+      }
+    })
+  }, {
+    requestId: "approval-published-request",
+    env: {},
+    knowledgeSnippets: []
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.status, "published");
+  assert.equal(response.body.audits.approval.status, "approved");
+  assert.equal(response.body.audits.approval.required, true);
+  assert.equal(response.body.report.metadata.approvalMode, "require-review");
 });
 
 test("handleZiweiApiRequest rejects incomplete profile through the agent chain", async () => {
@@ -146,6 +206,26 @@ test("handleZiweiApiRequest rejects incomplete profile through the agent chain",
   assert.equal(response.body.status, "needs_input");
   assert.equal(response.body.validation.missingFields.length > 0, true);
   assert.equal(response.body.report.status, "blocked");
+});
+
+test("handleZiweiApiRequest rejects invalid report approval payloads", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {},
+    body: JSON.stringify({
+      profile: createSampleProfile(),
+      reportApproval: {
+        mode: "manual"
+      }
+    })
+  }, {
+    requestId: "invalid-approval-request"
+  });
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(response.body.status, "invalid_request");
+  assert.ok(response.body.messages[0].includes("reportApproval.mode"));
 });
 
 test("handleZiweiApiRequest blocks invalid JSON and oversized payloads", async () => {
