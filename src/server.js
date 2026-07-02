@@ -9,6 +9,7 @@ import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
+import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
@@ -170,12 +171,21 @@ export function createZiweiHttpServer(options = {}) {
 
 async function main() {
   const env = process.env;
+  const runtimeConfig = buildServerRuntimeConfig(env);
+
+  if (runtimeConfig.status !== "ready") {
+    for (const issue of runtimeConfig.issues) {
+      console.error(`Runtime config error: ${issue}`);
+    }
+    process.exitCode = 2;
+    return;
+  }
+
   const knowledgeStore = env.ZIWEI_KNOWLEDGE_STORE
     ? await loadKnowledgeSnippetStore(env.ZIWEI_KNOWLEDGE_STORE)
     : { snippets: [] };
-  const port = parseOptionalInteger(env.PORT) ?? DEFAULT_PORT;
-  const maxBodyBytes = parseOptionalInteger(env.ZIWEI_API_MAX_BODY_BYTES) ??
-    DEFAULT_MAX_REQUEST_BYTES;
+  const port = runtimeConfig.values.port;
+  const maxBodyBytes = runtimeConfig.values.maxBodyBytes;
   const server = createZiweiHttpServer({
     env,
     knowledgeSnippets: knowledgeStore.snippets,

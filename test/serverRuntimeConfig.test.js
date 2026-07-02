@@ -1,0 +1,99 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { buildServerRuntimeConfig } from "../src/serverRuntimeConfig.js";
+
+test("buildServerRuntimeConfig accepts secure production runtime settings", () => {
+  const config = buildServerRuntimeConfig({
+    NODE_ENV: "production",
+    PORT: "8080",
+    ZIWEI_API_TOKEN: "secret-token",
+    ZIWEI_API_MAX_BODY_BYTES: "200000",
+    ZIWEI_API_RATE_LIMIT_WINDOW_MS: "120000",
+    ZIWEI_API_RATE_LIMIT_MAX: "30",
+    ZIWEI_API_OBSERVABILITY: "stdout",
+    ZIWEI_API_QUOTA_STORE: ".runtime/quota.json",
+    ZIWEI_KNOWLEDGE_STORE: "data/knowledge-snippets.example.json"
+  });
+
+  assert.equal(config.status, "ready");
+  assert.equal(config.issues.length, 0);
+  assert.equal(config.values.port, 8080);
+  assert.equal(config.values.maxBodyBytes, 200000);
+  assert.equal(config.values.rateLimitWindowMs, 120000);
+  assert.equal(config.values.rateLimitMaxRequests, 30);
+  assert.equal(config.values.observabilityMode, "stdout");
+});
+
+test("buildServerRuntimeConfig blocks production without API credentials", () => {
+  const config = buildServerRuntimeConfig({
+    NODE_ENV: "production"
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => {
+    return issue.includes("生产部署必须配置");
+  }));
+});
+
+test("buildServerRuntimeConfig blocks invalid numeric and observability settings", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_TOKEN: "secret-token",
+    PORT: "99999",
+    ZIWEI_API_MAX_BODY_BYTES: "0",
+    ZIWEI_API_RATE_LIMIT_WINDOW_MS: "-1",
+    ZIWEI_API_RATE_LIMIT_MAX: "many",
+    ZIWEI_API_OBSERVABILITY: "verbose"
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => issue.includes("PORT")));
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_MAX_BODY_BYTES")));
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_RATE_LIMIT_WINDOW_MS")));
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_RATE_LIMIT_MAX")));
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_OBSERVABILITY")));
+});
+
+test("buildServerRuntimeConfig accepts scoped credential JSON for required auth", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "app-client",
+        token: "app-secret",
+        scopes: ["reports:write"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "ready");
+});
+
+test("buildServerRuntimeConfig rejects malformed scoped credential JSON", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "missing-token",
+        scopes: ["reports:write"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "invalid");
+});
+
+test("buildServerRuntimeConfig requires at least one report-writing credential", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "health-client",
+        token: "health-secret",
+        scopes: ["health:read"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "invalid");
+});

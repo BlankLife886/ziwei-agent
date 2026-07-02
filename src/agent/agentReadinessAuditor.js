@@ -251,7 +251,7 @@ const READINESS_ITEMS = [
         pipelineResult.reportGeneration?.status === "generated" &&
         providerResolution?.status === "ready"
       ) {
-        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、多凭证 scoped bearer 鉴权、请求大小限制、请求追踪、结构化观测、内存限流和可选文件持久化配额，但尚未接入 UI、密钥生命周期管理和生产部署。", 0.92);
+        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、多凭证 scoped bearer 鉴权、请求大小限制、请求追踪、结构化观测、内存限流、可选文件持久化配额、运行时配置校验、API smoke 校验和容器部署工件，但尚未接入 UI、密钥生命周期管理和真实环境部署。", 0.94);
       }
 
       if (
