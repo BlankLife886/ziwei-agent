@@ -10,6 +10,7 @@ import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
 import { REPORT_GENERATOR_IDS } from "./agent/reportGenerator.js";
+import { buildOpenApiDocument } from "./openApiDocument.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
 import { resolveRuntimeEnv } from "./runtimeEnv.js";
 import {
@@ -129,6 +130,24 @@ export function createZiweiHttpServer(options = {}) {
           statusCode: apiResponse.statusCode,
           durationMs: Date.now() - startedAt,
           responseStatus: apiResponse.body?.status
+        });
+        writeJsonResponse(response, apiResponse, requestId);
+        return;
+      }
+
+      if (isOpenApiRequest(method, path)) {
+        const apiResponse = createOpenApiResponse({
+          method
+        });
+
+        emitApiEvent(observer, {
+          type: "api.request.completed",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          responseStatus: "openapi"
         });
         writeJsonResponse(response, apiResponse, requestId);
         return;
@@ -428,6 +447,22 @@ function isHealthRequest(method, path) {
 function isReadyRequest(method, path) {
   return (method === "GET" || method === "HEAD") &&
     normalizeRequestPath(path) === "/ready";
+}
+
+function isOpenApiRequest(method, path) {
+  return (method === "GET" || method === "HEAD") &&
+    normalizeRequestPath(path) === "/openapi.json";
+}
+
+function createOpenApiResponse({ method }) {
+  return {
+    statusCode: 200,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    body: method === "HEAD" ? undefined : buildOpenApiDocument()
+  };
 }
 
 function createHealthResponse({ requestId, method, release, knowledgeSnippetCount }) {

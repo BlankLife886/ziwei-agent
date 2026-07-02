@@ -167,6 +167,7 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 ```bash
 curl http://localhost:3000/health
 curl http://localhost:3000/ready
+curl http://localhost:3000/openapi.json
 ```
 
 停机流程：
@@ -277,6 +278,7 @@ npm run validate:release:summary
 同时人工确认：
 
 - Web UI 可以打开。
+- `/openapi.json` 返回 OpenAPI 3.1，且包含 `POST /v1/reports`。
 - 示例命盘可以生成命盘图和报告。
 - 响应包含 `chart`、`report`、`audits`、`diagnostics`。
 - 报告章节仍保留 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs`。

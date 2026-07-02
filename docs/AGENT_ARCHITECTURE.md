@@ -61,6 +61,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `smokeApi`：临时启动同一个 HTTP server，依次调用 `/health` 和 `/v1/reports`，证明部署环境中的 API 入口、鉴权、知识库加载、pipeline 和报告发布门禁可以串起来。
 - `validateDeployment`：部署前串联运行时配置、知识库 store 审计和 API smoke；配置了知识库但未通过审计时会阻断部署校验。
 - `public/`：轻量 Web UI，渲染输入表单、命盘十二宫图和发布后的报告章节；所有命理结果都来自 API 响应。
+- `openApiDocument`：输出当前 HTTP API 的 OpenAPI 3.1 合同，只描述 `/health`、`/ready` 和 `POST /v1/reports` 的真实边界，不承诺未实现的报告能力。
 - `ziweiApiHandler`：把 HTTP/API 请求转换为统一 pipeline 调用，负责请求大小限制、可选 bearer 鉴权、健康检查和基础请求诊断，不负责命理解释。
 - `apiCredentials`：解析 legacy 单 token 或多 credential 配置，执行 bearer token、scope 和 credential 生命周期鉴权；下游只获得 principal id 和 scopes，不获得原始 token。
 - `apiObservability`：生成结构化 API 事件，并对鉴权头、API key 和完整 body 做脱敏；观测失败不能阻断 agent 主链路。
@@ -132,7 +133,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 生产发布、credential 轮换、健康检查、观测诊断和回滚流程记录在 `docs/OPERATIONS.md`。该文档属于工程运行边界，不改变排盘、解释、报告规划或发布门禁。
 
-服务层默认给每个请求生成 `requestId`，并同时写入响应体和 `x-request-id` 响应头。`GET /health` 是轻量 liveness 探针，不读取请求体、不消耗业务限流配额，并返回 HTTP、agent 入口、release metadata 和已加载知识片段数量；Docker healthcheck 使用这条路径。`GET /ready` 是部署 readiness 探针，同样不消耗业务限流配额，并返回 release metadata、runtime、agent pipeline 入口、知识库加载状态和报告 provider 配置状态；如果外部大模型 provider 缺少 endpoint、API key 或 model，会返回 503，避免部署平台把不可生成报告的实例放入流量。服务收到 `SIGTERM` 或 `SIGINT` 后会进入 draining，`/ready` 立即返回 `not_ready`，`/health` 仍保持可用，然后 HTTP server 停止接收新连接并等待已有连接关闭。`ZIWEI_RELEASE_VERSION`、`ZIWEI_RELEASE_COMMIT`、`ZIWEI_RELEASE_SOURCE` 和 `ZIWEI_RELEASE_SUMMARY_PATH` 只用于运行实例追溯，不进入排盘、解释或用户报告。设置 `ZIWEI_API_OBSERVABILITY=stdout` 后，服务会输出 `api.request.started`、`api.request.completed`、`api.request.blocked` 和 `api.request.failed` 事件，事件只包含路由、状态码、耗时、鉴权 principal 摘要、报告生成状态和限流摘要，不记录完整请求体或密钥。`ZIWEI_API_RATE_LIMIT_WINDOW_MS` 和 `ZIWEI_API_RATE_LIMIT_MAX` 控制业务 API 限流窗口和配额，默认是 60 秒 60 次；bearer token 会先哈希再作为限流分桶 key。设置 `ZIWEI_API_QUOTA_STORE` 后，配额窗口会写入 JSON 文件，服务重启后仍沿用尚未过期的窗口；配额文件读取或写入失败时，限流器会阻断请求，避免异常状态下无限放行。
+服务层默认给每个请求生成 `requestId`，并同时写入响应体和 `x-request-id` 响应头。`GET /health` 是轻量 liveness 探针，不读取请求体、不消耗业务限流配额，并返回 HTTP、agent 入口、release metadata 和已加载知识片段数量；Docker healthcheck 使用这条路径。`GET /ready` 是部署 readiness 探针，同样不消耗业务限流配额，并返回 release metadata、runtime、agent pipeline 入口、知识库加载状态和报告 provider 配置状态；如果外部大模型 provider 缺少 endpoint、API key 或 model，会返回 503，避免部署平台把不可生成报告的实例放入流量。`GET /openapi.json` 返回 OpenAPI 3.1 合同，供前端、外部调用方和部署检查对齐当前真实 API 边界。服务收到 `SIGTERM` 或 `SIGINT` 后会进入 draining，`/ready` 立即返回 `not_ready`，`/health` 仍保持可用，然后 HTTP server 停止接收新连接并等待已有连接关闭。`ZIWEI_RELEASE_VERSION`、`ZIWEI_RELEASE_COMMIT`、`ZIWEI_RELEASE_SOURCE` 和 `ZIWEI_RELEASE_SUMMARY_PATH` 只用于运行实例追溯，不进入排盘、解释或用户报告。设置 `ZIWEI_API_OBSERVABILITY=stdout` 后，服务会输出 `api.request.started`、`api.request.completed`、`api.request.blocked` 和 `api.request.failed` 事件，事件只包含路由、状态码、耗时、鉴权 principal 摘要、报告生成状态和限流摘要，不记录完整请求体或密钥。`ZIWEI_API_RATE_LIMIT_WINDOW_MS` 和 `ZIWEI_API_RATE_LIMIT_MAX` 控制业务 API 限流窗口和配额，默认是 60 秒 60 次；bearer token 会先哈希再作为限流分桶 key。设置 `ZIWEI_API_QUOTA_STORE` 后，配额窗口会写入 JSON 文件，服务重启后仍沿用尚未过期的窗口；配额文件读取或写入失败时，限流器会阻断请求，避免异常状态下无限放行。
 
 ## 当前已支持的报告底稿
 
@@ -176,6 +177,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有报告审计层。
 - 有报告发布门禁。
 - 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
+- 有 OpenAPI 3.1 合同入口，供外部调用方按真实接口集成。
 - 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、托管密钥命令桥接、secret 文件载入、请求追踪、结构化观测、脱敏日志、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流和可选文件持久化配额。
 - 有运行时配置校验、部署校验、发布总门禁、机器可读 release summary、GitHub Actions CI、API smoke 校验、运维手册、Dockerfile、Compose/Kubernetes 部署模板、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
 - 有本地参考目录和解释目录。
@@ -186,7 +188,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但真实环境部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但真实环境部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。

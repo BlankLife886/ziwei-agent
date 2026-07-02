@@ -63,6 +63,7 @@ export async function runApiSmokeCheck(options = {}) {
     const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
     await assertStaticUi(baseUrl);
+    await assertOpenApi(baseUrl);
     await assertHealth(baseUrl);
     await assertReady(baseUrl);
     await assertReport(baseUrl, {
@@ -73,7 +74,7 @@ export async function runApiSmokeCheck(options = {}) {
 
     return {
       status: "ready",
-      checks: ["/", "/health", "/ready", "/v1/reports"],
+      checks: ["/", "/openapi.json", "/health", "/ready", "/v1/reports"],
       knowledgeSnippetCount: knowledgeStore.snippets.length
     };
   } finally {
@@ -93,10 +94,24 @@ async function main() {
   console.log("API smoke 校验：");
   console.log("- 状态：ready");
   console.log("- /：通过");
+  console.log("- /openapi.json：通过");
   console.log("- /health：通过");
   console.log("- /ready：通过");
   console.log("- /v1/reports：通过");
   console.log("- 结果：HTTP 入口到 agent 报告发布链路可用");
+}
+
+async function assertOpenApi(baseUrl) {
+  const response = await fetch(`${baseUrl}/openapi.json`);
+  const body = await response.json();
+
+  if (response.status !== 200 || body.openapi !== "3.1.0") {
+    throw new Error(`openapi check failed: ${response.status}`);
+  }
+
+  if (!body.paths?.["/v1/reports"]?.post) {
+    throw new Error("openapi check failed: missing POST /v1/reports contract");
+  }
 }
 
 async function assertStaticUi(baseUrl) {

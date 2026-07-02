@@ -91,6 +91,29 @@ test("createZiweiHttpServer serves readiness responses for deploy probes", async
   }
 });
 
+test("createZiweiHttpServer serves the OpenAPI contract", async () => {
+  const server = createZiweiHttpServer({
+    env: {},
+    knowledgeSnippets: []
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const response = await fetch(`http://127.0.0.1:${port}/openapi.json`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.openapi, "3.1.0");
+    assert.ok(body.paths["/v1/reports"].post);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(response.headers.get("x-request-id").startsWith("req_"), true);
+  } finally {
+    await close(server);
+  }
+});
+
 test("createZiweiHttpServer reports not ready for incomplete external providers", async () => {
   const server = createZiweiHttpServer({
     env: {
