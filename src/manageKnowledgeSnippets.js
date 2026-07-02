@@ -28,12 +28,24 @@ export async function runKnowledgeSnippetCommand(argv = []) {
     return draftKnowledgeSnippetFile(parsed);
   }
 
+  if (parsed.command === "draft-batch") {
+    return draftKnowledgeSnippetBatchFile(parsed);
+  }
+
   if (parsed.command === "promote") {
     return promoteKnowledgeSnippetFile(parsed);
   }
 
+  if (parsed.command === "promote-batch") {
+    return promoteKnowledgeSnippetBatchFile(parsed);
+  }
+
   if (parsed.command === "append") {
     return appendKnowledgeSnippetFile(parsed);
+  }
+
+  if (parsed.command === "append-batch") {
+    return appendKnowledgeSnippetBatchFile(parsed);
   }
 
   throw new Error(`未知知识片段命令：${parsed.command}`);
@@ -81,6 +93,62 @@ export async function promoteKnowledgeSnippetFile(options) {
       snippetId: result.snippet.id,
       audit: result.audit,
       nextAction: result.nextAction
+    }, null, 2)
+  };
+}
+
+export async function draftKnowledgeSnippetBatchFile(options) {
+  requirePathOption(options, "input");
+  const candidates = extractCandidates(await readJsonFile(options.input));
+  const results = candidates.map(ingestKnowledgeSnippetCandidate);
+  const outputPayload = buildBatchSnippetPayload(results);
+
+  if (options.output) {
+    await writeJsonFile(options.output, outputPayload);
+  }
+
+  return {
+    exitCode: 0,
+    output: JSON.stringify({
+      command: "draft-batch",
+      status: summarizeBatchStatus(results, "ready"),
+      input: options.input,
+      output: options.output ?? null,
+      count: results.length,
+      readyCount: results.filter((result) => result.status === "ready").length,
+      needsReviewCount: results.filter((result) => {
+        return result.status === "needs_review";
+      }).length,
+      items: results.map(formatBatchResultItem),
+      nextAction: "请逐条复核 draft 片段，确认字段、来源、主题和规则引用后再晋升。"
+    }, null, 2)
+  };
+}
+
+export async function promoteKnowledgeSnippetBatchFile(options) {
+  requirePathOption(options, "input");
+  const snippets = extractSnippets(await readJsonFile(options.input));
+  const results = snippets.map(promoteKnowledgeSnippet);
+  const status = summarizeBatchStatus(results, "verified");
+
+  if (status === "verified" && options.output) {
+    await writeJsonFile(options.output, buildBatchSnippetPayload(results));
+  }
+
+  return {
+    exitCode: status === "verified" ? 0 : 1,
+    output: JSON.stringify({
+      command: "promote-batch",
+      status,
+      input: options.input,
+      output: status === "verified" ? options.output ?? null : null,
+      count: results.length,
+      verifiedCount: results.filter((result) => result.status === "verified").length,
+      blockedCount: results.filter((result) => result.status === "blocked").length,
+      items: results.map(formatBatchResultItem),
+      nextAction: status === "verified"
+        ? "全部知识片段已晋升为 verified，可进入批量追加。"
+        : "批量晋升采用全有或全无策略，请先修复 blocked 片段。"
     }, null, 2)
   };
 }
@@ -169,6 +237,116 @@ export async function appendKnowledgeSnippetFile(options) {
   };
 }
 
+export async function appendKnowledgeSnippetBatchFile(options) {
+  requirePathOption(options, "input");
+  requirePathOption(options, "store");
+  const snippets = extractSnippets(await readJsonFile(options.input));
+  const snippetAudits = snippets.map((snippet) => {
+    return {
+      snippet,
+      audit: auditKnowledgeSnippet(snippet)
+    };
+  });
+  const failedAudits = snippetAudits.filter((item) => item.audit.status !== "passed");
+
+  if (failedAudits.length > 0) {
+    return {
+      exitCode: 1,
+      output: JSON.stringify({
+        command: "append-batch",
+        status: "blocked",
+        input: options.input,
+        store: options.store,
+        output: null,
+        count: snippets.length,
+        blockedCount: failedAudits.length,
+        items: snippetAudits.map((item) => ({
+          snippetId: item.snippet?.id ?? null,
+          audit: item.audit
+        })),
+        nextAction: "只能批量追加已通过 schema 审计的 verified 知识片段。"
+      }, null, 2)
+    };
+  }
+
+  const duplicateInputIds = findDuplicateIds(snippets);
+
+  if (duplicateInputIds.length > 0) {
+    return buildAppendBatchBlockedResult({
+      options,
+      count: snippets.length,
+      issueId: "knowledge-store.batch.duplicate-id",
+      message: `批量输入存在重复知识片段 id：${duplicateInputIds.join("、")}。`
+    });
+  }
+
+  const storePayload = await readJsonFile(options.store);
+
+  if (!Array.isArray(storePayload?.snippets)) {
+    return buildAppendBatchBlockedResult({
+      options,
+      count: snippets.length,
+      issueId: "knowledge-store.snippets.required",
+      message: "目标知识库必须包含 snippets 数组。"
+    });
+  }
+
+  const existingIds = new Set(storePayload.snippets.map((snippet) => snippet?.id));
+  const duplicateStoreIds = snippets
+    .map((snippet) => snippet.id)
+    .filter((id) => existingIds.has(id));
+
+  if (duplicateStoreIds.length > 0) {
+    return buildAppendBatchBlockedResult({
+      options,
+      count: snippets.length,
+      issueId: "knowledge-store.snippet.duplicate-id",
+      message: `目标知识库已存在以下知识片段 id：${duplicateStoreIds.join("、")}。`
+    });
+  }
+
+  const nextPayload = {
+    ...storePayload,
+    snippets: [...storePayload.snippets, ...snippets]
+  };
+  const nextStore = buildKnowledgeSnippetStore(nextPayload);
+
+  if (nextStore.status !== "ready") {
+    return {
+      exitCode: 1,
+      output: JSON.stringify({
+        command: "append-batch",
+        status: "blocked",
+        input: options.input,
+        store: options.store,
+        output: null,
+        count: snippets.length,
+        storeStatus: nextStore.status,
+        issues: nextStore.issues,
+        nextAction: "批量追加后的知识库未通过全库审计，请修复问题后再写入。"
+      }, null, 2)
+    };
+  }
+
+  const outputPath = options.output ?? options.store;
+  await writeJsonFile(outputPath, nextPayload);
+
+  return {
+    exitCode: 0,
+    output: JSON.stringify({
+      command: "append-batch",
+      status: "appended",
+      input: options.input,
+      store: options.store,
+      output: outputPath,
+      appendedCount: snippets.length,
+      storeStatus: nextStore.status,
+      snippetCount: nextStore.snippets.length,
+      nextAction: "知识片段批量追加完成并通过全库审计，可进入报告规划检索。"
+    }, null, 2)
+  };
+}
+
 function buildAppendBlockedResult({
   options,
   snippet,
@@ -190,6 +368,27 @@ function buildAppendBlockedResult({
   };
 }
 
+function buildAppendBatchBlockedResult({
+  options,
+  count,
+  issueId,
+  message
+}) {
+  return {
+    exitCode: 1,
+    output: JSON.stringify({
+      command: "append-batch",
+      status: "blocked",
+      input: options.input,
+      store: options.store,
+      output: null,
+      count,
+      issues: [{ id: issueId, message }],
+      nextAction: "请先修复批量输入或目标知识库，再追加 verified 知识片段。"
+    }, null, 2)
+  };
+}
+
 async function readJsonFile(filePath) {
   const rawText = await readFile(filePath, "utf8");
   return JSON.parse(rawText);
@@ -205,6 +404,84 @@ function unwrapSnippetPayload(payload) {
   }
 
   return payload;
+}
+
+function extractCandidates(payload) {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.candidates)) {
+    return payload.candidates;
+  }
+
+  throw new Error("批量 candidate 文件必须是数组，或包含 candidates 数组。");
+}
+
+function extractSnippets(payload) {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.snippets)) {
+    return payload.snippets;
+  }
+
+  if (isPlainObject(payload?.snippet)) {
+    return [payload.snippet];
+  }
+
+  throw new Error("批量 snippet 文件必须是数组，或包含 snippets 数组。");
+}
+
+function buildBatchSnippetPayload(results) {
+  return {
+    snippets: results.map((result) => result.snippet),
+    review: {
+      status: summarizeBatchStatus(results, "verified"),
+      items: results.map(formatBatchResultItem)
+    }
+  };
+}
+
+function summarizeBatchStatus(results, successStatus) {
+  if (results.length === 0) {
+    return "empty";
+  }
+
+  if (results.every((result) => result.status === successStatus)) {
+    return successStatus;
+  }
+
+  if (results.some((result) => result.status === "blocked")) {
+    return "blocked";
+  }
+
+  return "needs_review";
+}
+
+function formatBatchResultItem(result) {
+  return {
+    status: result.status,
+    snippetId: result.snippet?.id ?? null,
+    audit: result.audit,
+    nextAction: result.nextAction
+  };
+}
+
+function findDuplicateIds(snippets) {
+  const seenIds = new Set();
+  const duplicateIds = new Set();
+
+  for (const snippet of snippets) {
+    if (seenIds.has(snippet.id)) {
+      duplicateIds.add(snippet.id);
+    }
+
+    seenIds.add(snippet.id);
+  }
+
+  return [...duplicateIds];
 }
 
 function parseArgs(argv) {
@@ -267,13 +544,19 @@ function requirePathOption(options, key) {
 function buildHelpText() {
   return `用法：
   node src/manageKnowledgeSnippets.js draft --input <candidate.json> [--output <draft.json>]
+  node src/manageKnowledgeSnippets.js draft-batch --input <candidates.json> [--output <drafts.json>]
   node src/manageKnowledgeSnippets.js promote --input <draft.json> [--output <verified.json>]
+  node src/manageKnowledgeSnippets.js promote-batch --input <drafts.json> [--output <verified.json>]
   node src/manageKnowledgeSnippets.js append --input <verified.json> --store <store.json> [--output <store.json>]
+  node src/manageKnowledgeSnippets.js append-batch --input <verified.json> --store <store.json> [--output <store.json>]
 
 说明：
-  draft    把 PDF/OCR/研读笔记候选摘录标准化为 draft 知识片段。
-  promote  只在字段完整、来源已登记、规则引用完整时晋升为 verified。
-  append   只追加 verified 片段，并在写入前执行全库审计。
+  draft         把 PDF/OCR/研读笔记候选摘录标准化为 draft 知识片段。
+  draft-batch   批量标准化 candidates 数组，输出 snippets 队列和逐条审计。
+  promote       只在字段完整、来源已登记、规则引用完整时晋升为 verified。
+  promote-batch 批量晋升 snippets 队列，采用全有或全无写出策略。
+  append        只追加 verified 片段，并在写入前执行全库审计。
+  append-batch  批量追加 verified 片段，拒绝 draft、重复 id 和失败 store。
 `;
 }
 

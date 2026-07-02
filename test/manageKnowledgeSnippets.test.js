@@ -10,8 +10,11 @@ import {
   KNOWLEDGE_SNIPPET_STATUS
 } from "../src/agent/knowledgeSnippetCatalog.js";
 import {
+  appendKnowledgeSnippetBatchFile,
   appendKnowledgeSnippetFile,
+  draftKnowledgeSnippetBatchFile,
   draftKnowledgeSnippetFile,
+  promoteKnowledgeSnippetBatchFile,
   promoteKnowledgeSnippetFile,
   runKnowledgeSnippetCommand
 } from "../src/manageKnowledgeSnippets.js";
@@ -176,21 +179,197 @@ test("runKnowledgeSnippetCommand exposes help text", async () => {
 
   assert.equal(result.exitCode, 0);
   assert.ok(result.output.includes("draft --input"));
+  assert.ok(result.output.includes("draft-batch --input"));
   assert.ok(result.output.includes("promote --input"));
+  assert.ok(result.output.includes("promote-batch --input"));
   assert.ok(result.output.includes("append --input"));
+  assert.ok(result.output.includes("append-batch --input"));
+});
+
+test("draftKnowledgeSnippetBatchFile writes a review queue from candidates", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "candidates.json");
+  const outputPath = join(dir, "drafts.json");
+  await writeJson(inputPath, {
+    candidates: [
+      createCandidate("knowledge-snippet.batch.career", "career"),
+      createCandidate("knowledge-snippet.batch.wealth", "wealth")
+    ]
+  });
+
+  const result = await draftKnowledgeSnippetBatchFile({
+    command: "draft-batch",
+    input: inputPath,
+    output: outputPath
+  });
+  const output = JSON.parse(result.output);
+  const drafts = JSON.parse(await readFile(outputPath, "utf8"));
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(output.status, "needs_review");
+  assert.equal(output.count, 2);
+  assert.equal(output.needsReviewCount, 2);
+  assert.deepEqual(drafts.snippets.map((snippet) => snippet.status), [
+    KNOWLEDGE_SNIPPET_STATUS.DRAFT,
+    KNOWLEDGE_SNIPPET_STATUS.DRAFT
+  ]);
+  assert.equal(drafts.review.items.length, 2);
+});
+
+test("promoteKnowledgeSnippetBatchFile uses all-or-nothing writes", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "drafts.json");
+  const outputPath = join(dir, "verified.json");
+  await writeJson(inputPath, {
+    snippets: [
+      {
+        ...createCandidate("knowledge-snippet.batch.career", "career"),
+        status: KNOWLEDGE_SNIPPET_STATUS.DRAFT
+      },
+      {
+        ...createCandidate("knowledge-snippet.batch.incomplete", "wealth"),
+        excerpt: "",
+        status: KNOWLEDGE_SNIPPET_STATUS.DRAFT
+      }
+    ]
+  });
+
+  const result = await promoteKnowledgeSnippetBatchFile({
+    command: "promote-batch",
+    input: inputPath,
+    output: outputPath
+  });
+  const output = JSON.parse(result.output);
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(output.status, "blocked");
+  assert.equal(output.verifiedCount, 1);
+  assert.equal(output.blockedCount, 1);
+  assert.equal(existsSync(outputPath), false);
+});
+
+test("promoteKnowledgeSnippetBatchFile writes verified review queues", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "drafts.json");
+  const outputPath = join(dir, "verified.json");
+  await writeJson(inputPath, {
+    snippets: [
+      {
+        ...createCandidate("knowledge-snippet.batch.career", "career"),
+        status: KNOWLEDGE_SNIPPET_STATUS.DRAFT
+      },
+      {
+        ...createCandidate("knowledge-snippet.batch.wealth", "wealth"),
+        status: KNOWLEDGE_SNIPPET_STATUS.DRAFT
+      }
+    ]
+  });
+
+  const result = await promoteKnowledgeSnippetBatchFile({
+    command: "promote-batch",
+    input: inputPath,
+    output: outputPath
+  });
+  const output = JSON.parse(result.output);
+  const verified = JSON.parse(await readFile(outputPath, "utf8"));
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(output.status, "verified");
+  assert.equal(output.verifiedCount, 2);
+  assert.deepEqual(verified.snippets.map((snippet) => snippet.status), [
+    KNOWLEDGE_SNIPPET_STATUS.VERIFIED,
+    KNOWLEDGE_SNIPPET_STATUS.VERIFIED
+  ]);
+});
+
+test("appendKnowledgeSnippetBatchFile appends verified queues atomically", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "verified.json");
+  const storePath = join(dir, "store.json");
+  await writeJson(inputPath, {
+    snippets: [
+      {
+        ...createCandidate("knowledge-snippet.batch.career", "career"),
+        status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED
+      },
+      {
+        ...createCandidate("knowledge-snippet.batch.wealth", "wealth"),
+        status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED
+      }
+    ]
+  });
+  await writeJson(storePath, {
+    snippets: []
+  });
+
+  const result = await appendKnowledgeSnippetBatchFile({
+    command: "append-batch",
+    input: inputPath,
+    store: storePath
+  });
+  const output = JSON.parse(result.output);
+  const store = JSON.parse(await readFile(storePath, "utf8"));
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(output.status, "appended");
+  assert.equal(output.appendedCount, 2);
+  assert.equal(output.snippetCount, 2);
+  assert.deepEqual(store.snippets.map((snippet) => snippet.id), [
+    "knowledge-snippet.batch.career",
+    "knowledge-snippet.batch.wealth"
+  ]);
+});
+
+test("appendKnowledgeSnippetBatchFile blocks duplicate batch ids before writing", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "verified.json");
+  const storePath = join(dir, "store.json");
+  await writeJson(inputPath, {
+    snippets: [
+      {
+        ...createCandidate("knowledge-snippet.batch.duplicate", "career"),
+        status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED
+      },
+      {
+        ...createCandidate("knowledge-snippet.batch.duplicate", "wealth"),
+        status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED
+      }
+    ]
+  });
+  await writeJson(storePath, {
+    snippets: []
+  });
+
+  const result = await appendKnowledgeSnippetBatchFile({
+    command: "append-batch",
+    input: inputPath,
+    store: storePath
+  });
+  const output = JSON.parse(result.output);
+  const store = JSON.parse(await readFile(storePath, "utf8"));
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(output.status, "blocked");
+  assert.equal(output.issues[0].id, "knowledge-store.batch.duplicate-id");
+  assert.deepEqual(store.snippets, []);
 });
 
 async function writeJson(filePath, payload) {
   await writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
-function createCandidate() {
+function createCandidate(
+  id = "knowledge-snippet.career-structure-command",
+  topicId = "career"
+) {
   return {
-    id: "knowledge-snippet.career-structure-command",
+    id,
     sourceRef: KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS,
     title: "官禄宫结构研读",
-    topicIds: ["career"],
-    referenceRefs: ["framework.career-palace"],
+    topicIds: [topicId],
+    referenceRefs: [topicId === "wealth"
+      ? "framework.wealth-palace"
+      : "framework.career-palace"],
     excerpt: "官禄宫专题需要合看命宫、财帛宫与夫妻宫。",
     citation: "研读笔记 / 官禄宫结构",
     riskLevel: KNOWLEDGE_RISK_LEVELS.LOW
