@@ -7,16 +7,20 @@ import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
 const DEFAULT_PROFILE_PATH = "examples/profile.example.json";
 const DEFAULT_QUERY = "我想看婚姻、事业、财富和当前运势";
 
-async function main() {
-  const env = process.env;
+export async function runApiSmokeCheck(options = {}) {
+  const env = options.env ?? process.env;
+  const profilePath = options.profilePath ?? DEFAULT_PROFILE_PATH;
+  const query = options.query ?? DEFAULT_QUERY;
   const runtimeConfig = buildServerRuntimeConfig(env);
 
   // Smoke 校验先复用生产启动前的同一套配置门禁，避免出现“脚本能跑、
   // 服务不能启动”的假阳性。
   if (runtimeConfig.status !== "ready") {
-    printFailure("运行时配置不合格", runtimeConfig.issues);
-    process.exitCode = 2;
-    return;
+    return {
+      status: "invalid",
+      reason: "运行时配置不合格",
+      issues: runtimeConfig.issues
+    };
   }
 
   // 这里启动的是项目真实 HTTP server，而不是直接调用 pipeline。
@@ -24,7 +28,20 @@ async function main() {
   const knowledgeStore = runtimeConfig.values.knowledgeStorePath
     ? await loadKnowledgeSnippetStore(runtimeConfig.values.knowledgeStorePath)
     : { snippets: [] };
-  const profile = JSON.parse(await readFile(DEFAULT_PROFILE_PATH, "utf8"));
+
+  if (runtimeConfig.values.knowledgeStorePath && knowledgeStore.status !== "ready") {
+    return {
+      status: "invalid",
+      reason: "知识库配置不合格",
+      issues: knowledgeStore.issues.map((issue) => {
+        return issue.snippetId
+          ? `${issue.snippetId}: ${issue.message}`
+          : issue.message;
+      })
+    };
+  }
+
+  const profile = JSON.parse(await readFile(profilePath, "utf8"));
   const server = createZiweiHttpServer({
     env,
     knowledgeSnippets: knowledgeStore.snippets,
@@ -42,17 +59,34 @@ async function main() {
     await assertHealth(baseUrl);
     await assertReport(baseUrl, {
       env,
-      profile
+      profile,
+      query
     });
 
-    console.log("API smoke 校验：");
-    console.log("- 状态：ready");
-    console.log("- /health：通过");
-    console.log("- /v1/reports：通过");
-    console.log("- 结果：HTTP 入口到 agent 报告发布链路可用");
+    return {
+      status: "ready",
+      checks: ["/health", "/v1/reports"],
+      knowledgeSnippetCount: knowledgeStore.snippets.length
+    };
   } finally {
     await close(server);
   }
+}
+
+async function main() {
+  const result = await runApiSmokeCheck();
+
+  if (result.status !== "ready") {
+    printFailure(result.reason, result.issues);
+    process.exitCode = 2;
+    return;
+  }
+
+  console.log("API smoke 校验：");
+  console.log("- 状态：ready");
+  console.log("- /health：通过");
+  console.log("- /v1/reports：通过");
+  console.log("- 结果：HTTP 入口到 agent 报告发布链路可用");
 }
 
 async function assertHealth(baseUrl) {
@@ -64,7 +98,7 @@ async function assertHealth(baseUrl) {
   }
 }
 
-async function assertReport(baseUrl, { env, profile }) {
+async function assertReport(baseUrl, { env, profile, query }) {
   // 使用示例命盘做最小可复现请求：只判断链路发布成功和关键产物存在，
   // 不在 smoke 阶段绑定具体文案，避免把内容迭代变成部署阻断。
   const response = await fetch(`${baseUrl}/v1/reports`, {
@@ -75,7 +109,7 @@ async function assertReport(baseUrl, { env, profile }) {
     },
     body: JSON.stringify({
       profile,
-      query: DEFAULT_QUERY
+      query
     })
   });
   const body = await response.json();
@@ -168,9 +202,11 @@ function printFailure(title, details) {
   }
 }
 
-main().catch((error) => {
-  console.error("API smoke 校验：");
-  console.error("- 状态：failed");
-  console.error(`- 原因：${error.message}`);
-  process.exitCode = 2;
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error("API smoke 校验：");
+    console.error("- 状态：failed");
+    console.error(`- 原因：${error.message}`);
+    process.exitCode = 2;
+  });
+}

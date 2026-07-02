@@ -9,7 +9,11 @@ import { createZiweiHttpServer } from "../src/server.js";
 test("createZiweiHttpServer serves health responses", async () => {
   const server = createZiweiHttpServer({
     env: {},
-    knowledgeSnippets: []
+    knowledgeSnippets: [
+      {
+        id: "knowledge-snippet.test"
+      }
+    ]
   });
 
   await new Promise((resolve) => {
@@ -24,6 +28,10 @@ test("createZiweiHttpServer serves health responses", async () => {
     assert.equal(response.status, 200);
     assert.equal(body.status, "ok");
     assert.equal(body.service, "ziwei-agent");
+    assert.equal(body.checks.http, "ok");
+    assert.equal(body.checks.agentEntry, "ready");
+    assert.equal(body.checks.knowledgeSnippetCount, 1);
+    assert.equal(response.headers.get("cache-control"), "no-store");
     assert.equal(response.headers.get("x-request-id"), body.requestId);
   } finally {
     await new Promise((resolve) => {
@@ -32,7 +40,7 @@ test("createZiweiHttpServer serves health responses", async () => {
   }
 });
 
-test("createZiweiHttpServer rate limits requests before handling bodies", async () => {
+test("createZiweiHttpServer serves health responses without consuming rate quota", async () => {
   const server = createZiweiHttpServer({
     env: {},
     knowledgeSnippets: [],
@@ -49,6 +57,36 @@ test("createZiweiHttpServer rate limits requests before handling bodies", async 
     const body = await secondResponse.json();
 
     assert.equal(firstResponse.status, 200);
+    assert.equal(secondResponse.status, 200);
+    assert.equal(body.status, "ok");
+  } finally {
+    await close(server);
+  }
+});
+
+test("createZiweiHttpServer rate limits API requests before handling bodies", async () => {
+  const server = createZiweiHttpServer({
+    env: {},
+    knowledgeSnippets: [],
+    rateLimitWindowMs: 60_000,
+    rateLimitMaxRequests: 1
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const firstResponse = await fetch(`http://127.0.0.1:${port}/v1/reports`, {
+      method: "POST",
+      body: "{}"
+    });
+    const secondResponse = await fetch(`http://127.0.0.1:${port}/v1/reports`, {
+      method: "POST",
+      body: "{}"
+    });
+    const body = await secondResponse.json();
+
+    assert.equal(firstResponse.status, 400);
     assert.equal(secondResponse.status, 429);
     assert.equal(body.status, "rate_limited");
     assert.equal(typeof body.retryAfterMs, "number");
@@ -91,8 +129,8 @@ test("createZiweiHttpServer emits redacted observer events", async () => {
     assert.equal(events[0].headers.authorization, "[redacted]");
     assert.equal(events[1].type, "api.request.completed");
     assert.equal(events[1].requestId, body.requestId);
-    assert.equal(events[1].rateLimit.status, "allowed");
-    assert.equal(events[1].rateLimit.key, undefined);
+    assert.equal(events[1].responseStatus, "ok");
+    assert.equal(events[1].rateLimit, undefined);
   } finally {
     await close(server);
   }
@@ -115,7 +153,10 @@ test("createZiweiHttpServer can persist quota windows across server instances", 
     await listen(firstServer);
 
     const firstPort = firstServer.address().port;
-    const firstResponse = await fetch(`http://127.0.0.1:${firstPort}/health`);
+    const firstResponse = await fetch(`http://127.0.0.1:${firstPort}/v1/reports`, {
+      method: "POST",
+      body: "{}"
+    });
     await close(firstServer);
 
     const secondServer = createZiweiHttpServer({
@@ -131,10 +172,13 @@ test("createZiweiHttpServer can persist quota windows across server instances", 
 
     try {
       const secondPort = secondServer.address().port;
-      const secondResponse = await fetch(`http://127.0.0.1:${secondPort}/health`);
+      const secondResponse = await fetch(`http://127.0.0.1:${secondPort}/v1/reports`, {
+        method: "POST",
+        body: "{}"
+      });
       const body = await secondResponse.json();
 
-      assert.equal(firstResponse.status, 200);
+      assert.equal(firstResponse.status, 400);
       assert.equal(secondResponse.status, 429);
       assert.equal(body.status, "rate_limited");
     } finally {

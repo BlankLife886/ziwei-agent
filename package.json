@@ -8,6 +8,7 @@
     "serve": "node src/server.js",
     "test": "node --test",
     "smoke:api": "node src/smokeApi.js",
+    "validate:deploy": "node src/validateDeployment.js",
     "validate:runtime": "node src/validateRuntimeConfig.js",
     "validate:knowledge": "node src/validateKnowledgeStore.js data/knowledge-snippets.example.json"
   },

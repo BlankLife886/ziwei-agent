@@ -53,6 +53,26 @@ export function createZiweiHttpServer(options = {}) {
     });
 
     try {
+      if (isHealthRequest(method, path)) {
+        const apiResponse = createHealthResponse({
+          requestId,
+          method,
+          knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0
+        });
+
+        emitApiEvent(observer, {
+          type: "api.request.completed",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          responseStatus: apiResponse.body?.status
+        });
+        writeJsonResponse(response, apiResponse, requestId);
+        return;
+      }
+
       const rateLimit = rateLimiter.check({
         headers: request.headers,
         remoteAddress: request.socket.remoteAddress
@@ -283,6 +303,37 @@ function summarizeRateLimit(rateLimit) {
     remaining: rateLimit.remaining,
     retryAfterMs: rateLimit.retryAfterMs
   };
+}
+
+function isHealthRequest(method, path) {
+  return (method === "GET" || method === "HEAD") &&
+    normalizeRequestPath(path) === "/health";
+}
+
+function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
+  return {
+    statusCode: 200,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    body: method === "HEAD"
+      ? undefined
+      : {
+        status: "ok",
+        service: "ziwei-agent",
+        requestId,
+        checks: {
+          http: "ok",
+          agentEntry: "ready",
+          knowledgeSnippetCount
+        }
+      }
+  };
+}
+
+function normalizeRequestPath(path) {
+  return String(path ?? "/").split("?")[0];
 }
 
 function createQuotaStoreFromRuntime(env) {
