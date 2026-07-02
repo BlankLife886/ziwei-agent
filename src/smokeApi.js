@@ -64,6 +64,7 @@ export async function runApiSmokeCheck(options = {}) {
 
     await assertStaticUi(baseUrl);
     await assertHealth(baseUrl);
+    await assertReady(baseUrl);
     await assertReport(baseUrl, {
       env,
       profile,
@@ -72,7 +73,7 @@ export async function runApiSmokeCheck(options = {}) {
 
     return {
       status: "ready",
-      checks: ["/", "/health", "/v1/reports"],
+      checks: ["/", "/health", "/ready", "/v1/reports"],
       knowledgeSnippetCount: knowledgeStore.snippets.length
     };
   } finally {
@@ -93,6 +94,7 @@ async function main() {
   console.log("- 状态：ready");
   console.log("- /：通过");
   console.log("- /health：通过");
+  console.log("- /ready：通过");
   console.log("- /v1/reports：通过");
   console.log("- 结果：HTTP 入口到 agent 报告发布链路可用");
 }
@@ -112,6 +114,19 @@ async function assertHealth(baseUrl) {
 
   if (response.status !== 200 || body.status !== "ok") {
     throw new Error(`health check failed: ${response.status} ${body.status}`);
+  }
+}
+
+async function assertReady(baseUrl) {
+  const response = await fetch(`${baseUrl}/ready`);
+  const body = await response.json();
+
+  if (response.status !== 200 || body.status !== "ready") {
+    throw new Error(`ready check failed: ${response.status} ${body.status}`);
+  }
+
+  if (body.checks?.agentEntry?.status !== "ready") {
+    throw new Error("ready check failed: agent entry is not ready");
   }
 }
 

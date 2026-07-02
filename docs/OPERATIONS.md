@@ -123,10 +123,18 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 - 返回 `status`、`service`、`requestId` 和 `checks`。
 - `checks.knowledgeSnippetCount` 表示当前服务启动时加载进来的可用知识片段数量。
 
+`GET /ready` 是 readiness 探针：
+
+- 不读取请求体。
+- 不消耗业务限流配额。
+- 返回 runtime、agent 入口、知识库加载状态和报告 provider 配置状态。
+- 当 `ZIWEI_REPORT_PROVIDER=external-llm` 但缺少 `ZIWEI_LLM_ENDPOINT`、`ZIWEI_LLM_API_KEY` 或 `ZIWEI_LLM_MODEL` 时返回 503。
+
 示例：
 
 ```bash
 curl http://localhost:3000/health
+curl http://localhost:3000/ready
 ```
 
 Web UI 入口是：
@@ -220,6 +228,7 @@ ZIWEI_LLM_MODEL=
 
 ```bash
 curl http://localhost:3000/health
+curl http://localhost:3000/ready
 npm run smoke:api
 node --env-file=.env src/validateDeployment.js
 ```

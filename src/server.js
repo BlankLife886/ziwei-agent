@@ -9,6 +9,7 @@ import { createFileApiQuotaStore } from "./agent/apiQuotaStore.js";
 import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
+import { REPORT_GENERATOR_IDS } from "./agent/reportGenerator.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
 import { resolveRuntimeEnv } from "./runtimeEnv.js";
 import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
@@ -78,6 +79,29 @@ export function createZiweiHttpServer(options = {}) {
           requestId,
           method,
           knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0
+        });
+
+        emitApiEvent(observer, {
+          type: "api.request.completed",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          responseStatus: apiResponse.body?.status
+        });
+        writeJsonResponse(response, apiResponse, requestId);
+        return;
+      }
+
+      if (isReadyRequest(method, path)) {
+        const apiResponse = createReadyResponse({
+          requestId,
+          method,
+          env,
+          knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0,
+          knowledgeStoreStatus: options.knowledgeStoreStatus,
+          knowledgeStoreIssues: options.knowledgeStoreIssues
         });
 
         emitApiEvent(observer, {
@@ -248,11 +272,25 @@ async function main() {
   const knowledgeStore = env.ZIWEI_KNOWLEDGE_STORE
     ? await loadKnowledgeSnippetStore(env.ZIWEI_KNOWLEDGE_STORE)
     : { snippets: [] };
+
+  if (env.ZIWEI_KNOWLEDGE_STORE && knowledgeStore.status !== "ready") {
+    for (const issue of knowledgeStore.issues ?? []) {
+      const message = issue.snippetId
+        ? `${issue.snippetId}: ${issue.message}`
+        : issue.message;
+      console.error(`Knowledge store error: ${message}`);
+    }
+    process.exitCode = 2;
+    return;
+  }
+
   const port = runtimeConfig.values.port;
   const maxBodyBytes = runtimeConfig.values.maxBodyBytes;
   const server = createZiweiHttpServer({
     env,
     knowledgeSnippets: knowledgeStore.snippets,
+    knowledgeStoreStatus: knowledgeStore.status,
+    knowledgeStoreIssues: knowledgeStore.issues,
     maxBodyBytes
   });
 
@@ -362,6 +400,11 @@ function isHealthRequest(method, path) {
     normalizeRequestPath(path) === "/health";
 }
 
+function isReadyRequest(method, path) {
+  return (method === "GET" || method === "HEAD") &&
+    normalizeRequestPath(path) === "/ready";
+}
+
 function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
   return {
     statusCode: 200,
@@ -382,6 +425,94 @@ function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
         }
       }
   };
+}
+
+function createReadyResponse({
+  requestId,
+  method,
+  env,
+  knowledgeSnippetCount,
+  knowledgeStoreStatus,
+  knowledgeStoreIssues
+}) {
+  const reportProvider = buildReportProviderReadiness(env);
+  const knowledge = {
+    status: knowledgeStoreStatus ?? "ready",
+    count: knowledgeSnippetCount,
+    issues: summarizeKnowledgeStoreIssues(knowledgeStoreIssues)
+  };
+  const checks = {
+    runtime: {
+      status: "ready"
+    },
+    agentEntry: {
+      status: "ready",
+      pipeline: "buildChart -> runZiweiPipelineAsync -> reportAuditor -> reportPublisher"
+    },
+    knowledge,
+    reportProvider
+  };
+  const ready = Object.values(checks).every((check) => {
+    return check.status === "ready";
+  });
+
+  return {
+    statusCode: ready ? 200 : 503,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    body: method === "HEAD"
+      ? undefined
+      : {
+        status: ready ? "ready" : "not_ready",
+        service: "ziwei-agent",
+        requestId,
+        checks
+      }
+  };
+}
+
+function buildReportProviderReadiness(env) {
+  const providerId = env.ZIWEI_REPORT_PROVIDER || REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE;
+
+  if (providerId === REPORT_GENERATOR_IDS.DETERMINISTIC_TEMPLATE) {
+    return {
+      status: "ready",
+      providerId,
+      mode: "deterministic"
+    };
+  }
+
+  if (providerId === REPORT_GENERATOR_IDS.EXTERNAL_LLM) {
+    const missing = [
+      ["ZIWEI_LLM_ENDPOINT", env.ZIWEI_LLM_ENDPOINT],
+      ["ZIWEI_LLM_API_KEY", env.ZIWEI_LLM_API_KEY],
+      ["ZIWEI_LLM_MODEL", env.ZIWEI_LLM_MODEL]
+    ].filter(([, value]) => !value).map(([name]) => name);
+
+    return {
+      status: missing.length === 0 ? "ready" : "not_ready",
+      providerId,
+      mode: "external-llm",
+      missing
+    };
+  }
+
+  return {
+    status: "not_ready",
+    providerId,
+    mode: "unknown",
+    missing: ["supported ZIWEI_REPORT_PROVIDER"]
+  };
+}
+
+function summarizeKnowledgeStoreIssues(issues = []) {
+  return issues.map((issue) => {
+    return issue.snippetId
+      ? `${issue.snippetId}: ${issue.message}`
+      : issue.message;
+  });
 }
 
 function normalizeRequestPath(path) {

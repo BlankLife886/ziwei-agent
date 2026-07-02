@@ -40,6 +40,92 @@ test("createZiweiHttpServer serves health responses", async () => {
   }
 });
 
+test("createZiweiHttpServer serves readiness responses for deploy probes", async () => {
+  const server = createZiweiHttpServer({
+    env: {},
+    knowledgeSnippets: [
+      {
+        id: "knowledge-snippet.test"
+      }
+    ],
+    knowledgeStoreStatus: "ready"
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const response = await fetch(`http://127.0.0.1:${port}/ready`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.status, "ready");
+    assert.equal(body.checks.runtime.status, "ready");
+    assert.equal(body.checks.agentEntry.status, "ready");
+    assert.match(body.checks.agentEntry.pipeline, /reportPublisher/u);
+    assert.equal(body.checks.knowledge.status, "ready");
+    assert.equal(body.checks.knowledge.count, 1);
+    assert.equal(body.checks.reportProvider.status, "ready");
+    assert.equal(body.checks.reportProvider.mode, "deterministic");
+    assert.equal(response.headers.get("cache-control"), "no-store");
+  } finally {
+    await close(server);
+  }
+});
+
+test("createZiweiHttpServer reports not ready for incomplete external providers", async () => {
+  const server = createZiweiHttpServer({
+    env: {
+      ZIWEI_REPORT_PROVIDER: "external-llm",
+      ZIWEI_LLM_ENDPOINT: "https://example.com/v1/chat/completions"
+    },
+    knowledgeSnippets: []
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const response = await fetch(`http://127.0.0.1:${port}/ready`);
+    const body = await response.json();
+
+    assert.equal(response.status, 503);
+    assert.equal(body.status, "not_ready");
+    assert.equal(body.checks.reportProvider.status, "not_ready");
+    assert.deepEqual(body.checks.reportProvider.missing, [
+      "ZIWEI_LLM_API_KEY",
+      "ZIWEI_LLM_MODEL"
+    ]);
+    assert.equal(JSON.stringify(body).includes("secret"), false);
+  } finally {
+    await close(server);
+  }
+});
+
+test("createZiweiHttpServer serves readiness responses without consuming rate quota", async () => {
+  const server = createZiweiHttpServer({
+    env: {},
+    knowledgeSnippets: [],
+    rateLimitWindowMs: 60_000,
+    rateLimitMaxRequests: 1
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const firstResponse = await fetch(`http://127.0.0.1:${port}/ready`);
+    const secondResponse = await fetch(`http://127.0.0.1:${port}/ready`);
+    const body = await secondResponse.json();
+
+    assert.equal(firstResponse.status, 200);
+    assert.equal(secondResponse.status, 200);
+    assert.equal(body.status, "ready");
+  } finally {
+    await close(server);
+  }
+});
+
 test("createZiweiHttpServer serves the web UI assets", async () => {
   const server = createZiweiHttpServer({
     env: {},
