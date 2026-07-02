@@ -76,6 +76,48 @@ test("report section catalog defines the reusable marriage triad contract", () =
   ]);
 });
 
+test("report section catalog uses life palace star interpretations for personality evidence", () => {
+  const evidenceItems = [
+    createPalaceEvidence("命宫", {
+      mainStars: ["紫微", "破军"],
+      auxiliaryStars: ["左辅", "右弼"],
+      maleficStars: ["火星"],
+      voidStars: []
+    }),
+    createPalaceEvidence("财帛宫", {
+      mainStars: [],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createPalaceEvidence("官禄宫", {
+      mainStars: [],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    }),
+    createPalaceEvidence("迁移宫", {
+      mainStars: [],
+      auxiliaryStars: [],
+      maleficStars: [],
+      voidStars: []
+    })
+  ];
+
+  assert.deepEqual(buildSectionInterpretationRefs("life-triad", evidenceItems), [
+    "interpretation.life-triad.structure",
+    "interpretation.palace-role.life",
+    "interpretation.palace-role.wealth",
+    "interpretation.palace-role.career",
+    "interpretation.palace-role.travel",
+    "interpretation.star.zi-wei.life",
+    "interpretation.star.po-jun.life",
+    "interpretation.star.zuo-fu.life",
+    "interpretation.star.you-bi.life",
+    "interpretation.star.huo-xing.life"
+  ]);
+});
+
 test("report section catalog defines dedicated career and wealth contracts", () => {
   const careerFocusArea = {
     id: "career-palace",

@@ -15,6 +15,24 @@ export const INTERPRETATION_IDS = {
   PALACE_ROLE_CAREER: "interpretation.palace-role.career",
   PALACE_ROLE_TRAVEL: "interpretation.palace-role.travel",
   PALACE_ROLE_WELLBEING: "interpretation.palace-role.wellbeing",
+  STAR_ZI_WEI_LIFE: "interpretation.star.zi-wei.life",
+  STAR_TIAN_JI_LIFE: "interpretation.star.tian-ji.life",
+  STAR_TAI_YANG_LIFE: "interpretation.star.tai-yang.life",
+  STAR_WU_QU_LIFE: "interpretation.star.wu-qu.life",
+  STAR_TIAN_TONG_LIFE: "interpretation.star.tian-tong.life",
+  STAR_LIAN_ZHEN_LIFE: "interpretation.star.lian-zhen.life",
+  STAR_TIAN_FU_LIFE: "interpretation.star.tian-fu.life",
+  STAR_TAI_YIN_LIFE: "interpretation.star.tai-yin.life",
+  STAR_TAN_LANG_LIFE: "interpretation.star.tan-lang.life",
+  STAR_JU_MEN_LIFE: "interpretation.star.ju-men.life",
+  STAR_TIAN_XIANG_LIFE: "interpretation.star.tian-xiang.life",
+  STAR_TIAN_LIANG_LIFE: "interpretation.star.tian-liang.life",
+  STAR_QI_SHA_LIFE: "interpretation.star.qi-sha.life",
+  STAR_PO_JUN_LIFE: "interpretation.star.po-jun.life",
+  STAR_ZUO_FU_LIFE: "interpretation.star.zuo-fu.life",
+  STAR_YOU_BI_LIFE: "interpretation.star.you-bi.life",
+  STAR_HUO_XING_LIFE: "interpretation.star.huo-xing.life",
+  STAR_LING_XING_LIFE: "interpretation.star.ling-xing.life",
   CAREER_TRIAD_STRUCTURE: "interpretation.career-triad.structure",
   CAREER_PALACE_STATIC_ONLY: "interpretation.career-palace.static-only",
   WEALTH_TRIAD_STRUCTURE: "interpretation.wealth-triad.structure",
@@ -57,6 +75,96 @@ export const INTERPRETATION_IDS = {
 };
 
 const STAR_ROLE_INTERPRETATION_RULES = [
+  {
+    palaceName: "命宫",
+    starName: "紫微",
+    interpretationId: INTERPRETATION_IDS.STAR_ZI_WEI_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "天机",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_JI_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "太阳",
+    interpretationId: INTERPRETATION_IDS.STAR_TAI_YANG_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "武曲",
+    interpretationId: INTERPRETATION_IDS.STAR_WU_QU_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "天同",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_TONG_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "廉贞",
+    interpretationId: INTERPRETATION_IDS.STAR_LIAN_ZHEN_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "天府",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_FU_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "太阴",
+    interpretationId: INTERPRETATION_IDS.STAR_TAI_YIN_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "贪狼",
+    interpretationId: INTERPRETATION_IDS.STAR_TAN_LANG_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "巨门",
+    interpretationId: INTERPRETATION_IDS.STAR_JU_MEN_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "天相",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_XIANG_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "天梁",
+    interpretationId: INTERPRETATION_IDS.STAR_TIAN_LIANG_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "七杀",
+    interpretationId: INTERPRETATION_IDS.STAR_QI_SHA_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "破军",
+    interpretationId: INTERPRETATION_IDS.STAR_PO_JUN_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "左辅",
+    interpretationId: INTERPRETATION_IDS.STAR_ZUO_FU_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "右弼",
+    interpretationId: INTERPRETATION_IDS.STAR_YOU_BI_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "火星",
+    interpretationId: INTERPRETATION_IDS.STAR_HUO_XING_LIFE
+  },
+  {
+    palaceName: "命宫",
+    starName: "铃星",
+    interpretationId: INTERPRETATION_IDS.STAR_LING_XING_LIFE
+  },
   {
     palaceName: "夫妻宫",
     starName: "武曲",
@@ -169,6 +277,204 @@ const INTERPRETATIONS = [
     riskLevel: "low",
     sourceRefs: [REFERENCE_IDS.PALACE_ROLE],
     text: "命宫优先用于观察命主的基础气质、主观倾向和命盘分析的中心点。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_ZI_WEI_LIFE,
+    title: "紫微在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "紫微",
+    synthesis: "自我秩序与统筹意识",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见紫微时，可先观察自我秩序、统筹意识、尊严感和对稳定框架的需求；仍需合看三方四正，不能单独写成人生成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_JI_LIFE,
+    title: "天机在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "天机",
+    synthesis: "思考弹性与策略调整",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见天机时，可先观察思考弹性、策略调整、学习反应和变化意识；不宜直接扩大为心性不定或人生反复。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TAI_YANG_LIFE,
+    title: "太阳在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "太阳",
+    synthesis: "外向表达与责任承担",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见太阳时，可先观察外向表达、责任承担、照顾他人和公共性；仍需看亮度、同宫星曜和三方四正，不宜单点判断人格优劣。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_WU_QU_LIFE,
+    title: "武曲在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "武曲",
+    synthesis: "现实原则与执行边界",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见武曲时，可先观察现实原则、执行边界、资源意识和抗压方式；不能直接写成冷硬或只重利益。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_TONG_LIFE,
+    title: "天同在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "天同",
+    synthesis: "舒缓需求与关系适应",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见天同时，可先观察舒缓需求、关系适应、生活感受和避免过度冲突的倾向；不宜直接断为懒散或缺乏承担。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_LIAN_ZHEN_LIFE,
+    title: "廉贞在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "廉贞",
+    synthesis: "边界意识与选择张力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见廉贞时，可先观察边界意识、选择张力、规则感和关系中的自我定位；需要合看煞曜与四化，不能单独写成是非或情感问题。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_FU_LIFE,
+    title: "天府在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "天府",
+    synthesis: "稳定承接与资源管理",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见天府时，可先观察稳定承接、资源管理、守成意识和组织感；仍需结合三方四正，不能直接写成富足或地位。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TAI_YIN_LIFE,
+    title: "太阴在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "太阴",
+    synthesis: "细腻感受与内在安全感",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见太阴时，可先观察细腻感受、内在安全感、审美和照拂需求；不宜单独写成柔弱、退缩或情绪结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TAN_LANG_LIFE,
+    title: "贪狼在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "贪狼",
+    synthesis: "欲望弹性与社交探索",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见贪狼时，可先观察社交探索、兴趣弹性、欲望管理和环境适应；不能直接写成放纵或桃花结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_JU_MEN_LIFE,
+    title: "巨门在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "巨门",
+    synthesis: "语言辨析与疑问意识",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见巨门时，可先观察语言辨析、疑问意识、信息筛选和表达压力；不宜单独写成口舌是非。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_XIANG_LIFE,
+    title: "天相在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "天相",
+    synthesis: "秩序协调与角色平衡",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见天相时，可先观察秩序协调、角色平衡、规则意识和对公平感的重视；仍不能单独推成贵助或结果顺遂。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_TIAN_LIANG_LIFE,
+    title: "天梁在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "天梁",
+    synthesis: "原则照护与经验判断",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见天梁时，可先观察原则照护、经验判断、保护意识和道义感；不宜直接写成长辈缘或福荫结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_QI_SHA_LIFE,
+    title: "七杀在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "七杀",
+    synthesis: "决断力度与压力承接",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见七杀时，可先观察决断力度、压力承接、行动强度和变化适应；需要合看辅煞和四化，不能单独写成冲动或挫败。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_PO_JUN_LIFE,
+    title: "破军在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "破军",
+    synthesis: "重整意识与突破需求",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见破军时，可先观察重整意识、突破需求、阶段更新和对旧结构的调整；不能直接写成破败或人生动荡。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_ZUO_FU_LIFE,
+    title: "左辅在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "左辅",
+    synthesis: "辅助资源与协作能力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见左辅时，可先观察协作能力、辅助资源、修正能力和接受支持的方式；仍需与主星同看。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_YOU_BI_LIFE,
+    title: "右弼在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "右弼",
+    synthesis: "协调辅助与关系缓冲",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见右弼时，可先观察协调辅助、关系缓冲、补位能力和对外协作；不应单独扩大为稳定顺利。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_HUO_XING_LIFE,
+    title: "火星在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "火星",
+    synthesis: "行动急迫与反应张力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见火星时，可先观察行动急迫、反应张力、启动速度和压力释放方式；它只是性格张力线索，不能单独定吉凶。"
+  },
+  {
+    id: INTERPRETATION_IDS.STAR_LING_XING_LIFE,
+    title: "铃星在命宫的保守解释",
+    topic: "star-role",
+    palaceName: "命宫",
+    starName: "铃星",
+    synthesis: "敏感触发与内在警觉",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.LIFE_TRIAD, REFERENCE_IDS.STAR_PLACEMENT],
+    text: "命宫见铃星时，可先观察敏感触发、内在警觉、细微压力和反应节奏；需要合看全局，不能单独写成灾厄。"
   },
   {
     id: INTERPRETATION_IDS.PALACE_ROLE_SPOUSE,

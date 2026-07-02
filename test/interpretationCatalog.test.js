@@ -81,6 +81,35 @@ test("findStarRoleInterpretationRefs maps palace stars to controlled items", () 
   assert.ok(interpretations[0].synthesis.includes("资源秩序"));
 });
 
+test("findStarRoleInterpretationRefs maps life palace stars for personality analysis", () => {
+  const interpretationRefs = findStarRoleInterpretationRefs("命宫", {
+    mainStars: ["紫微", "天机", "破军"],
+    auxiliaryStars: ["左辅", "右弼"],
+    maleficStars: ["火星", "铃星"],
+    voidStars: []
+  });
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.STAR_ZI_WEI_LIFE,
+    INTERPRETATION_IDS.STAR_TIAN_JI_LIFE,
+    INTERPRETATION_IDS.STAR_PO_JUN_LIFE,
+    INTERPRETATION_IDS.STAR_ZUO_FU_LIFE,
+    INTERPRETATION_IDS.STAR_YOU_BI_LIFE,
+    INTERPRETATION_IDS.STAR_HUO_XING_LIFE,
+    INTERPRETATION_IDS.STAR_LING_XING_LIFE
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.palaceName),
+    ["命宫", "命宫", "命宫", "命宫", "命宫", "命宫", "命宫"]
+  );
+  assert.ok(interpretations[0].text.includes("自我秩序"));
+  assert.ok(interpretations[2].text.includes("重整意识"));
+  assert.ok(interpretations[5].text.includes("不能单独定吉凶"));
+});
+
 test("findStarRoleInterpretationRefs maps spouse palace stars", () => {
   const interpretationRefs = findStarRoleInterpretationRefs("夫妻宫", {
     mainStars: ["武曲", "七杀"],
