@@ -239,7 +239,7 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "birth-year-transformations")
       .referenceRefs,
-    ["rule.birth-year-four-transformations", "framework.palace-role"]
+    ["rule.birth-year-four-transformations", "rule.star-placement", "framework.palace-role"]
   );
   assert.deepEqual(
     reportPlan.sections
@@ -257,6 +257,10 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "interpretation.four-transformations.quan-ke-pair",
       "interpretation.four-transformations.quan-ji-pair",
       "interpretation.four-transformations.ke-ji-pair",
+      "interpretation.four-transformations.star-lu-same-palace",
+      "interpretation.four-transformations.star-quan-same-palace",
+      "interpretation.four-transformations.star-ke-same-palace",
+      "interpretation.four-transformations.star-ji-same-palace",
       "interpretation.four-transformations.on-spouse-palace",
       "interpretation.four-transformations.on-siblings-palace",
       "interpretation.four-transformations.on-children-palace",
@@ -407,6 +411,10 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.four-transformations.quan-ke-pair",
     "interpretation.four-transformations.quan-ji-pair",
     "interpretation.four-transformations.ke-ji-pair",
+    "interpretation.four-transformations.star-lu-same-palace",
+    "interpretation.four-transformations.star-quan-same-palace",
+    "interpretation.four-transformations.star-ke-same-palace",
+    "interpretation.four-transformations.star-ji-same-palace",
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-travel-palace",
     "interpretation.four-transformations.on-wellbeing-palace",

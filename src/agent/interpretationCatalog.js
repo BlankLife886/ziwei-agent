@@ -67,6 +67,10 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_QUAN_KE_PAIR: "interpretation.four-transformations.quan-ke-pair",
   FOUR_TRANSFORMATION_QUAN_JI_PAIR: "interpretation.four-transformations.quan-ji-pair",
   FOUR_TRANSFORMATION_KE_JI_PAIR: "interpretation.four-transformations.ke-ji-pair",
+  FOUR_TRANSFORMATION_STAR_LU_SAME_PALACE: "interpretation.four-transformations.star-lu-same-palace",
+  FOUR_TRANSFORMATION_STAR_QUAN_SAME_PALACE: "interpretation.four-transformations.star-quan-same-palace",
+  FOUR_TRANSFORMATION_STAR_KE_SAME_PALACE: "interpretation.four-transformations.star-ke-same-palace",
+  FOUR_TRANSFORMATION_STAR_JI_SAME_PALACE: "interpretation.four-transformations.star-ji-same-palace",
   FOUR_TRANSFORMATION_ON_LIFE_PALACE: "interpretation.four-transformations.on-life-palace",
   FOUR_TRANSFORMATION_ON_SPOUSE_PALACE: "interpretation.four-transformations.on-spouse-palace",
   FOUR_TRANSFORMATION_ON_WEALTH_PALACE: "interpretation.four-transformations.on-wealth-palace",
@@ -317,6 +321,25 @@ const FOUR_TRANSFORMATION_PAIR_RULES = [
   {
     transformationNames: ["化科", "化忌"],
     interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_JI_PAIR
+  }
+];
+
+const FOUR_TRANSFORMATION_STAR_PALACE_RULES = [
+  {
+    transformationName: "化禄",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_LU_SAME_PALACE
+  },
+  {
+    transformationName: "化权",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_QUAN_SAME_PALACE
+  },
+  {
+    transformationName: "化科",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_KE_SAME_PALACE
+  },
+  {
+    transformationName: "化忌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_JI_SAME_PALACE
   }
 ];
 
@@ -987,6 +1010,58 @@ const INTERPRETATIONS = [
     text: "科忌合参时，只能说明秩序修饰、表达整理或缓冲机制与牵挂约束并存，适合提示需要耐心修正；不能写成问题自动解决或长期困局。"
   },
   {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_LU_SAME_PALACE,
+    title: "星曜化禄同宫合参边界",
+    topic: "four-transformation-star-palace",
+    transformationName: "化禄",
+    synthesis: "星曜角色叠加资源可用性",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ],
+    text: "星曜化禄同宫合参时，应先看该星曜在目标宫位承担的角色，再把化禄作为资源可用性、吸引力或承接度的加权信号；不能脱离星曜与宫位直接写成得财、顺利或结果完成。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_QUAN_SAME_PALACE,
+    title: "星曜化权同宫合参边界",
+    topic: "four-transformation-star-palace",
+    transformationName: "化权",
+    synthesis: "星曜角色叠加推动压力",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ],
+    text: "星曜化权同宫合参时，应先看该星曜在目标宫位承担的角色，再把化权作为推动力、责任承担、控制需求或压力上升的加权信号；不能脱离星曜与宫位直接写成掌权、升迁或地位结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_KE_SAME_PALACE,
+    title: "星曜化科同宫合参边界",
+    topic: "four-transformation-star-palace",
+    transformationName: "化科",
+    synthesis: "星曜角色叠加秩序修饰",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ],
+    text: "星曜化科同宫合参时，应先看该星曜在目标宫位承担的角色，再把化科作为秩序修饰、表达整理、可见度或缓冲修复的加权信号；不能脱离星曜与宫位直接写成成名、考试成功或问题自动化解。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_JI_SAME_PALACE,
+    title: "星曜化忌同宫合参边界",
+    topic: "four-transformation-star-palace",
+    transformationName: "化忌",
+    synthesis: "星曜角色叠加牵挂约束",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ],
+    text: "星曜化忌同宫合参时，应先看该星曜在目标宫位承担的角色，再把化忌作为牵挂、约束、摩擦、滞留或修正课题的加权信号；不能脱离星曜与宫位直接写成灾祸、失败或不可改变的坏结果。"
+  },
+  {
     id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
     title: "四化落命宫的结构解释边界",
     topic: "four-transformation-palace",
@@ -1319,6 +1394,25 @@ export function findFourTransformationPairInterpretationRefs(transformations = [
     });
 
     return hasPair ? [rule.interpretationId] : [];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationStarPalaceInterpretationRefs(transformations = []) {
+  const transformationNames = new Set(transformations.flatMap((transformation) => {
+    if (!transformation?.name || !transformation?.star || !transformation?.targetPalaceName) {
+      return [];
+    }
+
+    return [transformation.name];
+  }));
+  const refs = FOUR_TRANSFORMATION_STAR_PALACE_RULES.flatMap((rule) => {
+    if (!transformationNames.has(rule.transformationName)) {
+      return [];
+    }
+
+    return [rule.interpretationId];
   });
 
   return [...new Set(refs)];

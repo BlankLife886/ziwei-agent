@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   INTERPRETATION_IDS,
   findFourTransformationPairInterpretationRefs,
+  findFourTransformationStarPalaceInterpretationRefs,
   findFourTransformationTargetPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findInterpretations,
@@ -151,6 +152,44 @@ test("findFourTransformationPairInterpretationRefs maps available transformation
   ]), [
     INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_JI_PAIR
   ]);
+});
+
+test("findFourTransformationStarPalaceInterpretationRefs maps transformed stars with target palaces", () => {
+  const interpretationRefs = findFourTransformationStarPalaceInterpretationRefs([
+    { name: "化禄", star: "太阳", targetPalaceName: "兄弟宫" },
+    { name: "化权", star: "武曲", targetPalaceName: "夫妻宫" },
+    { name: "化科", star: "太阴", targetPalaceName: "财帛宫" },
+    { name: "化忌", star: "天同", targetPalaceName: "子女宫" },
+    { name: "化禄", star: "", targetPalaceName: "命宫" },
+    { name: "化权", star: "紫微", targetPalaceName: null }
+  ]);
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_LU_SAME_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_QUAN_SAME_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_KE_SAME_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_JI_SAME_PALACE
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.topic),
+    [
+      "four-transformation-star-palace",
+      "four-transformation-star-palace",
+      "four-transformation-star-palace",
+      "four-transformation-star-palace"
+    ]
+  );
+  assert.ok(interpretations[0].text.includes("先看该星曜在目标宫位承担的角色"));
+  assert.ok(interpretations[1].text.includes("不能脱离星曜与宫位直接写成掌权"));
+  assert.ok(interpretations[3].text.includes("不能脱离星曜与宫位直接写成灾祸"));
+
+  assert.deepEqual(findFourTransformationStarPalaceInterpretationRefs([
+    { name: "化禄", star: "太阳" },
+    { name: "化忌", targetPalaceName: "子女宫" }
+  ]), []);
 });
 
 test("findFourTransformationTargetPalaceInterpretationRefs maps supported target palaces", () => {

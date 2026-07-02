@@ -229,6 +229,12 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections
       .find((section) => section.id === "birth-year-transformations")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("星曜化禄同宫合参时")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("不是婚姻结果判断")
   );
   assert.ok(
@@ -437,6 +443,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("禄忌合参时，只能说明资源牵引与约束"));
   assert.ok(paragraph.text.includes("权忌合参时，只能说明推进、控制、责任压力"));
   assert.ok(paragraph.text.includes("科忌合参时，只能说明秩序修饰"));
+  assert.ok(paragraph.text.includes("星曜化禄同宫合参时"));
+  assert.ok(paragraph.text.includes("先看该星曜在目标宫位承担的角色"));
+  assert.ok(paragraph.text.includes("星曜化忌同宫合参时"));
+  assert.ok(paragraph.text.includes("不能脱离星曜与宫位直接写成灾祸"));
   assert.ok(paragraph.text.includes("四化落夫妻宫时"));
   assert.ok(paragraph.text.includes("四化落迁移宫时"));
   assert.ok(paragraph.text.includes("四化落福德宫时"));
@@ -470,6 +480,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.quan-ke-pair",
     "interpretation.four-transformations.quan-ji-pair",
     "interpretation.four-transformations.ke-ji-pair",
+    "interpretation.four-transformations.star-lu-same-palace",
+    "interpretation.four-transformations.star-quan-same-palace",
+    "interpretation.four-transformations.star-ke-same-palace",
+    "interpretation.four-transformations.star-ji-same-palace",
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-travel-palace",
     "interpretation.four-transformations.on-wellbeing-palace",
