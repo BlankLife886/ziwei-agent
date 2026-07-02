@@ -71,6 +71,21 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_STAR_QUAN_SAME_PALACE: "interpretation.four-transformations.star-quan-same-palace",
   FOUR_TRANSFORMATION_STAR_KE_SAME_PALACE: "interpretation.four-transformations.star-ke-same-palace",
   FOUR_TRANSFORMATION_STAR_JI_SAME_PALACE: "interpretation.four-transformations.star-ji-same-palace",
+  FOUR_TRANSFORMATION_STAR_ROLE_ZI_WEI: "interpretation.four-transformations.star-role.zi-wei",
+  FOUR_TRANSFORMATION_STAR_ROLE_TIAN_JI: "interpretation.four-transformations.star-role.tian-ji",
+  FOUR_TRANSFORMATION_STAR_ROLE_TAI_YANG: "interpretation.four-transformations.star-role.tai-yang",
+  FOUR_TRANSFORMATION_STAR_ROLE_WU_QU: "interpretation.four-transformations.star-role.wu-qu",
+  FOUR_TRANSFORMATION_STAR_ROLE_TIAN_TONG: "interpretation.four-transformations.star-role.tian-tong",
+  FOUR_TRANSFORMATION_STAR_ROLE_LIAN_ZHEN: "interpretation.four-transformations.star-role.lian-zhen",
+  FOUR_TRANSFORMATION_STAR_ROLE_TAI_YIN: "interpretation.four-transformations.star-role.tai-yin",
+  FOUR_TRANSFORMATION_STAR_ROLE_TAN_LANG: "interpretation.four-transformations.star-role.tan-lang",
+  FOUR_TRANSFORMATION_STAR_ROLE_JU_MEN: "interpretation.four-transformations.star-role.ju-men",
+  FOUR_TRANSFORMATION_STAR_ROLE_TIAN_LIANG: "interpretation.four-transformations.star-role.tian-liang",
+  FOUR_TRANSFORMATION_STAR_ROLE_PO_JUN: "interpretation.four-transformations.star-role.po-jun",
+  FOUR_TRANSFORMATION_STAR_ROLE_WEN_CHANG: "interpretation.four-transformations.star-role.wen-chang",
+  FOUR_TRANSFORMATION_STAR_ROLE_WEN_QU: "interpretation.four-transformations.star-role.wen-qu",
+  FOUR_TRANSFORMATION_STAR_ROLE_ZUO_FU: "interpretation.four-transformations.star-role.zuo-fu",
+  FOUR_TRANSFORMATION_STAR_ROLE_YOU_BI: "interpretation.four-transformations.star-role.you-bi",
   FOUR_TRANSFORMATION_ON_LIFE_PALACE: "interpretation.four-transformations.on-life-palace",
   FOUR_TRANSFORMATION_ON_SPOUSE_PALACE: "interpretation.four-transformations.on-spouse-palace",
   FOUR_TRANSFORMATION_ON_WEALTH_PALACE: "interpretation.four-transformations.on-wealth-palace",
@@ -343,6 +358,69 @@ const FOUR_TRANSFORMATION_STAR_PALACE_RULES = [
   }
 ];
 
+const FOUR_TRANSFORMATION_STAR_ROLE_RULES = [
+  {
+    starName: "紫微",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_ZI_WEI
+  },
+  {
+    starName: "天机",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_JI
+  },
+  {
+    starName: "太阳",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YANG
+  },
+  {
+    starName: "武曲",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WU_QU
+  },
+  {
+    starName: "天同",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_TONG
+  },
+  {
+    starName: "廉贞",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_LIAN_ZHEN
+  },
+  {
+    starName: "太阴",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YIN
+  },
+  {
+    starName: "贪狼",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAN_LANG
+  },
+  {
+    starName: "巨门",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_JU_MEN
+  },
+  {
+    starName: "天梁",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_LIANG
+  },
+  {
+    starName: "破军",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_PO_JUN
+  },
+  {
+    starName: "文昌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WEN_CHANG
+  },
+  {
+    starName: "文曲",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WEN_QU
+  },
+  {
+    starName: "左辅",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_ZUO_FU
+  },
+  {
+    starName: "右弼",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_YOU_BI
+  }
+];
+
 const FOUR_TRANSFORMATION_TARGET_PALACE_RULES = [
   {
     palaceName: "命宫",
@@ -393,6 +471,110 @@ const FOUR_TRANSFORMATION_TARGET_PALACE_RULES = [
     interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PARENTS_PALACE
   }
 ];
+
+const FOUR_TRANSFORMATION_STAR_ROLE_INTERPRETATIONS = [
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_ZI_WEI,
+    starName: "紫微",
+    synthesis: "主导统摄被四化标记",
+    text: "紫微被四化标记时，先把它视为主导、统摄、资源调度和中心感的星曜角色被凸显；四化只说明这种角色被加权，不宜直接写成权位、地位或最终成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_JI,
+    starName: "天机",
+    synthesis: "机动筹划被四化标记",
+    text: "天机被四化标记时，先观察思考、规划、变动、技术和调整能力如何在目标宫位运作；四化只说明机动性被牵引，不宜直接写成计划成功、变化吉凶或具体事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YANG,
+    starName: "太阳",
+    synthesis: "外显照明被四化标记",
+    text: "太阳被四化标记时，先观察外显表达、责任承担、照拂他人和公开活动如何被目标宫位承接；四化只说明能见度或付出方式被加权，不宜直接写成名声、职位或关系结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WU_QU,
+    starName: "武曲",
+    synthesis: "执行资源被四化标记",
+    text: "武曲被四化标记时，先观察资源管理、执行纪律、现实取舍和边界感如何在目标宫位呈现；四化只说明资源与行动逻辑被加权，不宜直接写成财富结果、职位结果或损益结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_TONG,
+    starName: "天同",
+    synthesis: "舒缓适应被四化标记",
+    text: "天同被四化标记时，先观察舒缓、适应、情绪安顿和生活感受如何被目标宫位牵动；四化只说明安顿方式被加权，不宜直接写成享福、懈怠或结果顺逆。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_LIAN_ZHEN,
+    starName: "廉贞",
+    synthesis: "规范界线被四化标记",
+    text: "廉贞被四化标记时，先观察规则、界线、选择压力、关系张力和自我约束如何在目标宫位显现；四化只说明界线议题被加权，不宜直接写成冲突、桃花结果或法律事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YIN,
+    starName: "太阴",
+    synthesis: "内在承载被四化标记",
+    text: "太阴被四化标记时，先观察内在感受、承载、细腻经营、照料和隐性资源如何被目标宫位牵动；四化只说明承载方式被加权，不宜直接写成财富、婚恋或家庭结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAN_LANG,
+    starName: "贪狼",
+    synthesis: "欲望拓展被四化标记",
+    text: "贪狼被四化标记时，先观察欲望、兴趣、社交、拓展和多元尝试如何在目标宫位展开；四化只说明取向与吸引被加权，不宜直接写成情感结果、享乐过度或资源成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_JU_MEN,
+    starName: "巨门",
+    synthesis: "表达辨析被四化标记",
+    text: "巨门被四化标记时，先观察表达、辨析、沟通摩擦、疑问和信息处理如何被目标宫位牵动；四化只说明话语与认知议题被加权，不宜直接写成口舌是非、争讼或关系结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_LIANG,
+    starName: "天梁",
+    synthesis: "照护原则被四化标记",
+    text: "天梁被四化标记时，先观察照护、原则、保护、资历和制度支持如何在目标宫位发挥；四化只说明支撑与规范感被加权，不宜直接写成贵人结果、健康结果或制度结论。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_PO_JUN,
+    starName: "破军",
+    synthesis: "破旧重整被四化标记",
+    text: "破军被四化标记时，先观察破旧、重整、突破、消耗和重新配置如何被目标宫位承接；四化只说明变动课题被加权，不宜直接写成破败、成功突破或不可逆结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WEN_CHANG,
+    starName: "文昌",
+    synthesis: "文书表达被四化标记",
+    text: "文昌被四化标记时，先观察文书、学习、条理、表达和记录能力如何在目标宫位发挥；四化只说明表达秩序被加权，不宜直接写成考试、名声或文书结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WEN_QU,
+    starName: "文曲",
+    synthesis: "修饰感受被四化标记",
+    text: "文曲被四化标记时，先观察修饰、感受、审美、表达细节和人际语气如何被目标宫位牵动；四化只说明表达质感被加权，不宜直接写成才名、情感结果或文书成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_ZUO_FU,
+    starName: "左辅",
+    synthesis: "辅助支持被四化标记",
+    text: "左辅被四化标记时，先观察辅助、协作、旁支支持和资源补位如何在目标宫位出现；四化只说明支持结构被加权，不宜直接写成贵人必至或问题自动化解。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_YOU_BI,
+    starName: "右弼",
+    synthesis: "协同缓冲被四化标记",
+    text: "右弼被四化标记时，先观察协同、缓冲、调和、补位和关系中的辅助力量如何被目标宫位承接；四化只说明协作条件被加权，不宜直接写成稳定结果或外援确定到位。"
+  }
+].map((item) => {
+  return {
+    ...item,
+    title: `${item.starName}被四化标记的星曜角色边界`,
+    topic: "four-transformation-star-role",
+    riskLevel: "medium",
+    sourceRefs: [
+      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+      REFERENCE_IDS.STAR_PLACEMENT
+    ]
+  };
+});
 
 const INTERPRETATIONS = [
   {
@@ -1061,6 +1243,7 @@ const INTERPRETATIONS = [
     ],
     text: "星曜化忌同宫合参时，应先看该星曜在目标宫位承担的角色，再把化忌作为牵挂、约束、摩擦、滞留或修正课题的加权信号；不能脱离星曜与宫位直接写成灾祸、失败或不可改变的坏结果。"
   },
+  ...FOUR_TRANSFORMATION_STAR_ROLE_INTERPRETATIONS,
   {
     id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
     title: "四化落命宫的结构解释边界",
@@ -1409,6 +1592,25 @@ export function findFourTransformationStarPalaceInterpretationRefs(transformatio
   }));
   const refs = FOUR_TRANSFORMATION_STAR_PALACE_RULES.flatMap((rule) => {
     if (!transformationNames.has(rule.transformationName)) {
+      return [];
+    }
+
+    return [rule.interpretationId];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationStarRoleInterpretationRefs(transformations = []) {
+  const starNames = new Set(transformations.flatMap((transformation) => {
+    if (!transformation?.name || !transformation?.star || !transformation?.targetPalaceName) {
+      return [];
+    }
+
+    return [transformation.star];
+  }));
+  const refs = FOUR_TRANSFORMATION_STAR_ROLE_RULES.flatMap((rule) => {
+    if (!starNames.has(rule.starName)) {
       return [];
     }
 

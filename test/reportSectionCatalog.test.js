@@ -322,6 +322,10 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.quan-ke-pair",
     "interpretation.four-transformations.quan-ji-pair",
     "interpretation.four-transformations.ke-ji-pair",
+    "interpretation.four-transformations.star-role.tai-yang",
+    "interpretation.four-transformations.star-role.wu-qu",
+    "interpretation.four-transformations.star-role.tian-tong",
+    "interpretation.four-transformations.star-role.tai-yin",
     "interpretation.four-transformations.star-lu-same-palace",
     "interpretation.four-transformations.star-quan-same-palace",
     "interpretation.four-transformations.star-ke-same-palace",
@@ -334,7 +338,7 @@ test("transformation sections include four transformation type boundaries from m
   assert.deepEqual(buildSectionInterpretationRefs(
     "current-stage",
     currentStageEvidenceItems
-  ).slice(0, 22), [
+  ).slice(0, 26), [
     "interpretation.current-stage.static-only",
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
@@ -349,6 +353,10 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.quan-ke-pair",
     "interpretation.four-transformations.quan-ji-pair",
     "interpretation.four-transformations.ke-ji-pair",
+    "interpretation.four-transformations.star-role.tai-yang",
+    "interpretation.four-transformations.star-role.wu-qu",
+    "interpretation.four-transformations.star-role.tian-tong",
+    "interpretation.four-transformations.star-role.tai-yin",
     "interpretation.four-transformations.star-lu-same-palace",
     "interpretation.four-transformations.star-quan-same-palace",
     "interpretation.four-transformations.star-ke-same-palace",

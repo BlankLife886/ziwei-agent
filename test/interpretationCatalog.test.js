@@ -4,6 +4,7 @@ import {
   INTERPRETATION_IDS,
   findFourTransformationPairInterpretationRefs,
   findFourTransformationStarPalaceInterpretationRefs,
+  findFourTransformationStarRoleInterpretationRefs,
   findFourTransformationTargetPalaceInterpretationRefs,
   findFourTransformationTypeInterpretationRefs,
   findInterpretations,
@@ -187,6 +188,45 @@ test("findFourTransformationStarPalaceInterpretationRefs maps transformed stars 
   assert.ok(interpretations[3].text.includes("不能脱离星曜与宫位直接写成灾祸"));
 
   assert.deepEqual(findFourTransformationStarPalaceInterpretationRefs([
+    { name: "化禄", star: "太阳" },
+    { name: "化忌", targetPalaceName: "子女宫" }
+  ]), []);
+});
+
+test("findFourTransformationStarRoleInterpretationRefs maps transformed star roles", () => {
+  const interpretationRefs = findFourTransformationStarRoleInterpretationRefs([
+    { name: "化禄", star: "太阳", targetPalaceName: "兄弟宫" },
+    { name: "化权", star: "武曲", targetPalaceName: "夫妻宫" },
+    { name: "化科", star: "太阴", targetPalaceName: "财帛宫" },
+    { name: "化忌", star: "天同", targetPalaceName: "子女宫" },
+    { name: "化禄", star: "天府", targetPalaceName: "命宫" },
+    { name: "化权", star: "紫微", targetPalaceName: null }
+  ]);
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YANG,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_WU_QU,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TIAN_TONG,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_STAR_ROLE_TAI_YIN
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.topic),
+    [
+      "four-transformation-star-role",
+      "four-transformation-star-role",
+      "four-transformation-star-role",
+      "four-transformation-star-role"
+    ]
+  );
+  assert.ok(interpretations[0].text.includes("太阳被四化标记时"));
+  assert.ok(interpretations[1].text.includes("资源管理、执行纪律"));
+  assert.ok(interpretations[2].text.includes("不宜直接写成享福"));
+  assert.ok(interpretations[3].text.includes("内在感受、承载"));
+
+  assert.deepEqual(findFourTransformationStarRoleInterpretationRefs([
     { name: "化禄", star: "太阳" },
     { name: "化忌", targetPalaceName: "子女宫" }
   ]), []);

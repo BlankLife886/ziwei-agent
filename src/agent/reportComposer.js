@@ -372,6 +372,7 @@ function composeBirthYearTransformationsParagraph(section) {
     boundaryText,
     ...getFourTransformationTypeInterpretationTexts(section),
     ...getFourTransformationPairInterpretationTexts(section),
+    ...getFourTransformationStarRoleInterpretationTexts(section),
     ...getFourTransformationStarPalaceInterpretationTexts(section),
     ...getFourTransformationTargetPalaceInterpretationTexts(section)
   ])}`;
@@ -448,6 +449,7 @@ function composeCurrentStageParagraph(section) {
     annualTransformationText,
     ...getFourTransformationTypeInterpretationTexts(section),
     ...getFourTransformationPairInterpretationTexts(section),
+    ...getFourTransformationStarRoleInterpretationTexts(section),
     ...getFourTransformationStarPalaceInterpretationTexts(section),
     ...getFourTransformationTargetPalaceInterpretationTexts(section),
     monthlyPeriodText,
@@ -495,6 +497,20 @@ function getFourTransformationTargetPalaceInterpretationTexts(section) {
 function getFourTransformationPairInterpretationTexts(section) {
   return (section.interpretations ?? []).flatMap((interpretation) => {
     if (interpretation.topic !== "four-transformation-pair") {
+      return [];
+    }
+
+    if (!section.interpretationRefs?.includes(interpretation.id)) {
+      return [];
+    }
+
+    return [interpretation.text];
+  });
+}
+
+function getFourTransformationStarRoleInterpretationTexts(section) {
+  return (section.interpretations ?? []).flatMap((interpretation) => {
+    if (interpretation.topic !== "four-transformation-star-role") {
       return [];
     }
 

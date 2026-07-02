@@ -229,6 +229,12 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     reportDraft.sections
       .find((section) => section.id === "birth-year-transformations")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("太阳被四化标记时")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("星曜化禄同宫合参时")
   );
   assert.ok(
@@ -443,6 +449,9 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("禄忌合参时，只能说明资源牵引与约束"));
   assert.ok(paragraph.text.includes("权忌合参时，只能说明推进、控制、责任压力"));
   assert.ok(paragraph.text.includes("科忌合参时，只能说明秩序修饰"));
+  assert.ok(paragraph.text.includes("天机被四化标记时"));
+  assert.ok(paragraph.text.includes("武曲被四化标记时"));
+  assert.ok(paragraph.text.includes("右弼被四化标记时"));
   assert.ok(paragraph.text.includes("星曜化禄同宫合参时"));
   assert.ok(paragraph.text.includes("先看该星曜在目标宫位承担的角色"));
   assert.ok(paragraph.text.includes("星曜化忌同宫合参时"));
@@ -480,6 +489,14 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.quan-ke-pair",
     "interpretation.four-transformations.quan-ji-pair",
     "interpretation.four-transformations.ke-ji-pair",
+    "interpretation.four-transformations.star-role.tian-ji",
+    "interpretation.four-transformations.star-role.tai-yang",
+    "interpretation.four-transformations.star-role.wu-qu",
+    "interpretation.four-transformations.star-role.tian-tong",
+    "interpretation.four-transformations.star-role.lian-zhen",
+    "interpretation.four-transformations.star-role.tai-yin",
+    "interpretation.four-transformations.star-role.tan-lang",
+    "interpretation.four-transformations.star-role.you-bi",
     "interpretation.four-transformations.star-lu-same-palace",
     "interpretation.four-transformations.star-quan-same-palace",
     "interpretation.four-transformations.star-ke-same-palace",
