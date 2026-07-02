@@ -21,6 +21,7 @@ test("kubernetes deployment wires liveness, readiness, secrets, and runtime stat
   assert.match(manifest, /ZIWEI_RUNTIME_SECRETS_FILE/u);
   assert.match(manifest, /path:\s+\/health/u);
   assert.match(manifest, /path:\s+\/ready/u);
+  assert.match(manifest, /terminationGracePeriodSeconds:\s+30/u);
   assert.match(manifest, /persistentVolumeClaim/u);
   assert.match(manifest, /ZIWEI_API_QUOTA_STORE/u);
   assert.match(manifest, /ZIWEI_RELEASE_VERSION/u);

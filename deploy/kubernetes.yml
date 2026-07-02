@@ -52,6 +52,7 @@ spec:
       labels:
         app: ziwei-agent
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: ziwei-agent
           image: ziwei-agent:local

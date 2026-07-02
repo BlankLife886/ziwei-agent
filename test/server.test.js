@@ -4,7 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { createApiObserver } from "../src/agent/apiObservability.js";
-import { createZiweiHttpServer } from "../src/server.js";
+import {
+  createServerLifecycleState,
+  createZiweiHttpServer
+} from "../src/server.js";
 
 test("createZiweiHttpServer serves health responses", async () => {
   const server = createZiweiHttpServer({
@@ -112,6 +115,40 @@ test("createZiweiHttpServer reports not ready for incomplete external providers"
       "ZIWEI_LLM_MODEL"
     ]);
     assert.equal(JSON.stringify(body).includes("secret"), false);
+  } finally {
+    await close(server);
+  }
+});
+
+test("createZiweiHttpServer drains readiness during graceful shutdown", async () => {
+  const lifecycle = createServerLifecycleState();
+  const server = createZiweiHttpServer({
+    env: {},
+    lifecycle,
+    knowledgeSnippets: []
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+
+    lifecycle.draining = true;
+    lifecycle.signal = "SIGTERM";
+    lifecycle.startedAt = "2026-07-02T00:00:00.000Z";
+
+    const readyResponse = await fetch(`http://127.0.0.1:${port}/ready`);
+    const readyBody = await readyResponse.json();
+    const healthResponse = await fetch(`http://127.0.0.1:${port}/health`);
+    const healthBody = await healthResponse.json();
+
+    assert.equal(readyResponse.status, 503);
+    assert.equal(readyBody.status, "not_ready");
+    assert.equal(readyBody.checks.runtime.status, "not_ready");
+    assert.equal(readyBody.checks.runtime.draining, true);
+    assert.equal(readyBody.checks.runtime.signal, "SIGTERM");
+    assert.equal(healthResponse.status, 200);
+    assert.equal(healthBody.status, "ok");
   } finally {
     await close(server);
   }

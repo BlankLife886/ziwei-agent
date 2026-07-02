@@ -160,6 +160,7 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 - 不消耗业务限流配额。
 - 返回 release metadata、runtime、agent 入口、知识库加载状态和报告 provider 配置状态。
 - 当 `ZIWEI_REPORT_PROVIDER=external-llm` 但缺少 `ZIWEI_LLM_ENDPOINT`、`ZIWEI_LLM_API_KEY` 或 `ZIWEI_LLM_MODEL` 时返回 503。
+- 收到 `SIGTERM` 或 `SIGINT` 后会进入 draining，`checks.runtime.status` 变为 `not_ready`，用于让部署平台停止转发新请求。
 
 示例：
 
@@ -167,6 +168,13 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 curl http://localhost:3000/health
 curl http://localhost:3000/ready
 ```
+
+停机流程：
+
+1. 部署平台发送 `SIGTERM`。
+2. 服务标记 draining，`/ready` 返回 503，`/health` 继续返回 200。
+3. HTTP server 停止接收新连接，并等待已有请求结束。
+4. 若关闭超时，进程以非零状态退出，便于平台记录异常。
 
 Web UI 入口是：
 

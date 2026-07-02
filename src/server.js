@@ -21,6 +21,7 @@ const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 const DEFAULT_RATE_LIMIT_MAX = 60;
+const DEFAULT_SHUTDOWN_TIMEOUT_MS = 10_000;
 const STATIC_ASSETS = new Map([
   ["/", {
     fileUrl: new URL("../public/index.html", import.meta.url),
@@ -40,8 +41,17 @@ const STATIC_ASSETS = new Map([
   }]
 ]);
 
+export function createServerLifecycleState() {
+  return {
+    draining: false,
+    signal: undefined,
+    startedAt: undefined
+  };
+}
+
 export function createZiweiHttpServer(options = {}) {
   const env = options.env ?? process.env;
+  const lifecycle = options.lifecycle ?? createServerLifecycleState();
   const authenticator = options.authenticator ?? createApiAuthenticator({
     credentials: options.apiCredentials ?? parseApiCredentialsFromRuntime({
       env,
@@ -105,6 +115,7 @@ export function createZiweiHttpServer(options = {}) {
           method,
           env,
           release,
+          lifecycle,
           knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0,
           knowledgeStoreStatus: options.knowledgeStoreStatus,
           knowledgeStoreIssues: options.knowledgeStoreIssues
@@ -292,8 +303,10 @@ async function main() {
 
   const port = runtimeConfig.values.port;
   const maxBodyBytes = runtimeConfig.values.maxBodyBytes;
+  const lifecycle = createServerLifecycleState();
   const server = createZiweiHttpServer({
     env,
+    lifecycle,
     knowledgeSnippets: knowledgeStore.snippets,
     knowledgeStoreStatus: knowledgeStore.status,
     knowledgeStoreIssues: knowledgeStore.issues,
@@ -303,6 +316,11 @@ async function main() {
 
   server.listen(port, () => {
     console.log(`Ziwei Agent API listening on http://localhost:${port}`);
+  });
+
+  installShutdownHandlers({
+    server,
+    lifecycle
   });
 }
 
@@ -440,6 +458,7 @@ function createReadyResponse({
   method,
   env,
   release,
+  lifecycle,
   knowledgeSnippetCount,
   knowledgeStoreStatus,
   knowledgeStoreIssues
@@ -452,7 +471,9 @@ function createReadyResponse({
   };
   const checks = {
     runtime: {
-      status: "ready"
+      status: lifecycle.draining ? "not_ready" : "ready",
+      draining: lifecycle.draining,
+      signal: lifecycle.signal
     },
     agentEntry: {
       status: "ready",
@@ -481,6 +502,44 @@ function createReadyResponse({
         checks
       }
   };
+}
+
+function installShutdownHandlers({ server, lifecycle }) {
+  for (const signal of ["SIGTERM", "SIGINT"]) {
+    process.once(signal, () => {
+      beginGracefulShutdown({
+        signal,
+        server,
+        lifecycle
+      });
+    });
+  }
+}
+
+function beginGracefulShutdown({ signal, server, lifecycle }) {
+  lifecycle.draining = true;
+  lifecycle.signal = signal;
+  lifecycle.startedAt = new Date().toISOString();
+
+  console.log(`Ziwei Agent API received ${signal}; draining readiness and closing server.`);
+
+  const timeout = setTimeout(() => {
+    console.error("Ziwei Agent API graceful shutdown timed out.");
+    process.exit(1);
+  }, DEFAULT_SHUTDOWN_TIMEOUT_MS);
+
+  server.close((error) => {
+    clearTimeout(timeout);
+
+    if (error) {
+      console.error(`Ziwei Agent API shutdown failed: ${error.message}`);
+      process.exit(1);
+      return;
+    }
+
+    console.log("Ziwei Agent API stopped.");
+    process.exit(0);
+  });
 }
 
 function buildReportProviderReadiness(env) {
