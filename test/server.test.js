@@ -226,7 +226,10 @@ test("createZiweiHttpServer serves the web UI assets", async () => {
     assert.match(styleResponse.headers.get("content-type"), /text\/css/u);
     assert.match(indexBody, /紫微斗数命理师 Agent/u);
     assert.match(scriptBody, /POST/u);
+    assert.match(scriptBody, /renderReportParagraph/u);
+    assert.match(scriptBody, /paragraph-refs/u);
     assert.match(styleBody, /palace-grid/u);
+    assert.match(styleBody, /paragraph-ref-group/u);
   } finally {
     await close(server);
   }

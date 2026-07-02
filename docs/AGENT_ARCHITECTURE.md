@@ -202,7 +202,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有报告审计层。
 - 有产品侧发布确认门禁，支持自动确认和强制人工确认两种策略。
 - 有报告发布门禁。
-- 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
+- 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline，并在正文段落下展示 evidence/reference/interpretation 级引用链。
 - 有 OpenAPI 3.1 合同入口，供外部调用方按真实接口集成。
 - 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、托管密钥命令桥接、secret 文件载入、请求追踪、结构化观测、脱敏日志、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流和可选文件持久化配额。
 - 有运行时配置校验、部署校验、发布总门禁、机器可读 release summary、GitHub Actions CI、API smoke 校验、运维手册、Dockerfile、Compose/Kubernetes 部署模板、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。

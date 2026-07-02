@@ -346,9 +346,54 @@ textarea {
   line-height: 1.5;
 }
 
-.report-section p {
-  margin-bottom: 10px;
+.report-paragraph {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.report-paragraph p {
+  margin-bottom: 0;
   line-height: 1.7;
+}
+
+.paragraph-refs {
+  display: grid;
+  gap: 5px;
+}
+
+.paragraph-ref-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.paragraph-ref-group span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.paragraph-ref-group code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 3px 7px;
+  font-size: 0.72rem;
+}
+
+.paragraph-ref-group[data-kind="evidence"] code {
+  background: #dcefeb;
+  color: #0b5d55;
+}
+
+.paragraph-ref-group[data-kind="interpretation"] code {
+  background: #eef1f6;
+  color: #394354;
 }
 
 .appendix-counts {

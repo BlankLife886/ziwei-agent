@@ -292,9 +292,57 @@ function renderReportSection(section) {
   return `
     <article class="report-section">
       <h3>${escapeHtml(section.title)}</h3>
-      ${section.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph.text)}</p>`).join("")}
+      ${section.paragraphs.map(renderReportParagraph).join("")}
       <div class="ref-line">evidenceRefs ${section.evidenceRefs.length} · referenceRefs ${section.referenceRefs.length} · knowledgeSnippetRefs ${section.knowledgeSnippetRefs.length}</div>
     </article>
+  `;
+}
+
+function renderReportParagraph(paragraph) {
+  return `
+    <div class="report-paragraph">
+      <p>${escapeHtml(paragraph.text)}</p>
+      ${renderParagraphRefs(paragraph)}
+    </div>
+  `;
+}
+
+function renderParagraphRefs(paragraph) {
+  const groups = [
+    {
+      label: "证据",
+      kind: "evidence",
+      refs: paragraph.evidenceRefs ?? []
+    },
+    {
+      label: "规则",
+      kind: "reference",
+      refs: paragraph.referenceRefs ?? []
+    },
+    {
+      label: "解释",
+      kind: "interpretation",
+      refs: paragraph.interpretationRefs ?? []
+    }
+  ].filter((group) => group.refs.length > 0);
+
+  if (groups.length === 0) {
+    return "";
+  }
+
+  return `
+    <div class="paragraph-refs">
+      ${groups.map(renderParagraphRefGroup).join("")}
+    </div>
+  `;
+}
+
+function renderParagraphRefGroup(group) {
+  return `
+    <div class="paragraph-ref-group" data-kind="${escapeHtml(group.kind)}">
+      <span>${escapeHtml(group.label)}</span>
+      ${group.refs.map((ref) => `<code>${escapeHtml(ref)}</code>`).join("")}
+    </div>
   `;
 }
 
