@@ -8,6 +8,7 @@ import { auditReportOutput } from "./reportAuditor.js";
 import { createReportPlan } from "./reportPlanner.js";
 import { publishReportOutput } from "./reportPublisher.js";
 import { normalizeQueryIntent } from "./queryIntentParser.js";
+import { createRecoveryPlan } from "./recoveryPlanner.js";
 import { createZiweiAgentResponse } from "./ziweiAgent.js";
 
 // agent 编排层。
@@ -87,6 +88,18 @@ function finalizePipeline({
     reportAudit,
     reportOutput
   });
+  const recoveryPlan = createRecoveryPlan({
+    queryIntent,
+    buildResult,
+    agentResult,
+    reportPlan,
+    knowledgeCoverageAudit,
+    reportGeneration,
+    reportDraft,
+    reportAudit,
+    reportOutput,
+    readinessAudit
+  });
 
   return {
     status: derivePipelineStatus({
@@ -113,6 +126,7 @@ function finalizePipeline({
     reportAudit,
     reportOutput,
     readinessAudit,
+    recoveryPlan,
     steps: [
       buildStep("query-intent", queryIntent.status),
       buildStep("agent-context", agentResult.status),

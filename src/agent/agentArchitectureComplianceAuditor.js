@@ -20,7 +20,6 @@ const DEFAULT_CAPABILITIES = {
   genericToolRegistry: false,
   longTermMemory: false,
   vectorStore: false,
-  recoveryPlanner: false,
   webSessionAuth: false
 };
 
@@ -206,10 +205,18 @@ const ARCHITECTURE_ITEMS = [
     title: "Recovery Planner 失败恢复",
     weight: 5,
     critical: false,
-    evaluate: ({ capabilities }) => {
-      return capabilities.recoveryPlanner
-        ? aligned("已具备自动恢复计划。")
-        : partial("当前主要返回 blocked diagnostics，尚未实现复杂自动恢复计划。", 0.25);
+    evaluate: ({ pipelineResult }) => {
+      const recoveryPlan = pipelineResult.recoveryPlan;
+
+      if (
+        recoveryPlan &&
+        ["not_needed", "advisory", "recoverable"].includes(recoveryPlan.status) &&
+        typeof recoveryPlan.summary === "string"
+      ) {
+        return aligned("已具备结构化 Recovery Planner，能把阻断、审计失败和非阻断缺口转换为恢复动作。");
+      }
+
+      return partial("当前主要返回 blocked diagnostics，尚未实现结构化恢复计划。", 0.25);
     }
   }
 ];

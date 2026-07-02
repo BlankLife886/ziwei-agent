@@ -45,6 +45,7 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "deterministic-template");
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.equal(pipelineResult.readinessAudit.status, "in_progress");
+  assert.equal(pipelineResult.recoveryPlan.status, "advisory");
   assert.ok(pipelineResult.readinessAudit.percent < 100);
   assert.deepEqual(pipelineResult.reportAudit.issues, []);
   assert.ok(pipelineResult.nextAction.includes("审阅已发布的用户报告"));
@@ -178,6 +179,7 @@ test("runZiweiPipeline blocks custom providers that omit planned sections", () =
   assert.equal(pipelineResult.reportGeneration.status, "generated");
   assert.equal(pipelineResult.reportAudit.status, "failed");
   assert.equal(pipelineResult.reportOutput.status, "blocked");
+  assert.equal(pipelineResult.recoveryPlan.status, "recoverable");
   assert.ok(
     pipelineResult.reportAudit.issues.some((issue) => {
       return issue.id === "planned-section-missing";
@@ -235,6 +237,7 @@ test("runZiweiPipeline blocks the external LLM generator when no provider is con
   assert.equal(pipelineResult.reportDraft.status, "blocked");
   assert.equal(pipelineResult.reportAudit.status, "skipped");
   assert.equal(pipelineResult.reportOutput.status, "blocked");
+  assert.equal(pipelineResult.recoveryPlan.status, "recoverable");
   assert.ok(pipelineResult.nextAction.includes("生成报告正文草稿"));
 });
 

@@ -117,6 +117,7 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.equal(response.body.chart.profileSummary.name, "示例命主");
   assert.equal(response.body.report.metadata.outputType, "ziwei-user-report");
   assert.equal(response.body.audits.report.status, "passed");
+  assert.equal(response.body.recovery.status, "advisory");
   assert.equal(response.body.queryIntent.hasIntent, true);
   assert.ok(response.body.queryIntent.topics.includes("婚姻"));
   assert.ok(response.body.queryIntent.topics.includes("运势"));

@@ -124,6 +124,7 @@ export async function handleZiweiApiRequest(request, options = {}) {
       report: pipelineResult.reportAudit,
       readiness: pipelineResult.readinessAudit
     },
+    recovery: pipelineResult.recoveryPlan,
     diagnostics: {
       durationMs: Date.now() - startedAt,
       authorization: summarizeAuthResult(authResult),

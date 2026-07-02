@@ -18,6 +18,7 @@
   + 确定性或外部大模型写作 provider
   + 报告审计
   + 发布门禁
+  + 恢复计划
   + API 鉴权、限流、观测、部署验证
 ```
 
@@ -28,6 +29,7 @@
 - 外部大模型只能作为报告写作 provider，不能绕过证据链、知识审计和发布门禁。
 - 用户最终拿到的是 `reportOutput` 用户报告，而不是模型自由聊天文本。
 - 未通过 `reportAuditor` 的草稿不能发布。
+- 阻断、审计失败和能力缺口必须进入 `recoveryPlan`，不能只停留在散落的错误文案。
 - 生产环境缺少 `reports:write` credential 时必须 fail-closed。
 
 ## 当前生产链路
@@ -47,6 +49,7 @@
   -> deterministic-template 或 external-llm provider 生成草稿
   -> reportAuditor 审计断语、证据链和引用链
   -> reportPublisher 发布用户报告
+  -> recoveryPlanner 生成恢复动作或非阻断补强建议
 ```
 
 这条链路必须保持单向约束：
@@ -76,6 +79,7 @@
 | 知识层 | `knowledgeSnippetCatalog`, `knowledgeSnippetStore`, `knowledgeCoverageAuditor` | 管理 verified 知识片段，审计章节知识覆盖 |
 | 生成层 | `reportGenerator`, `reportComposer`, `externalLLMReportProvider` | 用受控 generation context 生成报告草稿 |
 | 审计发布层 | `reportAuditor`, `reportPublisher` | 阻断越权断语，发布合格用户报告 |
+| 恢复层 | `recoveryPlanner` | 把阻断、审计失败和能力缺口转换为 owner/priority/nextStep 明确的恢复计划 |
 | 部署运维层 | `validateRelease`, `validateDeployment`, `validateCloudflare`, `smokeApi`, `docs/OPERATIONS.md` | 本地、CI、Cloudflare、容器和运维验证 |
 
 ## 总体架构图
@@ -108,8 +112,10 @@ flowchart TD
     DRAFT --> AUDIT["reportAuditor<br/>证据链 / 引用链 / 风险断语审计"]
     AUDIT -->|通过| PUB["reportPublisher<br/>发布用户报告"]
     AUDIT -->|失败| BLOCK["blocked<br/>不发布，仅返回诊断"]
+    BLOCK --> RECOVERY["recoveryPlanner<br/>恢复动作"]
 
     PUB --> OUT["reportOutput<br/>用户可读命理报告"]
+    PUB --> RECOVERY
     OUT --> FE
 
     GENCTX --> KBASE["Knowledge Store<br/>verified snippets"]

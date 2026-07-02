@@ -47,6 +47,7 @@ birth/profile input
   -> reportDraft
   -> reportAuditor
   -> reportPublisher
+  -> recoveryPlanner
   -> reportOutput
 ```
 
@@ -78,6 +79,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
+- `recoveryPlanner`：把缺资料、报告规划阻断、provider 缺配置、报告审计失败、发布门禁阻断和非阻断知识缺口整理成结构化恢复动作，标明 owner、priority、reason 和 nextStep。
 
 这个分层是当前底座最重要的约束：计算层不写报告，报告层不重新排盘，解释层必须通过证据链回指到已计算结果。
 
@@ -125,6 +127,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - `validation`：出生资料校验结果和缺失字段。
 - `queryIntent`：本轮用户问题解析结果。
 - `audits`：知识覆盖、报告审计和完整度审计。
+- `recovery`：结构化恢复计划；当请求被阻断时给出用户、运营者或 agent 下一步动作，当报告已发布但知识覆盖不足时给出非阻断补强建议。
 - `diagnostics`：请求耗时、排盘状态、报告规划状态、生成状态和发布状态。
 
 当设置 `ZIWEI_API_TOKEN` 时，API 只接受 `authorization: Bearer <token>`，该 legacy token 自动获得 `reports:write`。生产式配置可使用 `ZIWEI_API_CREDENTIALS` JSON 数组登记多个 credential，每个 credential 包含 `id`、`token` 和 `scopes`，并可选 `disabled`、`notBefore`、`expiresAt` 做禁用、生效时间和过期控制；`POST /v1/reports` 必须具备当前可用的 `reports:write`。该鉴权只保护 API 入口，不改变 agent 内部证据、报告规划和审计逻辑。
@@ -188,12 +191,13 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
 - 有安全触发观察点、组合验证层、组合主题解释层、跨宫跨限运关系解释层和专题细分任务单，能把多层运限和四化重叠宫位列为待验证主题，筛出证据层数达标的合参主题，把已验证宫位转成阶段合参领域，整理当前大限、流年、流月之间的同宫或分宫关系，并把报告章节拆成可审计的专题角度，但不会输出事件断语。
+- 有结构化恢复计划层，能把阻断、审计失败和非阻断能力缺口转换为可执行的恢复动作，而不是只返回错误文案。
 
 当前底座仍需继续补强：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权、长期记忆、向量检索、通用 Tool Registry 和复杂自动恢复。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、结构化恢复计划、CLI 入口、HTTP API 入口、OpenAPI 合同入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、托管密钥命令桥接、secret 文件载入、请求大小限制、请求追踪、结构化观测、release/build 元数据、liveness/readiness 探针、readiness draining、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、机器可读 release summary、CI 工作流、运维手册、Dockerfile、Compose/Kubernetes 模板、Cloudflare Worker 入口和真实部署验证；后续仍需补齐用户会话鉴权、长期记忆、向量检索和通用 Tool Registry。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。

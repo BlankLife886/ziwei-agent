@@ -20,7 +20,6 @@ async function main() {
       genericToolRegistry: false,
       longTermMemory: false,
       vectorStore: false,
-      recoveryPlanner: false,
       webSessionAuth: false
     }
   });

@@ -248,6 +248,10 @@ export function buildOpenApiDocument() {
             type: "object",
             additionalProperties: true
           },
+          recovery: {
+            type: "object",
+            additionalProperties: true
+          },
           diagnostics: {
             type: "object",
             additionalProperties: true
