@@ -2,24 +2,30 @@ import { readFile } from "node:fs/promises";
 import { createZiweiHttpServer } from "./server.js";
 import { parseApiCredentialsFromRuntime } from "./agent/apiCredentials.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
+import { resolveRuntimeEnv } from "./runtimeEnv.js";
 import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
 
 const DEFAULT_PROFILE_PATH = "examples/profile.example.json";
 const DEFAULT_QUERY = "我想看婚姻、事业、财富和当前运势";
 
 export async function runApiSmokeCheck(options = {}) {
-  const env = options.env ?? process.env;
+  const runtimeEnv = resolveRuntimeEnv(options.env ?? process.env);
+  const env = runtimeEnv.env;
   const profilePath = options.profilePath ?? DEFAULT_PROFILE_PATH;
   const query = options.query ?? DEFAULT_QUERY;
   const runtimeConfig = buildServerRuntimeConfig(env);
+  const runtimeIssues = [
+    ...runtimeEnv.issues,
+    ...runtimeConfig.issues
+  ];
 
   // Smoke 校验先复用生产启动前的同一套配置门禁，避免出现“脚本能跑、
   // 服务不能启动”的假阳性。
-  if (runtimeConfig.status !== "ready") {
+  if (runtimeEnv.status !== "ready" || runtimeConfig.status !== "ready") {
     return {
       status: "invalid",
       reason: "运行时配置不合格",
-      issues: runtimeConfig.issues
+      issues: runtimeIssues
     };
   }
 

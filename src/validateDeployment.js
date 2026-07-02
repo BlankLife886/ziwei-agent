@@ -1,16 +1,18 @@
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
+import { resolveRuntimeEnv } from "./runtimeEnv.js";
 import { runApiSmokeCheck } from "./smokeApi.js";
 import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
 
 async function main() {
-  const env = process.env;
+  const runtimeEnv = resolveRuntimeEnv(process.env);
+  const env = runtimeEnv.env;
   const runtimeConfig = buildServerRuntimeConfig(env);
   const checks = [];
-  const issues = [];
+  const issues = [...runtimeEnv.issues];
 
   checks.push({
     name: "runtime",
-    status: runtimeConfig.status
+    status: issues.length === 0 && runtimeConfig.status === "ready" ? "ready" : "invalid"
   });
   issues.push(...runtimeConfig.issues);
 

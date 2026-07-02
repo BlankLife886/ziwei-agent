@@ -38,6 +38,32 @@ ZIWEI_API_QUOTA_STORE=.runtime/api-quota.json
 ZIWEI_KNOWLEDGE_STORE=data/knowledge-snippets.example.json
 ```
 
+生产中可把密钥放进 mounted secret 文件，避免直接写在 `.env`：
+
+```bash
+ZIWEI_RUNTIME_SECRETS_FILE=/run/secrets/ziwei-runtime.json
+ZIWEI_API_CREDENTIALS_FILE=/run/secrets/ziwei-api-credentials
+ZIWEI_API_TOKEN_FILE=/run/secrets/ziwei-api-token
+ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
+```
+
+`ZIWEI_RUNTIME_SECRETS_FILE` 必须是 JSON object，键名沿用环境变量名，例如：
+
+```json
+{
+  "ZIWEI_API_CREDENTIALS": [
+    {
+      "id": "app-client",
+      "token": "replace-with-secret",
+      "scopes": ["reports:write"]
+    }
+  ],
+  "ZIWEI_LLM_API_KEY": "replace-with-model-key"
+}
+```
+
+直接环境变量优先于 secret 文件。secret 文件读取失败、JSON 不合法或包含未支持键时，启动校验和部署校验会失败。
+
 外部大模型 provider 只通过报告生成器合同接入：
 
 ```bash
@@ -79,8 +105,8 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 轮换流程：
 
 1. 先追加新 credential，设置 `notBefore` 和 `expiresAt`。
-2. 执行 `node --env-file=.env src/validateDeployment.js`。
-3. 发布新环境变量并重启服务。
+2. 若使用 secret 文件，先更新 mounted secret，再执行 `node --env-file=.env src/validateDeployment.js`。
+3. 发布新环境变量或新 secret 版本并重启服务。
 4. 客户端切换到新 token。
 5. 确认观测事件中 principal id 已切到新 credential。
 6. 把旧 credential 设置 `disabled: true` 或等待 `expiresAt` 到期。

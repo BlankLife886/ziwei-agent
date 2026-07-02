@@ -10,6 +10,7 @@ import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
+import { resolveRuntimeEnv } from "./runtimeEnv.js";
 import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
 
 const DEFAULT_PORT = 3000;
@@ -228,11 +229,16 @@ export function createZiweiHttpServer(options = {}) {
 }
 
 async function main() {
-  const env = process.env;
+  const runtimeEnv = resolveRuntimeEnv(process.env);
+  const env = runtimeEnv.env;
   const runtimeConfig = buildServerRuntimeConfig(env);
+  const runtimeIssues = [
+    ...runtimeEnv.issues,
+    ...runtimeConfig.issues
+  ];
 
-  if (runtimeConfig.status !== "ready") {
-    for (const issue of runtimeConfig.issues) {
+  if (runtimeEnv.status !== "ready" || runtimeConfig.status !== "ready") {
+    for (const issue of runtimeIssues) {
       console.error(`Runtime config error: ${issue}`);
     }
     process.exitCode = 2;

@@ -24,6 +24,21 @@ test("buildServerRuntimeConfig accepts secure production runtime settings", () =
   assert.equal(config.values.observabilityMode, "stdout");
 });
 
+test("buildServerRuntimeConfig accepts env already resolved from secret files", () => {
+  const config = buildServerRuntimeConfig({
+    NODE_ENV: "production",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "secret-file-client",
+        token: "secret-file-token",
+        scopes: ["reports:write"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "ready");
+});
+
 test("buildServerRuntimeConfig blocks production without API credentials", () => {
   const config = buildServerRuntimeConfig({
     NODE_ENV: "production"
