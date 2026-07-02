@@ -12,6 +12,8 @@ import {
 import {
   appendKnowledgeSnippetBatchFile,
   appendKnowledgeSnippetFile,
+  auditKnowledgeSnippetCandidateFile,
+  auditKnowledgeSnippetCandidatesFile,
   draftKnowledgeSnippetBatchFile,
   draftKnowledgeSnippetFile,
   promoteKnowledgeSnippetBatchFile,
@@ -26,7 +28,7 @@ test("draftKnowledgeSnippetFile normalizes candidate notes and writes draft snip
   await writeJson(inputPath, {
     ...createCandidate(),
     title: "  官禄宫结构研读  ",
-    topicIds: ["career", "career", ""]
+    topicIds: ["career", "career"]
   });
 
   const result = await draftKnowledgeSnippetFile({
@@ -43,6 +45,73 @@ test("draftKnowledgeSnippetFile normalizes candidate notes and writes draft snip
   assert.equal(draft.status, KNOWLEDGE_SNIPPET_STATUS.DRAFT);
   assert.equal(draft.title, "官禄宫结构研读");
   assert.deepEqual(draft.topicIds, ["career"]);
+});
+
+test("auditKnowledgeSnippetCandidateFile reports candidate preflight quality", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "candidate.json");
+  await writeJson(inputPath, createCandidate());
+
+  const result = await auditKnowledgeSnippetCandidateFile({
+    command: "audit-candidate",
+    input: inputPath
+  });
+  const output = JSON.parse(result.output);
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(output.status, "passed");
+  assert.equal(output.audit.status, "passed");
+});
+
+test("auditKnowledgeSnippetCandidatesFile reports batch preflight failures", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "candidates.json");
+  await writeJson(inputPath, {
+    candidates: [
+      createCandidate("knowledge-snippet.batch.good", "career"),
+      {
+        ...createCandidate("knowledge-snippet.batch.bad", "career"),
+        excerpt: "太短。",
+        citation: "笔记"
+      }
+    ]
+  });
+
+  const result = await auditKnowledgeSnippetCandidatesFile({
+    command: "audit-candidates",
+    input: inputPath
+  });
+  const output = JSON.parse(result.output);
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(output.status, "failed");
+  assert.equal(output.failedCount, 1);
+  assert.ok(
+    output.audit.issues.some((issue) => issue.id === "candidate.excerpt.too-short")
+  );
+});
+
+test("draftKnowledgeSnippetFile blocks candidates that fail preflight", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "candidate.json");
+  const outputPath = join(dir, "draft.json");
+  await writeJson(inputPath, {
+    ...createCandidate(),
+    topicIds: ["wealth"],
+    referenceRefs: ["framework.career-palace"]
+  });
+
+  const result = await draftKnowledgeSnippetFile({
+    command: "draft",
+    input: inputPath,
+    output: outputPath
+  });
+  const output = JSON.parse(result.output);
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(output.status, "blocked");
+  assert.equal(output.candidateAudit.status, "failed");
+  assert.equal(existsSync(outputPath), false);
 });
 
 test("promoteKnowledgeSnippetFile blocks incomplete draft snippets", async () => {
@@ -178,12 +247,41 @@ test("runKnowledgeSnippetCommand exposes help text", async () => {
   const result = await runKnowledgeSnippetCommand(["--help"]);
 
   assert.equal(result.exitCode, 0);
+  assert.ok(result.output.includes("audit-candidate --input"));
+  assert.ok(result.output.includes("audit-candidates --input"));
   assert.ok(result.output.includes("draft --input"));
   assert.ok(result.output.includes("draft-batch --input"));
   assert.ok(result.output.includes("promote --input"));
   assert.ok(result.output.includes("promote-batch --input"));
   assert.ok(result.output.includes("append --input"));
   assert.ok(result.output.includes("append-batch --input"));
+});
+
+test("draftKnowledgeSnippetBatchFile blocks failing candidate queues", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ziwei-knowledge-command-"));
+  const inputPath = join(dir, "candidates.json");
+  const outputPath = join(dir, "drafts.json");
+  await writeJson(inputPath, {
+    candidates: [
+      createCandidate("knowledge-snippet.batch.good", "career"),
+      {
+        ...createCandidate("knowledge-snippet.batch.bad", "wealth"),
+        referenceRefs: ["framework.career-palace"]
+      }
+    ]
+  });
+
+  const result = await draftKnowledgeSnippetBatchFile({
+    command: "draft-batch",
+    input: inputPath,
+    output: outputPath
+  });
+  const output = JSON.parse(result.output);
+
+  assert.equal(result.exitCode, 1);
+  assert.equal(output.status, "blocked");
+  assert.equal(output.candidateAudit.status, "failed");
+  assert.equal(existsSync(outputPath), false);
 });
 
 test("draftKnowledgeSnippetBatchFile writes a review queue from candidates", async () => {
@@ -370,7 +468,7 @@ function createCandidate(
     referenceRefs: [topicId === "wealth"
       ? "framework.wealth-palace"
       : "framework.career-palace"],
-    excerpt: "官禄宫专题需要合看命宫、财帛宫与夫妻宫。",
+    excerpt: "官禄宫专题需要先观察职责结构，再合看命宫主体承载、财帛宫资源承接与夫妻宫合作牵动。",
     citation: "研读笔记 / 官禄宫结构",
     riskLevel: KNOWLEDGE_RISK_LEVELS.LOW
   };

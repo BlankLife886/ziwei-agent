@@ -3,6 +3,10 @@ import {
   auditKnowledgeSnippet
 } from "./agent/knowledgeSnippetCatalog.js";
 import {
+  auditKnowledgeSnippetCandidate,
+  auditKnowledgeSnippetCandidates
+} from "./agent/knowledgeCandidateAuditor.js";
+import {
   ingestKnowledgeSnippetCandidate,
   promoteKnowledgeSnippet
 } from "./agent/knowledgeSnippetIngestor.js";
@@ -22,6 +26,14 @@ export async function runKnowledgeSnippetCommand(argv = []) {
       exitCode: 0,
       output: buildHelpText()
     };
+  }
+
+  if (parsed.command === "audit-candidate") {
+    return auditKnowledgeSnippetCandidateFile(parsed);
+  }
+
+  if (parsed.command === "audit-candidates") {
+    return auditKnowledgeSnippetCandidatesFile(parsed);
   }
 
   if (parsed.command === "draft") {
@@ -51,9 +63,65 @@ export async function runKnowledgeSnippetCommand(argv = []) {
   throw new Error(`未知知识片段命令：${parsed.command}`);
 }
 
+export async function auditKnowledgeSnippetCandidateFile(options) {
+  requirePathOption(options, "input");
+  const candidate = await readJsonFile(options.input);
+  const audit = auditKnowledgeSnippetCandidate(candidate);
+
+  return {
+    exitCode: audit.status === "passed" ? 0 : 1,
+    output: JSON.stringify({
+      command: "audit-candidate",
+      status: audit.status,
+      input: options.input,
+      candidateId: candidate?.id ?? null,
+      audit,
+      nextAction: buildCandidateAuditNextAction(audit)
+    }, null, 2)
+  };
+}
+
+export async function auditKnowledgeSnippetCandidatesFile(options) {
+  requirePathOption(options, "input");
+  const candidates = extractCandidates(await readJsonFile(options.input));
+  const audit = auditKnowledgeSnippetCandidates(candidates);
+
+  return {
+    exitCode: audit.status === "passed" ? 0 : 1,
+    output: JSON.stringify({
+      command: "audit-candidates",
+      status: audit.status,
+      input: options.input,
+      count: candidates.length,
+      failedCount: audit.items.filter((item) => {
+        return item.audit.status !== "passed";
+      }).length,
+      audit,
+      nextAction: buildCandidateAuditNextAction(audit)
+    }, null, 2)
+  };
+}
+
 export async function draftKnowledgeSnippetFile(options) {
   requirePathOption(options, "input");
   const candidate = await readJsonFile(options.input);
+  const candidateAudit = auditKnowledgeSnippetCandidate(candidate);
+
+  if (candidateAudit.status !== "passed") {
+    return {
+      exitCode: 1,
+      output: JSON.stringify({
+        command: "draft",
+        status: "blocked",
+        input: options.input,
+        output: null,
+        candidateId: candidate?.id ?? null,
+        candidateAudit,
+        nextAction: "候选片段未通过入库前质量审计，请修复后再生成 draft。"
+      }, null, 2)
+    };
+  }
+
   const result = ingestKnowledgeSnippetCandidate(candidate);
 
   if (options.output) {
@@ -68,6 +136,7 @@ export async function draftKnowledgeSnippetFile(options) {
       input: options.input,
       output: options.output ?? null,
       snippetId: result.snippet.id,
+      candidateAudit,
       audit: result.audit,
       nextAction: result.nextAction
     }, null, 2)
@@ -100,6 +169,23 @@ export async function promoteKnowledgeSnippetFile(options) {
 export async function draftKnowledgeSnippetBatchFile(options) {
   requirePathOption(options, "input");
   const candidates = extractCandidates(await readJsonFile(options.input));
+  const candidateAudit = auditKnowledgeSnippetCandidates(candidates);
+
+  if (candidateAudit.status !== "passed") {
+    return {
+      exitCode: 1,
+      output: JSON.stringify({
+        command: "draft-batch",
+        status: "blocked",
+        input: options.input,
+        output: null,
+        count: candidates.length,
+        candidateAudit,
+        nextAction: "批量候选片段未通过入库前质量审计，请修复后再生成 draft 队列。"
+      }, null, 2)
+    };
+  }
+
   const results = candidates.map(ingestKnowledgeSnippetCandidate);
   const outputPayload = buildBatchSnippetPayload(results);
 
@@ -119,6 +205,7 @@ export async function draftKnowledgeSnippetBatchFile(options) {
       needsReviewCount: results.filter((result) => {
         return result.status === "needs_review";
       }).length,
+      candidateAudit,
       items: results.map(formatBatchResultItem),
       nextAction: "请逐条复核 draft 片段，确认字段、来源、主题和规则引用后再晋升。"
     }, null, 2)
@@ -389,6 +476,14 @@ function buildAppendBatchBlockedResult({
   };
 }
 
+function buildCandidateAuditNextAction(audit) {
+  if (audit.status === "passed") {
+    return "候选片段已通过入库前质量审计，可以进入 draft 标准化。";
+  }
+
+  return "请先修复候选片段的来源定位、摘录长度、主题/引用匹配或高风险断语问题。";
+}
+
 async function readJsonFile(filePath) {
   const rawText = await readFile(filePath, "utf8");
   return JSON.parse(rawText);
@@ -543,6 +638,8 @@ function requirePathOption(options, key) {
 
 function buildHelpText() {
   return `用法：
+  node src/manageKnowledgeSnippets.js audit-candidate --input <candidate.json>
+  node src/manageKnowledgeSnippets.js audit-candidates --input <candidates.json>
   node src/manageKnowledgeSnippets.js draft --input <candidate.json> [--output <draft.json>]
   node src/manageKnowledgeSnippets.js draft-batch --input <candidates.json> [--output <drafts.json>]
   node src/manageKnowledgeSnippets.js promote --input <draft.json> [--output <verified.json>]
@@ -551,6 +648,8 @@ function buildHelpText() {
   node src/manageKnowledgeSnippets.js append-batch --input <verified.json> --store <store.json> [--output <store.json>]
 
 说明：
+  audit-candidate  审计单条候选摘录的来源定位、摘录长度、topic/reference 匹配和风险语言。
+  audit-candidates 批量审计 candidates 数组，适合 OCR/PDF 摘录队列的入库前检查。
   draft         把 PDF/OCR/研读笔记候选摘录标准化为 draft 知识片段。
   draft-batch   批量标准化 candidates 数组，输出 snippets 队列和逐条审计。
   promote       只在字段完整、来源已登记、规则引用完整时晋升为 verified。

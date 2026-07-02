@@ -26,7 +26,7 @@
 
 知识覆盖审计会单独标记每个章节是否已有 verified 知识片段。当前示例库已录入 20 条本地审校片段，包含分析框架样本和命宫、性格、婚姻、财富、事业、当前阶段运势等专题知识笔记，用于验证 agent 的知识引用闭环；真实书籍/PDF片段尚未全量结构化录入时，系统仍不能把它包装成文献和知识库已经充分支撑的深入命运报告。
 
-知识片段录入遵循候选材料、draft、verified 三段流程：扫描件 OCR、PDF 摘录或研读笔记先作为候选片段进入 `knowledgeSnippetIngestor` 标准化；字段完整后仍保持 draft；只有经过人工复核并晋升为 verified 的片段，才允许被 `reportPlanner` 检索并进入报告引用链。实际操作入口是 `src/manageKnowledgeSnippets.js`：`draft` 和 `draft-batch` 负责标准化候选摘录，`promote` 和 `promote-batch` 负责执行 verified 晋升审计，`append` 和 `append-batch` 负责把 verified 片段追加到 JSON store 并在写入前执行全库审计；批量晋升和批量追加采用全有或全无策略。
+知识片段录入遵循候选材料、candidate audit、draft、verified 四段流程：扫描件 OCR、PDF 摘录或研读笔记先作为候选片段进入 `knowledgeCandidateAuditor`，审计来源定位、摘录长度、topic/reference 匹配和风险语言；通过后再进入 `knowledgeSnippetIngestor` 标准化；字段完整后仍保持 draft；只有经过人工复核并晋升为 verified 的片段，才允许被 `reportPlanner` 检索并进入报告引用链。实际操作入口是 `src/manageKnowledgeSnippets.js`：`audit-candidate` 和 `audit-candidates` 负责入库前质量审计，`draft` 和 `draft-batch` 负责标准化候选摘录，`promote` 和 `promote-batch` 负责执行 verified 晋升审计，`append` 和 `append-batch` 负责把 verified 片段追加到 JSON store 并在写入前执行全库审计；批量晋升和批量追加采用全有或全无策略。
 
 知识片段持久化入口是 JSON store。`knowledgeSnippetStore` 会读取 `snippets` 数组并逐条审计，只有通过 schema 审计的 verified 片段会传入 `runZiweiPipeline`；失败片段保留在 store 审计问题里，不进入报告规划。store 会同步构建 `knowledgeMemory` manifest 和本地稀疏向量检索索引，用 topic、reference、标题、摘录和 citation 做可解释排序；这不是外部 embedding 服务，但已经固定了后续替换为向量数据库的检索合同。
 
