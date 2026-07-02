@@ -178,10 +178,44 @@ function renderReport(report) {
       <p>${escapeHtml(report.introduction)}</p>
       <div class="ref-line">审计：${escapeHtml(report.audit?.status ?? "")} · 输出：${escapeHtml(report.metadata?.outputType ?? "")}</div>
     </section>
+    ${renderReportBrief(report.brief)}
     ${report.sections.map(renderReportSection).join("")}
     <section class="report-closing">
       <p>${escapeHtml(report.closing)}</p>
     </section>
+  `;
+}
+
+function renderReportBrief(brief) {
+  if (!brief) {
+    return "";
+  }
+
+  const sectionSummaries = brief.sectionSummaries ?? [];
+  const paragraphs = brief.paragraphs ?? [];
+
+  return `
+    <section class="report-brief">
+      <div class="brief-heading">
+        <h3>报告摘要</h3>
+        <span class="brief-mode">${escapeHtml(brief.mode ?? "")}</span>
+      </div>
+      <div class="brief-paragraphs">
+        ${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph.text)}</p>`).join("")}
+      </div>
+      <div class="brief-summary-list">
+        ${sectionSummaries.map(renderBriefSummary).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBriefSummary(summary) {
+  return `
+    <div class="brief-summary-item">
+      <strong>${escapeHtml(summary.title)}</strong>
+      <span>证据 ${escapeHtml(summary.evidenceCount)} · 规则 ${escapeHtml(summary.referenceCount)} · 知识片段 ${escapeHtml(summary.knowledgeSnippetCount)} · 解释 ${escapeHtml(summary.interpretationCount)}</span>
+    </div>
   `;
 }
 

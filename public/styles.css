@@ -281,12 +281,68 @@ textarea {
 }
 
 .report-intro,
+.report-brief,
 .report-section,
 .report-closing {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
   padding: 14px;
+}
+
+.brief-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.brief-heading h3 {
+  margin-bottom: 0;
+}
+
+.brief-mode {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  padding: 4px 9px;
+  font-size: 0.76rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.brief-paragraphs {
+  display: grid;
+  gap: 8px;
+}
+
+.brief-paragraphs p {
+  margin-bottom: 0;
+  line-height: 1.65;
+}
+
+.brief-summary-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.brief-summary-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 9px;
+}
+
+.brief-summary-item span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .report-section p {
@@ -322,7 +378,8 @@ textarea {
   }
 
   .profile-form,
-  .palace-grid {
+  .palace-grid,
+  .brief-summary-list {
     grid-template-columns: 1fr;
   }
 

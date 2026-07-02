@@ -113,6 +113,11 @@ test("formatReportDraft renders readable draft paragraphs", () => {
   assert.ok(lines.includes("Agent 报告正文草稿："));
   assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
   assert.ok(lines.includes("开篇："));
+  assert.ok(lines.includes("报告摘要："));
+  assert.ok(lines.includes("- 模式：foundation"));
+  assert.ok(lines.includes("章节概览："));
+  assert.ok(lines.some((line) => line.includes("【报告总览】")));
+  assert.ok(lines.some((line) => line.includes("命宫与三方四正：证据")));
   assert.ok(lines.some((line) => line.includes("【草稿判断】")));
   assert.ok(lines.some((line) => line.includes("【解释依据】")));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
@@ -246,6 +251,30 @@ test("formatReportOutput renders only published user reports", () => {
       knowledgeSnippetRefs: [],
       interpretationRefs: ["interpretation.life-triad.structure"]
     },
+    brief: {
+      kind: "report-brief",
+      mode: "focused",
+      subject: "示例命主",
+      paragraphs: [
+        {
+          kind: "brief-scope",
+          text: "【报告总览】本次报告围绕咨询主题组织命盘结构。",
+          evidenceRefs: ["life-triad.life-palace"],
+          referenceRefs: ["framework.life-triad"],
+          interpretationRefs: ["interpretation.life-triad.structure"]
+        }
+      ],
+      sectionSummaries: [
+        {
+          sectionId: "life-triad",
+          title: "命宫与三方四正",
+          evidenceCount: 1,
+          referenceCount: 1,
+          knowledgeSnippetCount: 0,
+          interpretationCount: 1
+        }
+      ]
+    },
     introduction: ["本报告以示例命主的本命盘为分析对象。"],
     sections: [
       {
@@ -271,6 +300,10 @@ test("formatReportOutput renders only published user reports", () => {
   assert.ok(lines.includes("报告元信息："));
   assert.ok(lines.includes("- 输出类型：ziwei-user-report"));
   assert.ok(lines.includes("- 章节：life-triad"));
+  assert.ok(lines.includes("报告摘要："));
+  assert.ok(lines.includes("- 模式：focused"));
+  assert.ok(lines.some((line) => line.includes("【报告总览】本次报告围绕咨询主题组织命盘结构。")));
+  assert.ok(lines.some((line) => line.includes("命宫与三方四正：证据 1 / 规则 1 / 知识片段 0 / 解释 1")));
   assert.ok(lines.includes("- 证据引用：1 项"));
   assert.ok(lines.includes("- 来源引用：1 项"));
   assert.ok(lines.includes("- 知识片段引用：0 项"));

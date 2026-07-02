@@ -127,6 +127,8 @@ export function formatReportDraft(reportDraft) {
     "开篇：",
     ...reportDraft.introduction.map((line) => `- ${line}`),
     "",
+    ...formatReportBrief(reportDraft.brief),
+    "",
     ...reportDraft.sections.flatMap((section) => {
       return [
         section.title,
@@ -240,6 +242,8 @@ export function formatReportOutput(reportOutput) {
     `- 知识片段引用：${reportOutput.metadata.knowledgeSnippetRefs.length} 项`,
     `- 解释引用：${reportOutput.metadata.interpretationRefs.length} 项`,
     "",
+    ...formatReportBrief(reportOutput.brief),
+    "",
     "开篇：",
     ...reportOutput.introduction.map((line) => `- ${line}`),
     "",
@@ -256,6 +260,27 @@ export function formatReportOutput(reportOutput) {
     ...reportOutput.closing.map((line) => `- ${line}`),
     "",
     `发布门禁：报告审计${reportOutput.audit.status === "passed" ? "通过" : "未通过"}`
+  ];
+}
+
+function formatReportBrief(brief) {
+  if (!brief) {
+    return [];
+  }
+
+  const sectionSummaries = brief.sectionSummaries ?? [];
+  const paragraphs = brief.paragraphs ?? [];
+
+  return [
+    "报告摘要：",
+    `- 模式：${brief.mode}`,
+    ...paragraphs.map((paragraph) => {
+      return `- ${formatParagraph(paragraph)}`;
+    }),
+    "章节概览：",
+    ...sectionSummaries.map((section) => {
+      return `- ${section.title}：证据 ${section.evidenceCount} / 规则 ${section.referenceCount} / 知识片段 ${section.knowledgeSnippetCount} / 解释 ${section.interpretationCount}`;
+    })
   ];
 }
 
