@@ -1,29 +1,106 @@
 import { createServer } from "node:http";
+import { createApiObserver } from "./agent/apiObservability.js";
+import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
+const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
+const DEFAULT_RATE_LIMIT_MAX = 60;
 
 export function createZiweiHttpServer(options = {}) {
+  const env = options.env ?? process.env;
+  const observer = options.observer ?? createApiObserver({
+    mode: options.observabilityMode ?? env.ZIWEI_API_OBSERVABILITY,
+    logger: options.logger
+  });
+  const rateLimiter = options.rateLimiter ?? createApiRateLimiter({
+    windowMs: options.rateLimitWindowMs ??
+      parseOptionalInteger(env.ZIWEI_API_RATE_LIMIT_WINDOW_MS) ??
+      DEFAULT_RATE_LIMIT_WINDOW_MS,
+    maxRequests: options.rateLimitMaxRequests ??
+      parseOptionalInteger(env.ZIWEI_API_RATE_LIMIT_MAX) ??
+      DEFAULT_RATE_LIMIT_MAX
+  });
+
   return createServer(async (request, response) => {
+    const startedAt = Date.now();
+    const requestId = createRequestId();
+    const method = String(request.method ?? "GET").toUpperCase();
+    const path = request.url ?? "/";
+
+    emitApiEvent(observer, {
+      type: "api.request.started",
+      requestId,
+      method,
+      path,
+      headers: request.headers
+    });
+
     try {
+      const rateLimit = rateLimiter.check({
+        headers: request.headers,
+        remoteAddress: request.socket.remoteAddress
+      });
+
+      if (rateLimit.status === "blocked") {
+        const apiResponse = {
+          statusCode: 429,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "retry-after": String(Math.ceil(rateLimit.retryAfterMs / 1000))
+          },
+          body: {
+            status: "rate_limited",
+            requestId,
+            messages: ["请求过于频繁。"],
+            retryAfterMs: rateLimit.retryAfterMs
+          }
+        };
+
+        emitApiEvent(observer, {
+          type: "api.request.blocked",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          reason: "rate_limited",
+          rateLimit: summarizeRateLimit(rateLimit)
+        });
+        writeJsonResponse(response, apiResponse, requestId);
+        return;
+      }
+
       const bodyRead = await readRequestBody(request, {
         maxBodyBytes: options.maxBodyBytes ?? DEFAULT_MAX_REQUEST_BYTES
       });
 
       if (bodyRead.status !== "ready") {
-        writeJsonResponse(response, {
+        const apiResponse = {
           statusCode: bodyRead.statusCode,
           headers: {
             "content-type": "application/json; charset=utf-8"
           },
           body: {
             status: bodyRead.status,
+            requestId,
             messages: bodyRead.messages
           }
+        };
+
+        emitApiEvent(observer, {
+          type: "api.request.blocked",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          reason: bodyRead.status
         });
+        writeJsonResponse(response, apiResponse, requestId);
         return;
       }
 
@@ -33,24 +110,48 @@ export function createZiweiHttpServer(options = {}) {
         headers: request.headers,
         body: bodyRead.body
       }, {
-        env: options.env ?? process.env,
+        env,
         apiToken: options.apiToken,
         knowledgeSnippets: options.knowledgeSnippets,
-        maxBodyBytes: options.maxBodyBytes ?? DEFAULT_MAX_REQUEST_BYTES
+        maxBodyBytes: options.maxBodyBytes ?? DEFAULT_MAX_REQUEST_BYTES,
+        requestId
       });
 
-      writeJsonResponse(response, apiResponse);
+      emitApiEvent(observer, {
+        type: "api.request.completed",
+        requestId,
+        method,
+        path,
+        statusCode: apiResponse.statusCode,
+        durationMs: Date.now() - startedAt,
+        responseStatus: apiResponse.body?.status,
+        diagnostics: summarizeDiagnostics(apiResponse.body?.diagnostics),
+        rateLimit: summarizeRateLimit(rateLimit)
+      });
+      writeJsonResponse(response, apiResponse, requestId);
     } catch {
-      writeJsonResponse(response, {
+      const apiResponse = {
         statusCode: 500,
         headers: {
           "content-type": "application/json; charset=utf-8"
         },
         body: {
           status: "internal_error",
+          requestId,
           messages: ["API 处理失败。"]
         }
+      };
+
+      emitApiEvent(observer, {
+        type: "api.request.failed",
+        requestId,
+        method,
+        path,
+        statusCode: apiResponse.statusCode,
+        durationMs: Date.now() - startedAt,
+        reason: "internal_error"
       });
+      writeJsonResponse(response, apiResponse, requestId);
     }
   });
 }
@@ -118,9 +219,51 @@ function readRequestBody(request, { maxBodyBytes }) {
   });
 }
 
-function writeJsonResponse(response, apiResponse) {
-  response.writeHead(apiResponse.statusCode, apiResponse.headers);
+function writeJsonResponse(response, apiResponse, requestId) {
+  response.writeHead(apiResponse.statusCode, {
+    ...apiResponse.headers,
+    "x-request-id": requestId
+  });
   response.end(JSON.stringify(apiResponse.body));
+}
+
+function emitApiEvent(observer, event) {
+  if (!observer?.emit) {
+    return;
+  }
+
+  try {
+    observer.emit(event);
+  } catch {
+    // Observability must never block the agent request path.
+  }
+}
+
+function summarizeDiagnostics(diagnostics) {
+  if (!diagnostics) {
+    return undefined;
+  }
+
+  return {
+    durationMs: diagnostics.durationMs,
+    buildStatus: diagnostics.buildStatus,
+    reportPlanStatus: diagnostics.reportPlanStatus,
+    reportGenerationStatus: diagnostics.reportGenerationStatus,
+    reportOutputStatus: diagnostics.reportOutputStatus
+  };
+}
+
+function summarizeRateLimit(rateLimit) {
+  return {
+    status: rateLimit.status,
+    limit: rateLimit.limit,
+    remaining: rateLimit.remaining,
+    retryAfterMs: rateLimit.retryAfterMs
+  };
+}
+
+function createRequestId() {
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
