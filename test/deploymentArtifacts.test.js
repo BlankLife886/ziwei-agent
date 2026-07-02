@@ -7,6 +7,8 @@ test("docker compose deployment wires runtime secrets, quota state, and liveness
 
   assert.match(compose, /ZIWEI_RUNTIME_SECRETS_FILE:\s+\/run\/secrets\/ziwei_runtime/u);
   assert.match(compose, /ZIWEI_API_QUOTA_STORE:\s+\/app\/\.runtime\/api-quota\.json/u);
+  assert.match(compose, /ZIWEI_RELEASE_VERSION:\s+\$\{ZIWEI_RELEASE_VERSION:-development\}/u);
+  assert.match(compose, /ZIWEI_RELEASE_SUMMARY_PATH:\s+\/app\/\.runtime\/release-summary\.json/u);
   assert.match(compose, /ziwei-runtime:\/app\/\.runtime/u);
   assert.match(compose, /runtime-secrets\.example\.json/u);
   assert.match(compose, /\/health/u);
@@ -21,6 +23,16 @@ test("kubernetes deployment wires liveness, readiness, secrets, and runtime stat
   assert.match(manifest, /path:\s+\/ready/u);
   assert.match(manifest, /persistentVolumeClaim/u);
   assert.match(manifest, /ZIWEI_API_QUOTA_STORE/u);
+  assert.match(manifest, /ZIWEI_RELEASE_VERSION/u);
+  assert.match(manifest, /ZIWEI_RELEASE_SUMMARY_PATH/u);
+});
+
+test("docker image accepts release metadata build arguments", async () => {
+  const dockerfile = await readFile("Dockerfile", "utf8");
+
+  assert.match(dockerfile, /ARG ZIWEI_RELEASE_VERSION/u);
+  assert.match(dockerfile, /ARG ZIWEI_RELEASE_COMMIT/u);
+  assert.match(dockerfile, /ENV ZIWEI_RELEASE_VERSION=\$ZIWEI_RELEASE_VERSION/u);
 });
 
 test("runtime secret example keeps credentials in the supported JSON shape", async () => {

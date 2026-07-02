@@ -12,7 +12,10 @@ import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
 import { REPORT_GENERATOR_IDS } from "./agent/reportGenerator.js";
 import { parseOptionalInteger } from "./runtimeOptions.js";
 import { resolveRuntimeEnv } from "./runtimeEnv.js";
-import { buildServerRuntimeConfig } from "./serverRuntimeConfig.js";
+import {
+  buildReleaseMetadata,
+  buildServerRuntimeConfig
+} from "./serverRuntimeConfig.js";
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
@@ -49,6 +52,7 @@ export function createZiweiHttpServer(options = {}) {
     mode: options.observabilityMode ?? env.ZIWEI_API_OBSERVABILITY,
     logger: options.logger
   });
+  const release = options.release ?? buildReleaseMetadata(env);
   const rateLimiter = options.rateLimiter ?? createApiRateLimiter({
     windowMs: options.rateLimitWindowMs ??
       parseOptionalInteger(env.ZIWEI_API_RATE_LIMIT_WINDOW_MS) ??
@@ -78,6 +82,7 @@ export function createZiweiHttpServer(options = {}) {
         const apiResponse = createHealthResponse({
           requestId,
           method,
+          release,
           knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0
         });
 
@@ -99,6 +104,7 @@ export function createZiweiHttpServer(options = {}) {
           requestId,
           method,
           env,
+          release,
           knowledgeSnippetCount: options.knowledgeSnippets?.length ?? 0,
           knowledgeStoreStatus: options.knowledgeStoreStatus,
           knowledgeStoreIssues: options.knowledgeStoreIssues
@@ -291,7 +297,8 @@ async function main() {
     knowledgeSnippets: knowledgeStore.snippets,
     knowledgeStoreStatus: knowledgeStore.status,
     knowledgeStoreIssues: knowledgeStore.issues,
-    maxBodyBytes
+    maxBodyBytes,
+    release: runtimeConfig.values.release
   });
 
   server.listen(port, () => {
@@ -405,7 +412,7 @@ function isReadyRequest(method, path) {
     normalizeRequestPath(path) === "/ready";
 }
 
-function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
+function createHealthResponse({ requestId, method, release, knowledgeSnippetCount }) {
   return {
     statusCode: 200,
     headers: {
@@ -418,6 +425,7 @@ function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
         status: "ok",
         service: "ziwei-agent",
         requestId,
+        release,
         checks: {
           http: "ok",
           agentEntry: "ready",
@@ -431,6 +439,7 @@ function createReadyResponse({
   requestId,
   method,
   env,
+  release,
   knowledgeSnippetCount,
   knowledgeStoreStatus,
   knowledgeStoreIssues
@@ -468,6 +477,7 @@ function createReadyResponse({
         status: ready ? "ready" : "not_ready",
         service: "ziwei-agent",
         requestId,
+        release,
         checks
       }
   };

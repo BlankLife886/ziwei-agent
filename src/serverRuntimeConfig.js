@@ -6,6 +6,9 @@ const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 const DEFAULT_RATE_LIMIT_MAX = 60;
 const OBSERVABILITY_MODES = new Set(["off", "stdout", undefined, ""]);
 const REPORTS_WRITE_SCOPE = "reports:write";
+const RELEASE_TEXT_PATTERN = /^[A-Za-z0-9._:/@+-]+$/u;
+const RELEASE_COMMIT_PATTERN = /^[0-9a-f]{7,64}$/iu;
+const RELEASE_FIELD_MAX_LENGTH = 128;
 
 export function buildServerRuntimeConfig(env = process.env) {
   const issues = [];
@@ -43,6 +46,8 @@ export function buildServerRuntimeConfig(env = process.env) {
     issues.push("生产部署必须配置至少一个当前可用的 reports:write API credential。");
   }
 
+  const release = buildReleaseMetadata(env, issues);
+
   return {
     status: issues.length === 0 ? "ready" : "invalid",
     issues,
@@ -53,8 +58,32 @@ export function buildServerRuntimeConfig(env = process.env) {
       rateLimitMaxRequests,
       observabilityMode,
       quotaStorePath: env.ZIWEI_API_QUOTA_STORE,
-      knowledgeStorePath: env.ZIWEI_KNOWLEDGE_STORE
+      knowledgeStorePath: env.ZIWEI_KNOWLEDGE_STORE,
+      release
     }
+  };
+}
+
+export function buildReleaseMetadata(env = process.env, issues = []) {
+  return {
+    version: parseReleaseTextEnv(env.ZIWEI_RELEASE_VERSION, {
+      name: "ZIWEI_RELEASE_VERSION",
+      issues
+    }) ?? "development",
+    commit: parseReleaseTextEnv(env.ZIWEI_RELEASE_COMMIT, {
+      name: "ZIWEI_RELEASE_COMMIT",
+      issues,
+      pattern: RELEASE_COMMIT_PATTERN
+    }),
+    source: parseReleaseTextEnv(env.ZIWEI_RELEASE_SOURCE, {
+      name: "ZIWEI_RELEASE_SOURCE",
+      issues
+    }),
+    summaryConfigured: Boolean(parseReleaseTextEnv(env.ZIWEI_RELEASE_SUMMARY_PATH, {
+      name: "ZIWEI_RELEASE_SUMMARY_PATH",
+      issues,
+      allowPath: true
+    }))
   };
 }
 
@@ -96,6 +125,35 @@ function auditApiCredentialRuntime(env) {
     issues: credentialAudit.issues,
     hasActiveReportWriter: credentialAudit.hasActiveReportWriter
   };
+}
+
+function parseReleaseTextEnv(value, { name, issues, pattern = RELEASE_TEXT_PATTERN, allowPath = false }) {
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    issues.push(`${name} 必须是字符串。`);
+    return undefined;
+  }
+
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  if (normalizedValue.length > RELEASE_FIELD_MAX_LENGTH) {
+    issues.push(`${name} 不能超过 ${RELEASE_FIELD_MAX_LENGTH} 个字符。`);
+    return undefined;
+  }
+
+  if (!allowPath && !pattern.test(normalizedValue)) {
+    issues.push(`${name} 只能包含字母、数字、点、下划线、冒号、斜杠、@、加号和短横线。`);
+    return undefined;
+  }
+
+  return normalizedValue;
 }
 
 function auditCredentialJson(rawValue, nowMs) {

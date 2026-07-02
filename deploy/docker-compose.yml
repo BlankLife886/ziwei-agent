@@ -3,6 +3,10 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+      args:
+        ZIWEI_RELEASE_VERSION: ${ZIWEI_RELEASE_VERSION:-development}
+        ZIWEI_RELEASE_COMMIT: ${ZIWEI_RELEASE_COMMIT:-}
+        ZIWEI_RELEASE_SOURCE: ${ZIWEI_RELEASE_SOURCE:-compose}
     image: ziwei-agent:local
     ports:
       - "3000:3000"
@@ -16,6 +20,10 @@ services:
       ZIWEI_API_QUOTA_STORE: /app/.runtime/api-quota.json
       ZIWEI_KNOWLEDGE_STORE: data/knowledge-snippets.example.json
       ZIWEI_RUNTIME_SECRETS_FILE: /run/secrets/ziwei_runtime
+      ZIWEI_RELEASE_VERSION: ${ZIWEI_RELEASE_VERSION:-development}
+      ZIWEI_RELEASE_COMMIT: ${ZIWEI_RELEASE_COMMIT:-}
+      ZIWEI_RELEASE_SOURCE: ${ZIWEI_RELEASE_SOURCE:-compose}
+      ZIWEI_RELEASE_SUMMARY_PATH: /app/.runtime/release-summary.json
     secrets:
       - ziwei_runtime
     volumes:

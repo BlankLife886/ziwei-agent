@@ -17,6 +17,9 @@ console.log(`- 限流次数：${config.values.rateLimitMaxRequests}`);
 console.log(`- 观测模式：${config.values.observabilityMode}`);
 console.log(`- 配额存储：${config.values.quotaStorePath ?? "memory"}`);
 console.log(`- 知识库：${config.values.knowledgeStorePath ?? "none"}`);
+console.log(`- release version：${config.values.release.version}`);
+console.log(`- release commit：${config.values.release.commit ?? "none"}`);
+console.log(`- release summary：${config.values.release.summaryConfigured ? "configured" : "none"}`);
 console.log(`- secret 来源：${runtimeEnv.secretSources.length} 项`);
 
 if (issues.length > 0) {

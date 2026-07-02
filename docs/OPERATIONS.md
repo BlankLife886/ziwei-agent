@@ -40,6 +40,10 @@ ZIWEI_API_RATE_LIMIT_WINDOW_MS=60000
 ZIWEI_API_RATE_LIMIT_MAX=60
 ZIWEI_API_QUOTA_STORE=.runtime/api-quota.json
 ZIWEI_KNOWLEDGE_STORE=data/knowledge-snippets.example.json
+ZIWEI_RELEASE_VERSION=development
+ZIWEI_RELEASE_COMMIT=
+ZIWEI_RELEASE_SOURCE=local
+ZIWEI_RELEASE_SUMMARY_PATH=.runtime/release-summary.json
 ```
 
 生产中可把密钥放进托管密钥平台或 mounted secret 文件，避免直接写在 `.env`：
@@ -147,14 +151,14 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 
 - 不读取请求体。
 - 不消耗业务限流配额。
-- 返回 `status`、`service`、`requestId` 和 `checks`。
+- 返回 `status`、`service`、`requestId`、`release` 和 `checks`。
 - `checks.knowledgeSnippetCount` 表示当前服务启动时加载进来的可用知识片段数量。
 
 `GET /ready` 是 readiness 探针：
 
 - 不读取请求体。
 - 不消耗业务限流配额。
-- 返回 runtime、agent 入口、知识库加载状态和报告 provider 配置状态。
+- 返回 release metadata、runtime、agent 入口、知识库加载状态和报告 provider 配置状态。
 - 当 `ZIWEI_REPORT_PROVIDER=external-llm` 但缺少 `ZIWEI_LLM_ENDPOINT`、`ZIWEI_LLM_API_KEY` 或 `ZIWEI_LLM_MODEL` 时返回 503。
 
 示例：

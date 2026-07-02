@@ -12,7 +12,11 @@ test("buildServerRuntimeConfig accepts secure production runtime settings", () =
     ZIWEI_API_RATE_LIMIT_MAX: "30",
     ZIWEI_API_OBSERVABILITY: "stdout",
     ZIWEI_API_QUOTA_STORE: ".runtime/quota.json",
-    ZIWEI_KNOWLEDGE_STORE: "data/knowledge-snippets.example.json"
+    ZIWEI_KNOWLEDGE_STORE: "data/knowledge-snippets.example.json",
+    ZIWEI_RELEASE_VERSION: "v0.1.0",
+    ZIWEI_RELEASE_COMMIT: "abcdef1234567890",
+    ZIWEI_RELEASE_SOURCE: "main",
+    ZIWEI_RELEASE_SUMMARY_PATH: ".runtime/release-summary.json"
   });
 
   assert.equal(config.status, "ready");
@@ -22,6 +26,10 @@ test("buildServerRuntimeConfig accepts secure production runtime settings", () =
   assert.equal(config.values.rateLimitWindowMs, 120000);
   assert.equal(config.values.rateLimitMaxRequests, 30);
   assert.equal(config.values.observabilityMode, "stdout");
+  assert.equal(config.values.release.version, "v0.1.0");
+  assert.equal(config.values.release.commit, "abcdef1234567890");
+  assert.equal(config.values.release.source, "main");
+  assert.equal(config.values.release.summaryConfigured, true);
 });
 
 test("buildServerRuntimeConfig accepts env already resolved from secret files", () => {
@@ -67,6 +75,17 @@ test("buildServerRuntimeConfig blocks invalid numeric and observability settings
   assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_RATE_LIMIT_WINDOW_MS")));
   assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_RATE_LIMIT_MAX")));
   assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_API_OBSERVABILITY")));
+});
+
+test("buildServerRuntimeConfig rejects invalid release metadata", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_RELEASE_VERSION: "bad version with spaces",
+    ZIWEI_RELEASE_COMMIT: "not-a-commit"
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_RELEASE_VERSION")));
+  assert.ok(config.issues.some((issue) => issue.includes("ZIWEI_RELEASE_COMMIT")));
 });
 
 test("buildServerRuntimeConfig accepts scoped credential JSON for required auth", () => {

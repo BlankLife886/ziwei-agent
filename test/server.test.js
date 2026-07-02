@@ -8,7 +8,11 @@ import { createZiweiHttpServer } from "../src/server.js";
 
 test("createZiweiHttpServer serves health responses", async () => {
   const server = createZiweiHttpServer({
-    env: {},
+    env: {
+      ZIWEI_RELEASE_VERSION: "v0.1.0",
+      ZIWEI_RELEASE_COMMIT: "abcdef1234567890",
+      ZIWEI_RELEASE_SOURCE: "local"
+    },
     knowledgeSnippets: [
       {
         id: "knowledge-snippet.test"
@@ -28,6 +32,10 @@ test("createZiweiHttpServer serves health responses", async () => {
     assert.equal(response.status, 200);
     assert.equal(body.status, "ok");
     assert.equal(body.service, "ziwei-agent");
+    assert.equal(body.release.version, "v0.1.0");
+    assert.equal(body.release.commit, "abcdef1234567890");
+    assert.equal(body.release.source, "local");
+    assert.equal(body.release.summaryConfigured, false);
     assert.equal(body.checks.http, "ok");
     assert.equal(body.checks.agentEntry, "ready");
     assert.equal(body.checks.knowledgeSnippetCount, 1);
@@ -42,7 +50,11 @@ test("createZiweiHttpServer serves health responses", async () => {
 
 test("createZiweiHttpServer serves readiness responses for deploy probes", async () => {
   const server = createZiweiHttpServer({
-    env: {},
+    env: {
+      ZIWEI_RELEASE_VERSION: "v0.1.0",
+      ZIWEI_RELEASE_COMMIT: "abcdef1234567890",
+      ZIWEI_RELEASE_SUMMARY_PATH: ".runtime/release-summary.json"
+    },
     knowledgeSnippets: [
       {
         id: "knowledge-snippet.test"
@@ -60,6 +72,9 @@ test("createZiweiHttpServer serves readiness responses for deploy probes", async
 
     assert.equal(response.status, 200);
     assert.equal(body.status, "ready");
+    assert.equal(body.release.version, "v0.1.0");
+    assert.equal(body.release.commit, "abcdef1234567890");
+    assert.equal(body.release.summaryConfigured, true);
     assert.equal(body.checks.runtime.status, "ready");
     assert.equal(body.checks.agentEntry.status, "ready");
     assert.match(body.checks.agentEntry.pipeline, /reportPublisher/u);

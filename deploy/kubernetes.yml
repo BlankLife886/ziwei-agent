@@ -78,6 +78,14 @@ spec:
               value: data/knowledge-snippets.example.json
             - name: ZIWEI_RUNTIME_SECRETS_FILE
               value: /run/secrets/ziwei/runtime-secrets.json
+            - name: ZIWEI_RELEASE_VERSION
+              value: development
+            - name: ZIWEI_RELEASE_COMMIT
+              value: ""
+            - name: ZIWEI_RELEASE_SOURCE
+              value: kubernetes
+            - name: ZIWEI_RELEASE_SUMMARY_PATH
+              value: /app/.runtime/release-summary.json
           volumeMounts:
             - name: runtime-secret
               mountPath: /run/secrets/ziwei
