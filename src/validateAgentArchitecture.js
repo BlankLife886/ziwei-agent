@@ -1,13 +1,19 @@
 import { readFile } from "node:fs/promises";
 import { auditAgentArchitectureCompliance } from "./agent/agentArchitectureComplianceAuditor.js";
+import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { runZiweiPipeline } from "./agent/ziweiPipeline.js";
 import { buildChart } from "./chartBuilder.js";
 
 const SAMPLE_PROFILE_PATH = "examples/profile.example.json";
+const SAMPLE_KNOWLEDGE_STORE_PATH = "data/knowledge-snippets.example.json";
 
 async function main() {
   const profile = JSON.parse(await readFile(SAMPLE_PROFILE_PATH, "utf8"));
-  const pipelineResult = runZiweiPipeline(buildChart(profile));
+  const knowledgeStore = await loadKnowledgeSnippetStore(SAMPLE_KNOWLEDGE_STORE_PATH);
+  const pipelineResult = runZiweiPipeline(buildChart(profile), {
+    knowledgeSnippets: knowledgeStore.snippets,
+    knowledgeRetrievalIndex: knowledgeStore.retrievalIndex
+  });
   const audit = auditAgentArchitectureCompliance({
     pipelineResult,
     capabilities: {
@@ -17,8 +23,6 @@ async function main() {
       cloudflareDeployment: true,
       ciReleaseGate: true,
       humanKnowledgeReview: true,
-      longTermMemory: false,
-      vectorStore: false,
       webSessionAuth: false
     }
   });

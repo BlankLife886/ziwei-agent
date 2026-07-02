@@ -17,8 +17,6 @@ const DEFAULT_CAPABILITIES = {
   cloudflareDeployment: true,
   ciReleaseGate: true,
   humanKnowledgeReview: true,
-  longTermMemory: false,
-  vectorStore: false,
   webSessionAuth: false
 };
 
@@ -127,23 +125,28 @@ const ARCHITECTURE_ITEMS = [
     weight: 10,
     critical: false,
     evaluate: ({ pipelineResult, capabilities }) => {
-      if (
-        pipelineResult.knowledgeCoverageAudit?.status === "covered" &&
-        capabilities.longTermMemory &&
-        capabilities.vectorStore
-      ) {
-        return aligned("已具备 verified 知识片段、长期记忆和向量检索。");
+      const knowledgeMemory = pipelineResult.knowledgeMemory;
+      const retrieval = knowledgeMemory?.retrieval;
+      const hasCoveredKnowledge = pipelineResult.knowledgeCoverageAudit?.status === "covered";
+      const hasPersistentMemory = knowledgeMemory?.persistence === "json-store" &&
+        knowledgeMemory?.reviewPolicy === "verified-snippets-only";
+      const hasRetrievalIndex = retrieval?.status === "ready" &&
+        retrieval?.kind === "local-sparse-vector-index" &&
+        retrieval?.snippetCount > 0;
+
+      if (hasCoveredKnowledge && hasPersistentMemory && hasRetrievalIndex) {
+        return aligned("已具备 verified 知识片段、JSON 长期知识记忆和本地稀疏向量检索索引。");
       }
 
       const ratio = [
-        pipelineResult.knowledgeCoverageAudit?.status === "covered",
+        hasCoveredKnowledge,
         capabilities.humanKnowledgeReview,
-        capabilities.longTermMemory,
-        capabilities.vectorStore
+        hasPersistentMemory,
+        hasRetrievalIndex
       ].filter(Boolean).length / 4;
 
       return partial(
-        "已有 verified snippet 合同和人工复核边界，但长期记忆、向量库或知识覆盖仍需补强。",
+        "已有 verified snippet 合同和人工复核边界，但知识覆盖、长期记忆或检索索引仍需补强。",
         Math.max(0.35, ratio)
       );
     }

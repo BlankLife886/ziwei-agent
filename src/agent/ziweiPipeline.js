@@ -1,5 +1,9 @@
 import { auditAgentReadiness } from "./agentReadinessAuditor.js";
 import {
+  buildKnowledgeRetrievalIndex,
+  summarizeKnowledgeRetrievalIndex
+} from "./knowledgeRetrievalIndex.js";
+import {
   generateReportDraft,
   generateReportDraftAsync
 } from "./reportGenerator.js";
@@ -43,9 +47,13 @@ export async function runZiweiPipelineAsync(buildResult, options = {}) {
 
 function preparePipeline(buildResult, options) {
   const queryIntent = normalizeQueryIntent(options.queryIntent);
+  const knowledgeSnippets = options.knowledgeSnippets ?? [];
+  const knowledgeRetrievalIndex = options.knowledgeRetrievalIndex ??
+    buildKnowledgeRetrievalIndex(knowledgeSnippets);
   const agentResult = createZiweiAgentResponse(buildResult, { queryIntent });
   const reportPlan = createReportPlan(agentResult, {
-    knowledgeSnippets: options.knowledgeSnippets
+    knowledgeSnippets,
+    knowledgeRetrievalIndex
   });
   const knowledgeCoverageAudit = auditKnowledgeCoverage(reportPlan);
 
@@ -54,6 +62,13 @@ function preparePipeline(buildResult, options) {
     buildResult,
     agentResult,
     reportPlan,
+    knowledgeMemory: {
+      status: knowledgeRetrievalIndex.status,
+      type: "knowledge-memory",
+      persistence: "json-store",
+      reviewPolicy: "verified-snippets-only",
+      retrieval: summarizeKnowledgeRetrievalIndex(knowledgeRetrievalIndex)
+    },
     knowledgeCoverageAudit
   };
 }
@@ -71,6 +86,7 @@ function finalizePipeline({
   buildResult,
   agentResult,
   reportPlan,
+  knowledgeMemory,
   knowledgeCoverageAudit,
   reportGeneration
 }) {
@@ -82,6 +98,7 @@ function finalizePipeline({
     buildResult,
     agentResult,
     reportPlan,
+    knowledgeMemory,
     knowledgeCoverageAudit,
     reportGeneration,
     reportDraft,
@@ -93,6 +110,7 @@ function finalizePipeline({
     buildResult,
     agentResult,
     reportPlan,
+    knowledgeMemory,
     knowledgeCoverageAudit,
     reportGeneration,
     reportDraft,
@@ -120,6 +138,7 @@ function finalizePipeline({
     buildResult,
     agentResult,
     reportPlan,
+    knowledgeMemory,
     knowledgeCoverageAudit,
     reportGeneration,
     reportDraft,

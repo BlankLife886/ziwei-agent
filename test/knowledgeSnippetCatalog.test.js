@@ -49,7 +49,8 @@ test("verified knowledge snippets can be found by id and query", () => {
   assert.deepEqual(
     searchKnowledgeSnippets({
       topicIds: ["career"],
-      referenceRefs: ["framework.career-palace"]
+      referenceRefs: ["framework.career-palace"],
+      text: "事业 官禄宫 结构"
     }, { snippets }).map((snippet) => snippet.id),
     ["knowledge-snippet.career-structure"]
   );

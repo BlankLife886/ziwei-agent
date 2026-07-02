@@ -15,5 +15,6 @@ test("buildOpenApiDocument describes the public HTTP contract", () => {
     document.paths["/v1/reports"].post.responses[200].content["application/json"].schema.$ref,
     "#/components/schemas/ReportResponse"
   );
+  assert.ok(document.components.schemas.ReportResponse.properties.knowledgeMemory);
   assert.equal(document.components.securitySchemes.bearerAuth.scheme, "bearer");
 });

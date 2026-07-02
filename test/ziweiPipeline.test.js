@@ -100,6 +100,8 @@ test("runZiweiPipeline uses verified knowledge snippets in report planning", () 
   });
 
   assert.equal(pipelineResult.reportPlan.sections[0].id, "career-palace");
+  assert.equal(pipelineResult.knowledgeMemory.persistence, "json-store");
+  assert.equal(pipelineResult.knowledgeMemory.retrieval.kind, "local-sparse-vector-index");
   assert.deepEqual(pipelineResult.reportPlan.sections[0].knowledgeSnippetRefs, [
     "knowledge-snippet.career-structure-store"
   ]);

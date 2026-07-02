@@ -91,18 +91,28 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
   const referenceRefs = collectReferenceRefs(evidenceItems, interpretations);
   const references = findReferences(referenceRefs);
   const queryContext = buildSectionQueryContext(focusArea.id, queryIntent);
+  const title = buildSectionTitle(focusArea, queryContext);
+  const purpose = buildSectionPurpose(focusArea, queryContext);
+  const writingPrompt = buildSectionWritingPrompt(focusArea.id, queryContext);
   const knowledgeSnippets = searchKnowledgeSnippets({
     topicIds: queryContext.topicIds,
-    referenceRefs
+    referenceRefs,
+    text: [
+      title,
+      purpose,
+      writingPrompt,
+      ...evidenceItems.map((item) => item.text)
+    ].join(" ")
   }, {
-    snippets: options.knowledgeSnippets
+    snippets: options.knowledgeSnippets,
+    retrievalIndex: options.knowledgeRetrievalIndex
   });
   const sourceRefs = collectSectionSourceRefs(references, knowledgeSnippets);
 
   const section = {
     id: focusArea.id,
-    title: buildSectionTitle(focusArea, queryContext),
-    purpose: buildSectionPurpose(focusArea, queryContext),
+    title,
+    purpose,
     queryContext,
     guidingQuestions: buildSectionGuidingQuestions(focusArea.id, queryContext),
     evidence: evidenceItems.map((item) => item.text),
@@ -116,7 +126,7 @@ function buildSectionFromFocusArea(focusArea, queryIntent, options) {
     sources: findSources(sourceRefs),
     knowledgeSnippetRefs: knowledgeSnippets.map((snippet) => snippet.id),
     knowledgeSnippets,
-    writingPrompt: buildSectionWritingPrompt(focusArea.id, queryContext)
+    writingPrompt
   };
 
   return {

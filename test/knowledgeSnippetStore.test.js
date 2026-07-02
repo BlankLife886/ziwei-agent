@@ -22,6 +22,9 @@ test("buildKnowledgeSnippetStore accepts verified snippets", () => {
 
   assert.equal(store.status, "ready");
   assert.equal(store.snippets.length, 1);
+  assert.equal(store.retrievalIndex.kind, "local-sparse-vector-index");
+  assert.equal(store.memoryManifest.persistence, "json-store");
+  assert.equal(store.memoryManifest.reviewPolicy, "verified-snippets-only");
   assert.deepEqual(store.issues, []);
 });
 
@@ -67,6 +70,7 @@ test("loadKnowledgeSnippetStore reads a JSON knowledge store file", async () => 
 
   assert.equal(store.status, "ready");
   assert.equal(store.snippets[0].id, "knowledge-snippet.career-structure-store");
+  assert.equal(store.memoryManifest.retrieval.snippetCount, 1);
 });
 
 test("example knowledge store covers the default report pipeline", async () => {
@@ -77,6 +81,8 @@ test("example knowledge store covers the default report pipeline", async () => {
 
   assert.equal(store.status, "ready");
   assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
+  assert.equal(pipelineResult.knowledgeMemory.retrieval.kind, "local-sparse-vector-index");
+  assert.equal(pipelineResult.knowledgeMemory.retrieval.snippetCount, 10);
   assert.equal(pipelineResult.readinessAudit.percent >= 85, true);
   assert.deepEqual(pipelineResult.knowledgeCoverageAudit.missingSectionIds, []);
   assert.equal(

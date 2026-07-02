@@ -1,3 +1,8 @@
+import {
+  buildKnowledgeRetrievalIndex,
+  searchKnowledgeRetrievalIndex
+} from "./knowledgeRetrievalIndex.js";
+
 // 外部知识片段目录。
 //
 // 这里是后续接入书籍、PDF、笔记和向量检索的边界层。
@@ -76,22 +81,18 @@ export function findKnowledgeSnippets(snippetRefs = [], options = {}) {
 }
 
 export function searchKnowledgeSnippets(query = {}, options = {}) {
-  const topicIds = new Set(query.topicIds ?? []);
-  const referenceRefs = new Set(query.referenceRefs ?? []);
   const snippets = options.snippets ?? KNOWLEDGE_SNIPPETS;
-
-  return snippets.filter((snippet) => {
-    if (!isUsableKnowledgeSnippet(snippet)) {
-      return false;
-    }
-
-    const topicMatched = topicIds.size === 0 ||
-      snippet.topicIds.some((topicId) => topicIds.has(topicId));
-    const referenceMatched = referenceRefs.size === 0 ||
-      snippet.referenceRefs.some((referenceRef) => referenceRefs.has(referenceRef));
-
-    return topicMatched && referenceMatched;
+  const usableSnippets = snippets.filter(isUsableKnowledgeSnippet);
+  const index = options.retrievalIndex ??
+    buildKnowledgeRetrievalIndex(usableSnippets);
+  const results = searchKnowledgeRetrievalIndex(query, index, {
+    limit: options.limit,
+    minScore: options.minScore ?? 0
   });
+
+  return results
+    .map((result) => result.snippet)
+    .filter(isUsableKnowledgeSnippet);
 }
 
 export function isUsableKnowledgeSnippet(snippet) {

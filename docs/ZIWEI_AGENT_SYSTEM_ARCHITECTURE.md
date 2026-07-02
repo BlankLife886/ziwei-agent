@@ -211,7 +211,7 @@ stateDiagram-v2
 
 ## 知识库与 RAG 演进图
 
-当前已经有 JSON store 和 verified snippet 审计；后续可以接入 OCR、PDF 解析、向量检索、重排和权限过滤，但所有材料仍必须先进入可追溯 snippet 合同。
+当前已经有 JSON store、verified snippet 审计、knowledge memory manifest 和本地稀疏向量检索索引；后续可以接入 OCR、PDF 解析、外部 embedding、向量数据库、重排和权限过滤，但所有材料仍必须先进入可追溯 snippet 合同。
 
 ```mermaid
 flowchart TD
@@ -223,7 +223,9 @@ flowchart TD
     REVIEW --> VERIFIED["verified snippet"]
     VERIFIED --> STORE["Knowledge Store<br/>JSON / DB / R2 / KV"]
 
-    STORE --> RETRIEVE["检索层<br/>topicIds / referenceRefs / future vector search"]
+    STORE --> MEMORY["knowledgeMemory<br/>JSON manifest"]
+    MEMORY --> RETRIEVE["检索层<br/>topicIds / referenceRefs / local sparse vector"]
+    RETRIEVE --> FUTURE["未来增强<br/>embedding / vector DB / rerank"]
     RETRIEVE --> COVERAGE["knowledgeCoverageAuditor"]
     COVERAGE --> PLAN["reportPlanner"]
     PLAN --> GENCTX["generationContext"]

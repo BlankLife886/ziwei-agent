@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { auditAgentArchitectureCompliance } from "../src/agent/agentArchitectureComplianceAuditor.js";
+import {
+  KNOWLEDGE_RISK_LEVELS,
+  KNOWLEDGE_SOURCE_IDS,
+  KNOWLEDGE_SNIPPET_STATUS
+} from "../src/agent/knowledgeSnippetCatalog.js";
+import { parseQueryIntentFromText } from "../src/agent/queryIntentParser.js";
 import { runZiweiPipeline } from "../src/agent/ziweiPipeline.js";
 import { buildChart } from "../src/chartBuilder.js";
 
 test("auditAgentArchitectureCompliance confirms the current complex agent skeleton", () => {
-  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()));
+  const pipelineResult = runZiweiPipeline(buildChart(createSampleProfile()), {
+    queryIntent: parseQueryIntentFromText("我想看事业。"),
+    knowledgeSnippets: [createKnowledgeSnippet()]
+  });
   const audit = auditAgentArchitectureCompliance({
     pipelineResult
   });
@@ -37,8 +46,8 @@ test("auditAgentArchitectureCompliance confirms the current complex agent skelet
   assert.ok(
     audit.items.some((item) => {
       return item.id === "memory-knowledge" &&
-        item.status === "partial" &&
-        item.message.includes("长期记忆");
+        item.status === "aligned" &&
+        item.message.includes("稀疏向量检索");
     })
   );
 });
@@ -78,5 +87,19 @@ function createSampleProfile() {
     use_true_solar_time: false,
     is_leap_month: false,
     analysis_date: "2026-06-30"
+  };
+}
+
+function createKnowledgeSnippet() {
+  return {
+    id: "knowledge-snippet.career-structure-store",
+    sourceRef: KNOWLEDGE_SOURCE_IDS.PENDING_ZIWEI_CORPUS,
+    title: "官禄宫结构片段",
+    topicIds: ["career"],
+    referenceRefs: ["framework.career-palace"],
+    excerpt: "官禄宫专题需要合看命宫、财帛宫与夫妻宫。",
+    citation: "示例知识库 / 官禄宫结构",
+    status: KNOWLEDGE_SNIPPET_STATUS.VERIFIED,
+    riskLevel: KNOWLEDGE_RISK_LEVELS.LOW
   };
 }

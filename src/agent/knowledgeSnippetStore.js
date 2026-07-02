@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { auditKnowledgeSnippet } from "./knowledgeSnippetCatalog.js";
+import {
+  buildKnowledgeRetrievalIndex,
+  summarizeKnowledgeRetrievalIndex
+} from "./knowledgeRetrievalIndex.js";
 
 // 知识片段持久化加载层。
 //
@@ -19,6 +23,12 @@ export function buildKnowledgeSnippetStore(payload) {
     return {
       status: "invalid",
       snippets: [],
+      retrievalIndex: buildKnowledgeRetrievalIndex([]),
+      memoryManifest: buildKnowledgeMemoryManifest({
+        status: "invalid",
+        snippetCount: 0,
+        retrievalIndex: buildKnowledgeRetrievalIndex([])
+      }),
       audits: [],
       issues: [
         {
@@ -46,11 +56,34 @@ export function buildKnowledgeSnippetStore(payload) {
       };
     });
   });
+  const retrievalIndex = buildKnowledgeRetrievalIndex(validSnippets);
+  const status = issues.length === 0 ? "ready" : "needs_review";
 
   return {
-    status: issues.length === 0 ? "ready" : "needs_review",
+    status,
     snippets: validSnippets,
+    retrievalIndex,
+    memoryManifest: buildKnowledgeMemoryManifest({
+      status,
+      snippetCount: validSnippets.length,
+      retrievalIndex
+    }),
     audits,
     issues
+  };
+}
+
+function buildKnowledgeMemoryManifest({
+  status,
+  snippetCount,
+  retrievalIndex
+}) {
+  return {
+    status,
+    type: "knowledge-memory",
+    persistence: "json-store",
+    reviewPolicy: "verified-snippets-only",
+    snippetCount,
+    retrieval: summarizeKnowledgeRetrievalIndex(retrievalIndex)
   };
 }
