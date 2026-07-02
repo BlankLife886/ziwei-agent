@@ -35,6 +35,16 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
     })
   );
   assert.equal(reportDraft.brief.sectionSummaries.length, 8);
+  assert.ok(
+    reportDraft.brief.sectionSummaries.every((summary) => {
+      return Number.isInteger(summary.referenceCount);
+    })
+  );
+  assert.ok(
+    reportDraft.brief.sectionSummaries.some((summary) => {
+      return summary.id === "life-triad" && summary.referenceCount > 0;
+    })
+  );
   assert.deepEqual(
     reportDraft.sections.map((section) => section.id),
     [

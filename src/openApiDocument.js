@@ -267,8 +267,7 @@ export function buildOpenApiDocument() {
             additionalProperties: true
           },
           report: {
-            type: "object",
-            additionalProperties: true
+            $ref: "#/components/schemas/ReportOutput"
           },
           validation: {
             type: "object",
@@ -295,6 +294,90 @@ export function buildOpenApiDocument() {
             additionalProperties: true
           }
         }),
+        ReportOutput: {
+          type: "object",
+          required: ["status"],
+          additionalProperties: true,
+          properties: {
+            status: {
+              type: "string"
+            },
+            title: {
+              type: "string"
+            },
+            brief: {
+              type: ["object", "null"],
+              additionalProperties: true
+            },
+            sections: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            appendix: {
+              $ref: "#/components/schemas/ReportAppendix"
+            },
+            metadata: {
+              type: "object",
+              additionalProperties: true
+            },
+            audit: {
+              type: "object",
+              additionalProperties: true
+            }
+          }
+        },
+        ReportAppendix: {
+          type: ["object", "null"],
+          additionalProperties: true,
+          properties: {
+            kind: {
+              type: "string",
+              const: "report-appendix"
+            },
+            evidence: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            references: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            sources: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            knowledgeSnippets: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            interpretations: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: true
+              }
+            },
+            traceability: {
+              type: "object",
+              additionalProperties: true
+            }
+          }
+        },
         ErrorResponse: responseSchema({
           status: {
             type: "string"

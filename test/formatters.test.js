@@ -289,6 +289,38 @@ test("formatReportOutput renders only published user reports", () => {
         ]
       }
     ],
+    appendix: {
+      kind: "report-appendix",
+      evidence: [
+        {
+          id: "life-triad.life-palace",
+          text: "命宫在巳。",
+          sectionIds: ["life-triad"]
+        }
+      ],
+      references: [
+        {
+          id: "framework.life-triad",
+          title: "命宫与三方四正分析框架",
+          sectionIds: ["life-triad"]
+        }
+      ],
+      sources: [
+        {
+          id: "source.local.analysis-frameworks",
+          title: "本地分析框架目录",
+          sectionIds: ["life-triad"]
+        }
+      ],
+      knowledgeSnippets: [],
+      interpretations: [
+        {
+          id: "interpretation.life-triad.structure",
+          title: "命宫三方四正结构解释",
+          sectionIds: ["life-triad"]
+        }
+      ]
+    },
     closing: ["以上草稿只使用当前排盘已经生成的证据。"],
     audit: {
       status: "passed"
@@ -307,6 +339,12 @@ test("formatReportOutput renders only published user reports", () => {
   assert.ok(lines.includes("- 证据引用：1 项"));
   assert.ok(lines.includes("- 来源引用：1 项"));
   assert.ok(lines.includes("- 知识片段引用：0 项"));
+  assert.ok(lines.includes("可追溯附录："));
+  assert.ok(lines.includes("- 证据：1 项"));
+  assert.ok(lines.includes("- 规则/框架：1 项"));
+  assert.ok(lines.includes("证据清单："));
+  assert.ok(lines.some((line) => line.includes("[life-triad.life-palace]")));
+  assert.ok(lines.includes("解释条目清单："));
   assert.ok(lines.some((line) => line.includes("证据：life-triad.life-palace")));
   assert.ok(lines.includes("发布门禁：报告审计通过"));
 });

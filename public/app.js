@@ -180,6 +180,7 @@ function renderReport(report) {
     </section>
     ${renderReportBrief(report.brief)}
     ${report.sections.map(renderReportSection).join("")}
+    ${renderReportAppendix(report.appendix)}
     <section class="report-closing">
       <p>${escapeHtml(report.closing)}</p>
     </section>
@@ -215,6 +216,74 @@ function renderBriefSummary(summary) {
     <div class="brief-summary-item">
       <strong>${escapeHtml(summary.title)}</strong>
       <span>证据 ${escapeHtml(summary.evidenceCount)} · 规则 ${escapeHtml(summary.referenceCount)} · 知识片段 ${escapeHtml(summary.knowledgeSnippetCount)} · 解释 ${escapeHtml(summary.interpretationCount)}</span>
+    </div>
+  `;
+}
+
+function renderReportAppendix(appendix) {
+  if (!appendix) {
+    return "";
+  }
+
+  return `
+    <section class="report-appendix">
+      <h3>可追溯附录</h3>
+      <div class="appendix-counts">
+        ${renderAppendixCount("证据", appendix.evidence)}
+        ${renderAppendixCount("规则", appendix.references)}
+        ${renderAppendixCount("来源", appendix.sources)}
+        ${renderAppendixCount("知识片段", appendix.knowledgeSnippets)}
+        ${renderAppendixCount("解释", appendix.interpretations)}
+      </div>
+      ${renderAppendixGroup("证据清单", appendix.evidence)}
+      ${renderAppendixGroup("规则/框架清单", appendix.references)}
+      ${renderAppendixGroup("来源清单", appendix.sources)}
+      ${renderAppendixGroup("知识片段清单", appendix.knowledgeSnippets)}
+      ${renderAppendixGroup("解释条目清单", appendix.interpretations)}
+    </section>
+  `;
+}
+
+function renderAppendixCount(label, items = []) {
+  return `
+    <div class="appendix-count">
+      <strong>${escapeHtml(items.length)}</strong>
+      <span>${escapeHtml(label)}</span>
+    </div>
+  `;
+}
+
+function renderAppendixGroup(title, items = []) {
+  if (!items.length) {
+    return "";
+  }
+
+  return `
+    <details class="appendix-group">
+      <summary>${escapeHtml(title)} · ${escapeHtml(items.length)} 项</summary>
+      <div class="appendix-list">
+        ${items.slice(0, 8).map(renderAppendixItem).join("")}
+      </div>
+    </details>
+  `;
+}
+
+function renderAppendixItem(item) {
+  const label = item.title ?? item.text ?? item.id;
+  const sectionIds = item.sectionIds?.length ? item.sectionIds.join("、") : "";
+  const subline = [
+    item.type,
+    item.status,
+    item.riskLevel,
+    item.citation,
+    sectionIds ? `章节 ${sectionIds}` : ""
+  ].filter(Boolean).join(" · ");
+
+  return `
+    <div class="appendix-item">
+      <strong>${escapeHtml(label)}</strong>
+      <code>${escapeHtml(item.id)}</code>
+      ${subline ? `<span>${escapeHtml(subline)}</span>` : ""}
     </div>
   `;
 }

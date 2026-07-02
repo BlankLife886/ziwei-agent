@@ -35,6 +35,7 @@ function composeReportBrief(reportPlan) {
       id: section.id,
       title: section.title,
       evidenceCount: section.evidenceRefs?.length ?? 0,
+      referenceCount: section.referenceRefs?.length ?? 0,
       interpretationCount: section.interpretationRefs?.length ?? 0,
       knowledgeSnippetCount: section.knowledgeSnippetRefs?.length ?? 0,
       topicTitles: (section.topicRefinements ?? []).map((item) => item.topicTitle)

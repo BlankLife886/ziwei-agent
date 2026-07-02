@@ -283,6 +283,7 @@ textarea {
 .report-intro,
 .report-brief,
 .report-section,
+.report-appendix,
 .report-closing {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -350,6 +351,68 @@ textarea {
   line-height: 1.7;
 }
 
+.appendix-counts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.appendix-count {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 8px;
+}
+
+.appendix-count strong {
+  font-size: 1rem;
+}
+
+.appendix-count span {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.appendix-group {
+  border-top: 1px solid var(--line);
+  padding: 9px 0;
+}
+
+.appendix-group summary {
+  cursor: pointer;
+  color: var(--accent-strong);
+  font-weight: 750;
+}
+
+.appendix-list {
+  display: grid;
+  gap: 7px;
+  padding-top: 9px;
+}
+
+.appendix-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.appendix-item code {
+  overflow-wrap: anywhere;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+}
+
+.appendix-item span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .ref-line {
   color: var(--muted);
   font-size: 0.78rem;
@@ -379,7 +442,8 @@ textarea {
 
   .profile-form,
   .palace-grid,
-  .brief-summary-list {
+  .brief-summary-list,
+  .appendix-counts {
     grid-template-columns: 1fr;
   }
 

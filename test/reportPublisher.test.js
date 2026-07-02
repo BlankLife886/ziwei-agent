@@ -63,6 +63,34 @@ test("publishReportOutput publishes only audited report drafts", () => {
   assert.ok(reportOutput.sections[0].sourceRefs.includes("source.local.analysis-frameworks"));
   assert.equal(reportOutput.sections[0].topicRefinements[0].title, "命宫三方四正专题细分");
   assert.ok(reportOutput.sections[0].paragraphs[0].evidenceRefs);
+  assert.equal(reportOutput.appendix.kind, "report-appendix");
+  assert.ok(
+    reportOutput.appendix.evidence.some((item) => {
+      return item.id === "life-triad.life-palace" &&
+        item.sectionIds.includes("life-triad");
+    })
+  );
+  assert.ok(
+    reportOutput.appendix.references.some((item) => {
+      return item.id === "framework.life-triad" &&
+        item.sourceRefs.includes("source.local.analysis-frameworks");
+    })
+  );
+  assert.ok(
+    reportOutput.appendix.sources.some((item) => {
+      return item.id === "source.local.implemented-rules";
+    })
+  );
+  assert.ok(
+    reportOutput.appendix.interpretations.some((item) => {
+      return item.id === "interpretation.life-triad.structure" &&
+        item.sectionIds.includes("life-triad");
+    })
+  );
+  assert.deepEqual(
+    reportOutput.appendix.traceability.evidenceRefs,
+    reportOutput.metadata.evidenceRefs
+  );
 });
 
 test("publishReportOutput carries section-level knowledge refs", () => {
@@ -107,6 +135,19 @@ test("publishReportOutput carries section-level knowledge refs", () => {
       "knowledge-source.local-reviewed-framework-notes"
     )
   );
+  assert.deepEqual(reportOutput.appendix.knowledgeSnippets, [
+    {
+      id: "knowledge-snippet.career-structure-store",
+      title: "官禄宫结构片段",
+      sourceRef: "knowledge-source.local-reviewed-framework-notes",
+      topicIds: ["career"],
+      referenceRefs: ["framework.career-palace"],
+      citation: "示例知识库 / 官禄宫结构",
+      status: "verified",
+      riskLevel: "low",
+      sectionIds: ["career-palace"]
+    }
+  ]);
 });
 
 test("publishReportOutput blocks drafts that did not pass audit", () => {

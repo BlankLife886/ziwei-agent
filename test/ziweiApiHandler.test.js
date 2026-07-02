@@ -116,6 +116,12 @@ test("handleZiweiApiRequest runs the full agent pipeline and returns a user repo
   assert.equal(response.body.status, "published");
   assert.equal(response.body.chart.profileSummary.name, "示例命主");
   assert.equal(response.body.report.metadata.outputType, "ziwei-user-report");
+  assert.equal(response.body.report.appendix.kind, "report-appendix");
+  assert.ok(response.body.report.appendix.evidence.length > 0);
+  assert.deepEqual(
+    response.body.report.appendix.traceability.evidenceRefs,
+    response.body.report.metadata.evidenceRefs
+  );
   assert.equal(response.body.audits.report.status, "passed");
   assert.equal(response.body.audits.approval.status, "approved");
   assert.equal(response.body.knowledgeMemory.persistence, "json-store");

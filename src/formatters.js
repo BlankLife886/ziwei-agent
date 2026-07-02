@@ -256,10 +256,50 @@ export function formatReportOutput(reportOutput) {
         ""
       ];
     }),
+    ...formatReportAppendix(reportOutput.appendix),
+    "",
     "收束：",
     ...reportOutput.closing.map((line) => `- ${line}`),
     "",
     `发布门禁：报告审计${reportOutput.audit.status === "passed" ? "通过" : "未通过"}`
+  ];
+}
+
+function formatReportAppendix(appendix) {
+  if (!appendix) {
+    return [];
+  }
+
+  return [
+    "可追溯附录：",
+    `- 证据：${appendix.evidence?.length ?? 0} 项`,
+    `- 规则/框架：${appendix.references?.length ?? 0} 项`,
+    `- 来源：${appendix.sources?.length ?? 0} 项`,
+    `- 知识片段：${appendix.knowledgeSnippets?.length ?? 0} 项`,
+    `- 解释条目：${appendix.interpretations?.length ?? 0} 项`,
+    ...formatAppendixPreview("证据清单", appendix.evidence),
+    ...formatAppendixPreview("规则/框架清单", appendix.references),
+    ...formatAppendixPreview("来源清单", appendix.sources),
+    ...formatAppendixPreview("知识片段清单", appendix.knowledgeSnippets),
+    ...formatAppendixPreview("解释条目清单", appendix.interpretations)
+  ];
+}
+
+function formatAppendixPreview(title, items = []) {
+  if (items.length === 0) {
+    return [];
+  }
+
+  return [
+    `${title}：`,
+    ...items.slice(0, 5).map((item) => {
+      const label = item.title ?? item.text ?? item.id;
+      const sectionText = item.sectionIds?.length > 0
+        ? `（章节：${item.sectionIds.join("、")}）`
+        : "";
+
+      return `- [${item.id}] ${label}${sectionText}`;
+    })
   ];
 }
 

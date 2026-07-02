@@ -20,6 +20,15 @@ test("buildOpenApiDocument describes the public HTTP contract", () => {
     document.components.schemas.ReportRequest.properties.reportApproval.properties.mode.enum,
     ["auto", "require-review"]
   );
+  assert.equal(
+    document.components.schemas.ReportResponse.properties.report.$ref,
+    "#/components/schemas/ReportOutput"
+  );
+  assert.ok(document.components.schemas.ReportOutput.properties.appendix);
+  assert.equal(
+    document.components.schemas.ReportAppendix.properties.kind.const,
+    "report-appendix"
+  );
   assert.ok(document.components.schemas.ReportResponse.properties.knowledgeMemory);
   assert.equal(document.components.securitySchemes.bearerAuth.scheme, "bearer");
 });

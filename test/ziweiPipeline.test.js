@@ -47,6 +47,12 @@ test("runZiweiPipeline produces the complete agent output chain", () => {
   assert.equal(pipelineResult.reportOutput.metadata.generation.providerId, "deterministic-template");
   assert.equal(pipelineResult.reportOutput.brief.kind, "report-brief");
   assert.equal(pipelineResult.reportOutput.brief.sectionSummaries.length, 8);
+  assert.equal(pipelineResult.reportOutput.appendix.kind, "report-appendix");
+  assert.ok(pipelineResult.reportOutput.appendix.evidence.length > 0);
+  assert.deepEqual(
+    pipelineResult.reportOutput.appendix.traceability.evidenceRefs,
+    pipelineResult.reportOutput.metadata.evidenceRefs
+  );
   assert.equal(pipelineResult.reportAudit.status, "passed");
   assert.equal(pipelineResult.readinessAudit.status, "in_progress");
   assert.equal(pipelineResult.recoveryPlan.status, "advisory");
@@ -111,6 +117,9 @@ test("runZiweiPipeline uses verified knowledge snippets in report planning", () 
   ]);
   assert.equal(pipelineResult.knowledgeCoverageAudit.status, "covered");
   assert.deepEqual(pipelineResult.reportOutput.metadata.knowledgeSnippetRefs, [
+    "knowledge-snippet.career-structure-store"
+  ]);
+  assert.deepEqual(pipelineResult.reportOutput.appendix.knowledgeSnippets.map((item) => item.id), [
     "knowledge-snippet.career-structure-store"
   ]);
 });

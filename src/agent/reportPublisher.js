@@ -39,6 +39,7 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit, report
     introduction: reportDraft.introduction,
     brief: publishBrief(reportDraft.brief),
     sections: reportDraft.sections.map(publishSection),
+    appendix: buildReportAppendix(reportPlan),
     closing: reportDraft.closing,
     approval: summarizeApproval(reportApproval),
     audit: {
@@ -123,6 +124,146 @@ function publishSection(section) {
         interpretationRefs: paragraph.interpretationRefs ?? []
       };
     })
+  };
+}
+
+function buildReportAppendix(reportPlan) {
+  const sections = reportPlan.sections ?? [];
+
+  return {
+    kind: "report-appendix",
+    evidence: collectEvidenceAppendixItems(sections),
+    references: collectCatalogAppendixItems(sections, {
+      fieldName: "references",
+      refFieldName: "referenceRefs",
+      mapItem: mapReferenceAppendixItem
+    }),
+    sources: collectCatalogAppendixItems(sections, {
+      fieldName: "sources",
+      refFieldName: "sourceRefs",
+      mapItem: mapSourceAppendixItem
+    }),
+    knowledgeSnippets: collectCatalogAppendixItems(sections, {
+      fieldName: "knowledgeSnippets",
+      refFieldName: "knowledgeSnippetRefs",
+      mapItem: mapKnowledgeSnippetAppendixItem
+    }),
+    interpretations: collectCatalogAppendixItems(sections, {
+      fieldName: "interpretations",
+      refFieldName: "interpretationRefs",
+      mapItem: mapInterpretationAppendixItem
+    }),
+    traceability: {
+      evidenceRefs: uniqueInOrder(sections.flatMap((section) => section.evidenceRefs ?? [])),
+      referenceRefs: uniqueInOrder(sections.flatMap((section) => section.referenceRefs ?? [])),
+      sourceRefs: uniqueInOrder(sections.flatMap((section) => section.sourceRefs ?? [])),
+      knowledgeSnippetRefs: uniqueInOrder(
+        sections.flatMap((section) => section.knowledgeSnippetRefs ?? [])
+      ),
+      interpretationRefs: uniqueInOrder(
+        sections.flatMap((section) => section.interpretationRefs ?? [])
+      )
+    }
+  };
+}
+
+function collectEvidenceAppendixItems(sections) {
+  const itemsById = new Map();
+
+  sections.forEach((section) => {
+    (section.evidenceItems ?? []).forEach((item) => {
+      const existing = itemsById.get(item.id);
+      const sectionIds = uniqueInOrder([...(existing?.sectionIds ?? []), section.id]);
+
+      itemsById.set(item.id, {
+        id: item.id,
+        text: item.text,
+        source: item.source ?? "agent.evidence",
+        referenceRefs: item.referenceRefs ?? [],
+        sectionIds
+      });
+    });
+  });
+
+  return [...itemsById.values()];
+}
+
+function collectCatalogAppendixItems(sections, {
+  fieldName,
+  refFieldName,
+  mapItem
+}) {
+  const itemsById = new Map();
+
+  sections.forEach((section) => {
+    const orderedRefs = section[refFieldName] ?? [];
+    const itemsByRef = new Map((section[fieldName] ?? []).map((item) => {
+      return [item.id, item];
+    }));
+
+    orderedRefs.forEach((ref) => {
+      const item = itemsByRef.get(ref);
+
+      if (!item) {
+        return;
+      }
+
+      const existing = itemsById.get(ref);
+      const sectionIds = uniqueInOrder([...(existing?.sectionIds ?? []), section.id]);
+
+      itemsById.set(ref, {
+        ...mapItem(item),
+        sectionIds
+      });
+    });
+  });
+
+  return [...itemsById.values()];
+}
+
+function mapReferenceAppendixItem(reference) {
+  return {
+    id: reference.id,
+    title: reference.title,
+    type: reference.type,
+    sourceRefs: reference.sourceRefs ?? [],
+    note: reference.note
+  };
+}
+
+function mapSourceAppendixItem(source) {
+  return {
+    id: source.id,
+    title: source.title,
+    type: source.type,
+    status: source.status,
+    citation: source.citation,
+    note: source.note
+  };
+}
+
+function mapKnowledgeSnippetAppendixItem(snippet) {
+  return {
+    id: snippet.id,
+    title: snippet.title,
+    sourceRef: snippet.sourceRef,
+    topicIds: snippet.topicIds ?? [],
+    referenceRefs: snippet.referenceRefs ?? [],
+    citation: snippet.citation,
+    status: snippet.status,
+    riskLevel: snippet.riskLevel
+  };
+}
+
+function mapInterpretationAppendixItem(interpretation) {
+  return {
+    id: interpretation.id,
+    title: interpretation.title,
+    topic: interpretation.topic,
+    palaceName: interpretation.palaceName,
+    starName: interpretation.starName,
+    riskLevel: interpretation.riskLevel,
+    sourceRefs: interpretation.sourceRefs ?? []
   };
 }
 
