@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 import { createApiObserver } from "../src/agent/apiObservability.js";
 import { createZiweiHttpServer } from "../src/server.js";
@@ -92,6 +95,56 @@ test("createZiweiHttpServer emits redacted observer events", async () => {
     assert.equal(events[1].rateLimit.key, undefined);
   } finally {
     await close(server);
+  }
+});
+
+test("createZiweiHttpServer can persist quota windows across server instances", async () => {
+  const tempDir = mkdtempSync(join(tmpdir(), "ziwei-server-quota-"));
+  const quotaStorePath = join(tempDir, "quota.json");
+
+  try {
+    const firstServer = createZiweiHttpServer({
+      env: {
+        ZIWEI_API_QUOTA_STORE: quotaStorePath
+      },
+      knowledgeSnippets: [],
+      rateLimitWindowMs: 60_000,
+      rateLimitMaxRequests: 1
+    });
+
+    await listen(firstServer);
+
+    const firstPort = firstServer.address().port;
+    const firstResponse = await fetch(`http://127.0.0.1:${firstPort}/health`);
+    await close(firstServer);
+
+    const secondServer = createZiweiHttpServer({
+      env: {
+        ZIWEI_API_QUOTA_STORE: quotaStorePath
+      },
+      knowledgeSnippets: [],
+      rateLimitWindowMs: 60_000,
+      rateLimitMaxRequests: 1
+    });
+
+    await listen(secondServer);
+
+    try {
+      const secondPort = secondServer.address().port;
+      const secondResponse = await fetch(`http://127.0.0.1:${secondPort}/health`);
+      const body = await secondResponse.json();
+
+      assert.equal(firstResponse.status, 200);
+      assert.equal(secondResponse.status, 429);
+      assert.equal(body.status, "rate_limited");
+    } finally {
+      await close(secondServer);
+    }
+  } finally {
+    rmSync(tempDir, {
+      recursive: true,
+      force: true
+    });
   }
 });
 

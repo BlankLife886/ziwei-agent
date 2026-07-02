@@ -4,6 +4,7 @@ import {
   parseApiCredentialsFromRuntime
 } from "./agent/apiCredentials.js";
 import { createApiObserver } from "./agent/apiObservability.js";
+import { createFileApiQuotaStore } from "./agent/apiQuotaStore.js";
 import { createApiRateLimiter } from "./agent/apiRateLimiter.js";
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
 import { handleZiweiApiRequest } from "./agent/ziweiApiHandler.js";
@@ -32,7 +33,8 @@ export function createZiweiHttpServer(options = {}) {
       DEFAULT_RATE_LIMIT_WINDOW_MS,
     maxRequests: options.rateLimitMaxRequests ??
       parseOptionalInteger(env.ZIWEI_API_RATE_LIMIT_MAX) ??
-      DEFAULT_RATE_LIMIT_MAX
+      DEFAULT_RATE_LIMIT_MAX,
+    bucketStore: options.quotaStore ?? createQuotaStoreFromRuntime(env)
   });
 
   return createServer(async (request, response) => {
@@ -266,10 +268,21 @@ function summarizeDiagnostics(diagnostics) {
 function summarizeRateLimit(rateLimit) {
   return {
     status: rateLimit.status,
+    reason: rateLimit.reason,
     limit: rateLimit.limit,
     remaining: rateLimit.remaining,
     retryAfterMs: rateLimit.retryAfterMs
   };
+}
+
+function createQuotaStoreFromRuntime(env) {
+  if (!env.ZIWEI_API_QUOTA_STORE) {
+    return undefined;
+  }
+
+  return createFileApiQuotaStore({
+    filePath: env.ZIWEI_API_QUOTA_STORE
+  });
 }
 
 function createRequestId() {

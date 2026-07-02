@@ -251,7 +251,7 @@ const READINESS_ITEMS = [
         pipelineResult.reportGeneration?.status === "generated" &&
         providerResolution?.status === "ready"
       ) {
-        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、多凭证 scoped bearer 鉴权、请求大小限制、请求追踪、结构化观测和内存限流，但尚未接入 UI、密钥生命周期管理、持久化配额和生产部署。", 0.915);
+        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、多凭证 scoped bearer 鉴权、请求大小限制、请求追踪、结构化观测、内存限流和可选文件持久化配额，但尚未接入 UI、密钥生命周期管理和生产部署。", 0.92);
       }
 
       if (
@@ -281,10 +281,13 @@ export function auditAgentReadiness(pipelineResult) {
   });
   const totalWeight = READINESS_ITEMS.reduce((sum, item) => sum + item.weight, 0);
   const score = items.reduce((sum, item) => sum + item.score, 0);
-  const percent = Math.round((score / totalWeight) * 100);
   const blockers = items.filter((item) => item.status !== "complete").map((item) => {
     return `${item.title}：${item.message}`;
   });
+  const roundedPercent = Math.round((score / totalWeight) * 100);
+  const percent = blockers.length > 0
+    ? Math.min(99, roundedPercent)
+    : roundedPercent;
 
   return {
     status: percent >= 90 ? "near_complete" : "in_progress",

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { createMemoryApiQuotaStore } from "./apiQuotaStore.js";
 
 const DEFAULT_WINDOW_MS = 60_000;
 const DEFAULT_MAX_REQUESTS = 60;
@@ -7,27 +8,43 @@ export function createApiRateLimiter(options = {}) {
   const windowMs = normalizePositiveInteger(options.windowMs, DEFAULT_WINDOW_MS);
   const maxRequests = normalizePositiveInteger(options.maxRequests, DEFAULT_MAX_REQUESTS);
   const now = options.now ?? Date.now;
-  const buckets = new Map();
+  const bucketStore = options.bucketStore ?? createMemoryApiQuotaStore();
 
   return {
     check(request) {
       const currentTime = now();
       const key = buildRateLimitKey(request);
-      const existingBucket = buckets.get(key);
-      const bucket = existingBucket && existingBucket.resetAt > currentTime
-        ? existingBucket
+      const bucketRead = readBucket(bucketStore, key);
+
+      if (bucketRead.status !== "ready") {
+        return quotaStoreBlockedResult({
+          key,
+          windowMs,
+          maxRequests
+        });
+      }
+
+      const bucket = bucketRead.bucket && bucketRead.bucket.resetAt > currentTime
+        ? bucketRead.bucket
         : {
             count: 0,
             resetAt: currentTime + windowMs
           };
 
       bucket.count += 1;
-      buckets.set(key, bucket);
-      pruneExpiredBuckets(buckets, currentTime);
+
+      if (!writeBucket(bucketStore, key, bucket, currentTime)) {
+        return quotaStoreBlockedResult({
+          key,
+          windowMs,
+          maxRequests
+        });
+      }
 
       if (bucket.count > maxRequests) {
         return {
           status: "blocked",
+          reason: "rate_limited",
           key,
           retryAfterMs: Math.max(0, bucket.resetAt - currentTime),
           limit: maxRequests,
@@ -80,10 +97,37 @@ function getHeader(headers = {}, headerName) {
   return matchedHeaderName ? headers[matchedHeaderName] : undefined;
 }
 
-function pruneExpiredBuckets(buckets, currentTime) {
-  for (const [key, bucket] of buckets.entries()) {
-    if (bucket.resetAt <= currentTime) {
-      buckets.delete(key);
-    }
+function readBucket(bucketStore, key) {
+  try {
+    return {
+      status: "ready",
+      bucket: bucketStore.get(key)
+    };
+  } catch {
+    return {
+      status: "store_error"
+    };
   }
+}
+
+function writeBucket(bucketStore, key, bucket, currentTime) {
+  try {
+    bucketStore.set(key, bucket);
+    bucketStore.prune(currentTime);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function quotaStoreBlockedResult({ key, windowMs, maxRequests }) {
+  return {
+    status: "blocked",
+    reason: "quota_store_error",
+    key,
+    retryAfterMs: windowMs,
+    limit: maxRequests,
+    remaining: 0,
+    resetAt: Date.now() + windowMs
+  };
 }
