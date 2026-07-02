@@ -21,7 +21,7 @@ test("publishReportOutput publishes only audited report drafts", () => {
   const reportOutput = publishReportOutput(reportPlan, reportDraft, reportAudit);
 
   assert.equal(reportOutput.status, "published");
-  assert.equal(reportOutput.title, "示例命主的紫微斗数本命盘分析草稿");
+  assert.equal(reportOutput.title, "示例命主的紫微斗数本命盘分析报告");
   assert.equal(reportOutput.audit.status, "passed");
   assert.equal(reportOutput.metadata.outputType, "ziwei-user-report");
   assert.equal(reportOutput.metadata.reportStatus, "published");

@@ -8,6 +8,7 @@
     "serve": "node src/server.js",
     "test": "node --test",
     "token:create": "node src/manageApiToken.js",
+    "report:markdown": "node src/exportReportMarkdown.js",
     "knowledge:audit-candidate": "node src/manageKnowledgeSnippets.js audit-candidate",
     "knowledge:audit-candidates": "node src/manageKnowledgeSnippets.js audit-candidates",
     "knowledge:draft": "node src/manageKnowledgeSnippets.js draft",

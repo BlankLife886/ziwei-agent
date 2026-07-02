@@ -241,7 +241,7 @@ test("formatReportOutput renders only published user reports", () => {
 
   const lines = formatReportOutput({
     status: "published",
-    title: "示例命主的紫微斗数本命盘分析草稿",
+    title: "示例命主的紫微斗数本命盘分析报告",
     metadata: {
       outputType: "ziwei-user-report",
       sectionIds: ["life-triad"],
@@ -328,7 +328,7 @@ test("formatReportOutput renders only published user reports", () => {
   });
 
   assert.ok(lines.includes("用户报告："));
-  assert.ok(lines.includes("示例命主的紫微斗数本命盘分析草稿"));
+  assert.ok(lines.includes("示例命主的紫微斗数本命盘分析报告"));
   assert.ok(lines.includes("报告元信息："));
   assert.ok(lines.includes("- 输出类型：ziwei-user-report"));
   assert.ok(lines.includes("- 章节：life-triad"));

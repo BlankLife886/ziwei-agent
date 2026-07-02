@@ -33,7 +33,7 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit, report
 
   return {
     status: "published",
-    title: reportDraft.title,
+    title: buildPublishedReportTitle(reportDraft.title),
     subject: reportDraft.subject,
     metadata: buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApproval),
     introduction: reportDraft.introduction,
@@ -48,6 +48,14 @@ export function publishReportOutput(reportPlan, reportDraft, reportAudit, report
       warnings: reportAudit.warnings
     }
   };
+}
+
+function buildPublishedReportTitle(draftTitle) {
+  if (typeof draftTitle !== "string" || draftTitle.trim() === "") {
+    return "紫微斗数命盘分析报告";
+  }
+
+  return draftTitle.replace(/草稿$/u, "报告");
 }
 
 function buildReportMetadata(reportPlan, reportDraft, reportAudit, reportApproval) {
