@@ -24,9 +24,14 @@ npm run smoke:api
 node src/cli.js examples/profile.example.json
 node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json
 npm run validate:knowledge
+npm run knowledge:draft -- --input examples/knowledge-candidate.example.json --output .runtime/knowledge-draft.json
+npm run knowledge:promote -- --input .runtime/knowledge-draft.json --output .runtime/knowledge-verified.json
+npm run knowledge:append -- --input .runtime/knowledge-verified.json --store data/knowledge-snippets.example.json --output .runtime/knowledge-snippets.next.json
 ```
 
 `npm start` 会加载 `data/knowledge-snippets.example.json`，用于演示“verified 知识片段 -> 报告规划 -> 知识覆盖审计 -> 用户报告引用”的闭环。这个示例知识库目前包含本地审校分析框架样本和专题知识笔记，覆盖命宫、性格、婚姻、财富、事业和当前阶段运势；它不代表用户提供的 PDF、书籍和扫描件已经完成全量结构化录入。
+
+书籍、PDF、OCR 或研读笔记进入 agent 时，先整理为 candidate JSON，再用 `knowledge:draft` 标准化为 draft；人工复核字段、来源、主题和规则引用后，用 `knowledge:promote` 晋升为 verified；最后用 `knowledge:append` 追加到知识库。`append` 会拒绝 draft、重复 id 和追加后无法通过全库审计的 store。示例里把追加结果写到 `.runtime/knowledge-snippets.next.json`，便于先审计，再决定是否覆盖正式知识库。
 
 如果要让 CLI 走外部大模型报告 provider，可设置以下环境变量：
 
@@ -158,6 +163,7 @@ kubectl apply -f deploy/kubernetes.yml
 - `src/agent/knowledgeSnippetCatalog.js`: 定义外部书籍、PDF、笔记和知识库片段的 schema、审计和检索接口；只有字段完整、来源已登记且 `status` 为 `verified` 的片段才允许进入报告规划，当前示例包含本地审校框架样本和专题知识笔记，不把未录入内容作为报告依据。
 - `src/agent/knowledgeSnippetIngestor.js`: 把候选摘录或研读笔记标准化为 draft 知识片段，并提供晋升为 verified 的门禁，避免未复核材料直接进入报告依据。
 - `src/agent/knowledgeSnippetStore.js`: 从 JSON 文件加载 verified 知识片段，逐条审计后只把通过的片段交给报告规划。
+- `src/manageKnowledgeSnippets.js`: 提供 `draft`、`promote`、`append` 三个知识片段管理命令，把 PDF/OCR/研读笔记候选摘录纳入可审计的入库流程。
 - `src/agent/interpretationCatalog.js`: 定义当前可用的命理解释条目，让报告正文引用受控解释，而不是直接散写断语。
 - `src/agent/inputQuestionnaire.js`: 把缺失字段转换为结构化追问，包括字段名、提问话术、示例和追问原因，方便后续接入聊天 UI 或多轮 agent。
 - `src/agent/ziweiAgent.js`: 根据排盘结果生成 agent 分析上下文，包括核心证据、建议分析重点和当前限制；核心证据同时保留文本和结构化 `evidenceItems`。

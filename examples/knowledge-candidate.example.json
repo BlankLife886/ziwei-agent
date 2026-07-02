@@ -1,0 +1,10 @@
+{
+  "id": "knowledge-snippet.example.career-structure-note",
+  "sourceRef": "knowledge-source.pending-ziwei-corpus",
+  "title": "官禄宫结构研读候选片段",
+  "topicIds": ["career"],
+  "referenceRefs": ["framework.career-palace"],
+  "excerpt": "官禄宫专题需要先观察职责结构，再合看命宫的主体承载和财帛宫的资源承接。",
+  "citation": "研读笔记示例 / 官禄宫结构 / 段落 1",
+  "riskLevel": "low"
+}
