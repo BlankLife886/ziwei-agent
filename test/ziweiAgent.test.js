@@ -263,6 +263,69 @@ test("createZiweiAgentResponse includes current major period when analysis date 
   );
 });
 
+test("createZiweiAgentResponse adds current stage transformation evidence to topic palaces only when matched", () => {
+  const buildResult = buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+  const syntheticBuildResult = structuredClone(buildResult);
+
+  syntheticBuildResult.chart.currentMajorPeriod.transformations.transformations = [
+    {
+      name: "化忌",
+      star: "天机",
+      source: "major-period-palace-stem",
+      targetPalaceName: "财帛宫"
+    }
+  ];
+  syntheticBuildResult.chart.annualPeriod.transformations.transformations = [
+    {
+      name: "化禄",
+      star: "天同",
+      source: "annual-year-stem",
+      targetPalaceName: "官禄宫"
+    }
+  ];
+
+  const agentResult = createZiweiAgentResponse(syntheticBuildResult, {
+    queryIntent: parseQueryIntentFromText("我想看婚姻、事业和财帛。")
+  });
+  const careerArea = agentResult.focusAreas.find((area) => {
+    return area.id === "career-palace";
+  });
+  const wealthArea = agentResult.focusAreas.find((area) => {
+    return area.id === "wealth-palace";
+  });
+  const spouseArea = agentResult.focusAreas.find((area) => {
+    return area.id === "spouse-palace";
+  });
+
+  assert.ok(
+    careerArea.evidenceItems.some((item) => {
+      return item.id === "career-palace.annual-transformations.career-palace" &&
+        item.text === "官禄宫流年四化参照：天同化禄在官禄宫酉" &&
+        item.referenceRefs.includes("rule.annual-four-transformations") &&
+        item.metadata.transformationScope === "annual-topic-palace";
+    })
+  );
+  assert.ok(
+    wealthArea.evidenceItems.some((item) => {
+      return item.id === "wealth-palace.current-major-period-transformations.wealth-palace" &&
+        item.text === "财帛宫当前大限四化参照：天机化忌在财帛宫丑" &&
+        item.referenceRefs.includes("rule.major-period-four-transformations") &&
+        item.metadata.transformationScope === "major-period-topic-palace";
+    })
+  );
+  assert.ok(
+    spouseArea.evidenceItems.some((item) => {
+      return item.id === "spouse-palace.four-transformations.spouse-palace" &&
+        item.text === "夫妻宫四化参照：武曲化权在夫妻宫卯" &&
+        item.referenceRefs.includes("rule.birth-year-four-transformations") &&
+        item.metadata.transformationScope === "birth-year-topic-palace";
+    })
+  );
+});
+
 test("createZiweiAgentResponse keeps all evidence but filters focus areas by query intent", () => {
   const buildResult = buildChart({
     ...createSampleProfile(),

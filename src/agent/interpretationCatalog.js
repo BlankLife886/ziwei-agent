@@ -766,10 +766,7 @@ const FOUR_TRANSFORMATION_TOPIC_PALACE_INTERPRETATIONS = [
     title: `${item.topicTitle}${item.transformationName}专题合参边界`,
     topic: "four-transformation-topic-palace",
     riskLevel: "medium",
-    sourceRefs: [
-      REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
-      ...item.sourceRefs
-    ]
+    sourceRefs: item.sourceRefs
   };
 });
 
@@ -1021,7 +1018,7 @@ const INTERPRETATIONS = [
     palaceName: "官禄宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.CAREER_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前事业专题以本命盘基础结构为主，适合描述职业结构、职责压力、资源配合与合作参照；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和职业知识库，因此不能推职位高低、升迁时间或具体职业结果。"
+    text: "当前事业专题以本命盘基础结构为主，适合描述职业结构、职责压力、资源配合与合作参照；本宫被生年四化、当前大限四化或流年四化命中时只作为专题合参边界，尚未接入更深层的运限组合和职业知识库，因此不能推职位高低、升迁时间或具体职业结果。"
   },
   {
     id: INTERPRETATION_IDS.WEALTH_TRIAD_STRUCTURE,
@@ -1038,7 +1035,7 @@ const INTERPRETATIONS = [
     palaceName: "财帛宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.WEALTH_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前财富专题以本命盘基础结构为主，适合描述资源经营方式、助力、压力与内在取舍；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和风险分级规则，因此不能推具体金额、投资结果或特定年份。"
+    text: "当前财富专题以本命盘基础结构为主，适合描述资源经营方式、助力、压力与内在取舍；本宫被生年四化、当前大限四化或流年四化命中时只作为专题合参边界，尚未接入更深层的运限组合和风险分级规则，因此不能推具体金额、投资结果或特定年份。"
   },
   {
     id: INTERPRETATION_IDS.SPOUSE_TRIAD_STRUCTURE,
@@ -1055,7 +1052,7 @@ const INTERPRETATIONS = [
     palaceName: "夫妻宫",
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.SPOUSE_PALACE, REFERENCE_IDS.STAR_PLACEMENT],
-    text: "当前婚姻专题以本命盘基础结构为主，适合描述关系互动倾向与结构参照；本宫被生年四化命中时只作为专题合参边界，尚未接入大限四化、流年和触发规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
+    text: "当前婚姻专题以本命盘基础结构为主，适合描述关系互动倾向与结构参照；本宫被生年四化、当前大限四化或流年四化命中时只作为专题合参边界，尚未接入更深层的运限组合和触发规则，因此不能推结婚时间、分合事件或伴侣具体身份。"
   },
   {
     id: INTERPRETATION_IDS.STAR_WU_QU_SPOUSE,

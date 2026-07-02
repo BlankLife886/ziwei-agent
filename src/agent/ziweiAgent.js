@@ -478,30 +478,70 @@ function buildBirthYearTransformationEvidenceItems(chart) {
 }
 
 function buildTopicPalaceTransformationEvidenceItems(chart, scope, palaceName) {
-  const metadata = buildBirthYearTransformationEvidenceMetadata(chart);
-  const transformations = metadata.transformations.filter((transformation) => {
-    return transformation.targetPalaceName === palaceName;
-  });
-
-  if (transformations.length === 0) {
-    return [];
-  }
-
   const palaceId = PALACE_EVIDENCE_IDS[palaceName] ?? palaceName;
-
-  return [
-    createEvidenceItem(
-      `${scope}.four-transformations.${palaceId}`,
-      `${palaceName}四化参照：${formatTransformationItems(transformations)}`,
-      "chart.starAnchors.birthYearTransformations",
-      getTopicPalaceTransformationReferenceRefs(palaceName),
-      {
-        transformationScope: "birth-year-topic-palace",
-        topicPalaceName: palaceName,
-        transformations
-      }
-    )
+  const topicReferenceRefs = getTopicPalaceReferenceRefs(palaceName);
+  const evidenceGroups = [
+    {
+      id: `${scope}.four-transformations.${palaceId}`,
+      label: `${palaceName}四化参照`,
+      source: "chart.starAnchors.birthYearTransformations",
+      referenceRefs: [
+        REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
+        ...topicReferenceRefs
+      ],
+      transformationScope: "birth-year-topic-palace",
+      transformations: buildBirthYearTransformationEvidenceMetadata(chart).transformations
+    },
+    {
+      id: `${scope}.current-major-period-transformations.${palaceId}`,
+      label: `${palaceName}当前大限四化参照`,
+      source: "chart.currentMajorPeriod.transformations",
+      referenceRefs: [
+        REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS,
+        ...topicReferenceRefs
+      ],
+      transformationScope: "major-period-topic-palace",
+      transformations: chart.currentMajorPeriod?.transformations?.transformations ?? []
+    },
+    {
+      id: `${scope}.annual-transformations.${palaceId}`,
+      label: `${palaceName}流年四化参照`,
+      source: "chart.annualPeriod.transformations",
+      referenceRefs: [
+        REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS,
+        ...topicReferenceRefs
+      ],
+      transformationScope: "annual-topic-palace",
+      transformations: chart.annualPeriod?.transformations?.transformations ?? []
+    }
   ];
+
+  return evidenceGroups.flatMap((group) => {
+    const transformations = enrichTransformationsWithTargetBranches(
+      chart,
+      group.transformations.filter((transformation) => {
+        return transformation.targetPalaceName === palaceName;
+      })
+    );
+
+    if (transformations.length === 0) {
+      return [];
+    }
+
+    return [
+      createEvidenceItem(
+        group.id,
+        `${group.label}：${formatTransformationItems(transformations)}`,
+        group.source,
+        group.referenceRefs,
+        {
+          transformationScope: group.transformationScope,
+          topicPalaceName: palaceName,
+          transformations
+        }
+      )
+    ];
+  });
 }
 
 function buildMajorPeriodEvidenceItems(chart) {
@@ -768,17 +808,14 @@ function getPalaceEvidenceReferenceRefs(scope) {
   return [REFERENCE_IDS.STAR_PLACEMENT];
 }
 
-function getTopicPalaceTransformationReferenceRefs(palaceName) {
+function getTopicPalaceReferenceRefs(palaceName) {
   const topicReferenceRefs = {
     夫妻宫: REFERENCE_IDS.SPOUSE_PALACE,
     财帛宫: REFERENCE_IDS.WEALTH_PALACE,
     官禄宫: REFERENCE_IDS.CAREER_PALACE
   };
 
-  return [
-    REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS,
-    topicReferenceRefs[palaceName]
-  ].filter(Boolean);
+  return [topicReferenceRefs[palaceName]].filter(Boolean);
 }
 
 function formatEvidenceText(evidenceItem) {
@@ -836,6 +873,23 @@ function formatTransformationItems(transformations) {
 
     return `${transformation.star}${transformation.name}${palaceText}`;
   }).join("；");
+}
+
+function enrichTransformationsWithTargetBranches(chart, transformations) {
+  return transformations.map((transformation) => {
+    if (transformation.targetPalaceBranch) {
+      return transformation;
+    }
+
+    const palace = chart.palaces.find((item) => {
+      return item.name === transformation.targetPalaceName;
+    });
+
+    return {
+      ...transformation,
+      targetPalaceBranch: palace?.branch ?? null
+    };
+  });
 }
 
 function findPalaceContainingStar(chart, starName) {

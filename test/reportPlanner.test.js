@@ -508,6 +508,53 @@ test("createReportPlan creates dedicated career and wealth sections for matching
   assert.ok(wealthSection.writingPrompt.includes("不推具体金额"));
 });
 
+test("createReportPlan carries current major and annual transformation refs into topic sections", () => {
+  const buildResult = buildChart({
+    ...createSampleProfile(),
+    analysis_date: "2026-06-30"
+  });
+  const syntheticBuildResult = structuredClone(buildResult);
+
+  syntheticBuildResult.chart.currentMajorPeriod.transformations.transformations = [
+    {
+      name: "化忌",
+      star: "天机",
+      source: "major-period-palace-stem",
+      targetPalaceName: "财帛宫"
+    }
+  ];
+  syntheticBuildResult.chart.annualPeriod.transformations.transformations = [
+    {
+      name: "化禄",
+      star: "天同",
+      source: "annual-year-stem",
+      targetPalaceName: "官禄宫"
+    }
+  ];
+
+  const agentResult = createZiweiAgentResponse(syntheticBuildResult, {
+    queryIntent: parseQueryIntentFromText("我想看事业、财帛和婚姻。")
+  });
+  const reportPlan = createReportPlan(agentResult);
+  const careerSection = reportPlan.sections.find((section) => {
+    return section.id === "career-palace";
+  });
+  const wealthSection = reportPlan.sections.find((section) => {
+    return section.id === "wealth-palace";
+  });
+
+  assert.ok(careerSection.evidence.includes("官禄宫流年四化参照：天同化禄在官禄宫酉"));
+  assert.ok(careerSection.referenceRefs.includes("rule.annual-four-transformations"));
+  assert.ok(careerSection.interpretationRefs.includes(
+    "interpretation.four-transformations.topic.career-lu"
+  ));
+  assert.ok(wealthSection.evidence.includes("财帛宫当前大限四化参照：天机化忌在财帛宫丑"));
+  assert.ok(wealthSection.referenceRefs.includes("rule.major-period-four-transformations"));
+  assert.ok(wealthSection.interpretationRefs.includes(
+    "interpretation.four-transformations.topic.wealth-ji"
+  ));
+});
+
 test("createReportPlan accepts external topic context without matched items", () => {
   const agentResult = createZiweiAgentResponse(buildChart(createSampleProfile()), {
     queryIntent: {
