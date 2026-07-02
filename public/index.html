@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>紫微斗数命理师 Agent</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="紫微斗数命理师 Agent">
+        <div class="intake-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">Ziwei Agent</p>
+            <h1>紫微斗数命理师 Agent</h1>
+          </div>
+
+          <form id="profile-form" class="profile-form">
+            <label>
+              姓名
+              <input name="name" value="示例命主" autocomplete="name">
+            </label>
+
+            <label>
+              性别
+              <select name="gender">
+                <option value="female">女</option>
+                <option value="male">男</option>
+              </select>
+            </label>
+
+            <label>
+              历法
+              <select name="calendar">
+                <option value="solar">公历</option>
+                <option value="lunar">农历</option>
+              </select>
+            </label>
+
+            <label>
+              出生日期
+              <input name="birth_date" type="date" value="1990-05-18">
+            </label>
+
+            <label>
+              出生时间
+              <input name="birth_time" type="time" value="23:30">
+            </label>
+
+            <label>
+              出生地
+              <input name="birth_place" value="Shanghai, China">
+            </label>
+
+            <label>
+              时区
+              <input name="timezone" value="Asia/Shanghai">
+            </label>
+
+            <label>
+              分析日期
+              <input name="analysis_date" type="date" value="2026-06-30">
+            </label>
+
+            <label class="wide-field">
+              咨询问题
+              <textarea name="query" rows="3">我想看婚姻、事业、财富和当前运势</textarea>
+            </label>
+
+            <label class="wide-field">
+              API Token
+              <input name="api_token" type="password" autocomplete="current-password">
+            </label>
+
+            <div class="toggles">
+              <label>
+                <input name="use_true_solar_time" type="checkbox">
+                真太阳时
+              </label>
+              <label>
+                <input name="is_leap_month" type="checkbox">
+                闰月
+              </label>
+            </div>
+
+            <button class="primary-action" type="submit">生成报告</button>
+          </form>
+        </div>
+
+        <div class="result-panel" aria-live="polite">
+          <div id="status-line" class="status-line">待生成</div>
+          <section id="chart-view" class="chart-view"></section>
+          <section id="report-view" class="report-view"></section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

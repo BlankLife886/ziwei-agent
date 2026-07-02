@@ -50,6 +50,8 @@ birth/profile input
 
 CLI 和 HTTP API 都必须进入这条链路。`ziweiApiHandler` 只负责接收 `profile`、`query` 或显式 `queryIntent`，然后调用 `buildChart` 和 `runZiweiPipelineAsync`；它不会直接调用报告 composer，也不会跳过审计发布门禁。`server`、`serverRuntimeConfig`、`apiCredentials`、`apiObservability`、`apiQuotaStore` 和 `apiRateLimiter` 只负责服务入口治理，例如运行时配置校验、scoped 鉴权、请求追踪、脱敏日志、限流、配额窗口持久化、请求体大小限制和响应封装，不负责命理解释。
 
+Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和咨询问题，调用 `POST /v1/reports`，再把返回的 `chart` 与 `report` 渲染为命盘图和用户报告；它不在前端重新排盘、不生成解释、不跳过报告审计。
+
 各层职责如下：
 
 - `buildChart`：只负责排盘计算，输出结构化命盘。
@@ -57,6 +59,7 @@ CLI 和 HTTP API 都必须进入这条链路。`ziweiApiHandler` 只负责接收
 - `serverRuntimeConfig`：在服务启动前校验端口、请求体上限、限流、观测模式和生产鉴权配置；生产模式下没有当前可用的可写报告 scope 时不会启动。
 - `smokeApi`：临时启动同一个 HTTP server，依次调用 `/health` 和 `/v1/reports`，证明部署环境中的 API 入口、鉴权、知识库加载、pipeline 和报告发布门禁可以串起来。
 - `validateDeployment`：部署前串联运行时配置、知识库 store 审计和 API smoke；配置了知识库但未通过审计时会阻断部署校验。
+- `public/`：轻量 Web UI，渲染输入表单、命盘十二宫图和发布后的报告章节；所有命理结果都来自 API 响应。
 - `ziweiApiHandler`：把 HTTP/API 请求转换为统一 pipeline 调用，负责请求大小限制、可选 bearer 鉴权、健康检查和基础请求诊断，不负责命理解释。
 - `apiCredentials`：解析 legacy 单 token 或多 credential 配置，执行 bearer token、scope 和 credential 生命周期鉴权；下游只获得 principal id 和 scopes，不获得原始 token。
 - `apiObservability`：生成结构化 API 事件，并对鉴权头、API key 和完整 body 做脱敏；观测失败不能阻断 agent 主链路。
@@ -167,9 +170,9 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有正文草稿生成层。
 - 有报告审计层。
 - 有报告发布门禁。
-- 有 CLI 和 HTTP API 两种入口，且都进入同一条 pipeline。
+- 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
 - 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、请求追踪、结构化观测、脱敏日志、健康检查、内存限流和可选文件持久化配额。
-- 有运行时配置校验、部署校验、API smoke 校验、Dockerfile、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 入口启动。
+- 有运行时配置校验、部署校验、API smoke 校验、Dockerfile、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
 - 有安全触发观察点、组合验证层、组合主题解释层、跨宫跨限运关系解释层和专题细分任务单，能把多层运限和四化重叠宫位列为待验证主题，筛出证据层数达标的合参主题，把已验证宫位转成阶段合参领域，整理当前大限、流年、流月之间的同宫或分宫关系，并把报告章节拆成可审计的专题角度，但不会输出事件断语。
@@ -178,7 +181,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口和 HTTP API 入口已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、请求大小限制、请求追踪、结构化观测、健康检查、内存限流、可选文件持久化配额、运行时配置校验、部署校验和容器部署工件，但 UI、集中式密钥管理平台和真实环境部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、请求大小限制、请求追踪、结构化观测、健康检查、内存限流、可选文件持久化配额、运行时配置校验、部署校验和容器部署工件，但集中式密钥管理平台和真实环境部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。

@@ -40,6 +40,37 @@ test("createZiweiHttpServer serves health responses", async () => {
   }
 });
 
+test("createZiweiHttpServer serves the web UI assets", async () => {
+  const server = createZiweiHttpServer({
+    env: {},
+    knowledgeSnippets: []
+  });
+
+  await listen(server);
+
+  try {
+    const { port } = server.address();
+    const indexResponse = await fetch(`http://127.0.0.1:${port}/`);
+    const scriptResponse = await fetch(`http://127.0.0.1:${port}/app.js`);
+    const styleResponse = await fetch(`http://127.0.0.1:${port}/styles.css`);
+    const indexBody = await indexResponse.text();
+    const scriptBody = await scriptResponse.text();
+    const styleBody = await styleResponse.text();
+
+    assert.equal(indexResponse.status, 200);
+    assert.equal(scriptResponse.status, 200);
+    assert.equal(styleResponse.status, 200);
+    assert.match(indexResponse.headers.get("content-type"), /text\/html/u);
+    assert.match(scriptResponse.headers.get("content-type"), /text\/javascript/u);
+    assert.match(styleResponse.headers.get("content-type"), /text\/css/u);
+    assert.match(indexBody, /紫微斗数命理师 Agent/u);
+    assert.match(scriptBody, /POST/u);
+    assert.match(styleBody, /palace-grid/u);
+  } finally {
+    await close(server);
+  }
+});
+
 test("createZiweiHttpServer serves health responses without consuming rate quota", async () => {
   const server = createZiweiHttpServer({
     env: {},

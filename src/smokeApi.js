@@ -56,6 +56,7 @@ export async function runApiSmokeCheck(options = {}) {
   try {
     const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
+    await assertStaticUi(baseUrl);
     await assertHealth(baseUrl);
     await assertReport(baseUrl, {
       env,
@@ -65,7 +66,7 @@ export async function runApiSmokeCheck(options = {}) {
 
     return {
       status: "ready",
-      checks: ["/health", "/v1/reports"],
+      checks: ["/", "/health", "/v1/reports"],
       knowledgeSnippetCount: knowledgeStore.snippets.length
     };
   } finally {
@@ -84,9 +85,19 @@ async function main() {
 
   console.log("API smoke 校验：");
   console.log("- 状态：ready");
+  console.log("- /：通过");
   console.log("- /health：通过");
   console.log("- /v1/reports：通过");
   console.log("- 结果：HTTP 入口到 agent 报告发布链路可用");
+}
+
+async function assertStaticUi(baseUrl) {
+  const response = await fetch(`${baseUrl}/`);
+  const body = await response.text();
+
+  if (response.status !== 200 || !body.includes("紫微斗数命理师 Agent")) {
+    throw new Error(`static UI check failed: ${response.status}`);
+  }
 }
 
 async function assertHealth(baseUrl) {

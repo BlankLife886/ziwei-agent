@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import {
   createApiAuthenticator,
@@ -15,6 +16,24 @@ const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_REQUEST_BYTES = 100_000;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 const DEFAULT_RATE_LIMIT_MAX = 60;
+const STATIC_ASSETS = new Map([
+  ["/", {
+    fileUrl: new URL("../public/index.html", import.meta.url),
+    contentType: "text/html; charset=utf-8"
+  }],
+  ["/index.html", {
+    fileUrl: new URL("../public/index.html", import.meta.url),
+    contentType: "text/html; charset=utf-8"
+  }],
+  ["/styles.css", {
+    fileUrl: new URL("../public/styles.css", import.meta.url),
+    contentType: "text/css; charset=utf-8"
+  }],
+  ["/app.js", {
+    fileUrl: new URL("../public/app.js", import.meta.url),
+    contentType: "text/javascript; charset=utf-8"
+  }]
+]);
 
 export function createZiweiHttpServer(options = {}) {
   const env = options.env ?? process.env;
@@ -70,6 +89,25 @@ export function createZiweiHttpServer(options = {}) {
           responseStatus: apiResponse.body?.status
         });
         writeJsonResponse(response, apiResponse, requestId);
+        return;
+      }
+
+      if (isStaticAssetRequest(method, path)) {
+        const apiResponse = await createStaticAssetResponse({
+          method,
+          path
+        });
+
+        emitApiEvent(observer, {
+          type: "api.request.completed",
+          requestId,
+          method,
+          path,
+          statusCode: apiResponse.statusCode,
+          durationMs: Date.now() - startedAt,
+          responseStatus: "static"
+        });
+        writeRawResponse(response, apiResponse, requestId);
         return;
       }
 
@@ -268,6 +306,14 @@ function writeJsonResponse(response, apiResponse, requestId) {
   response.end(JSON.stringify(apiResponse.body));
 }
 
+function writeRawResponse(response, apiResponse, requestId) {
+  response.writeHead(apiResponse.statusCode, {
+    ...apiResponse.headers,
+    "x-request-id": requestId
+  });
+  response.end(apiResponse.body);
+}
+
 function emitApiEvent(observer, event) {
   if (!observer?.emit) {
     return;
@@ -334,6 +380,25 @@ function createHealthResponse({ requestId, method, knowledgeSnippetCount }) {
 
 function normalizeRequestPath(path) {
   return String(path ?? "/").split("?")[0];
+}
+
+function isStaticAssetRequest(method, path) {
+  return (method === "GET" || method === "HEAD") &&
+    STATIC_ASSETS.has(normalizeRequestPath(path));
+}
+
+async function createStaticAssetResponse({ method, path }) {
+  const asset = STATIC_ASSETS.get(normalizeRequestPath(path));
+  const body = method === "HEAD" ? undefined : await readFile(asset.fileUrl);
+
+  return {
+    statusCode: 200,
+    headers: {
+      "content-type": asset.contentType,
+      "cache-control": "no-store"
+    },
+    body
+  };
 }
 
 function createQuotaStoreFromRuntime(env) {
