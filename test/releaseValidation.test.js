@@ -11,6 +11,7 @@ test("release validation script includes the full local gate set", async () => {
     "knowledge",
     "runtime",
     "deployment",
+    "cloudflare",
     "env-example-deployment",
     "diff-check"
   ]) {
@@ -18,6 +19,7 @@ test("release validation script includes the full local gate set", async () => {
   }
 
   assert.match(source, /npm",\s+args:\s+\["test"\]/u);
+  assert.match(source, /validate:cloudflare/u);
   assert.match(source, /--env-file=\.env\.example/u);
   assert.match(source, /git",\s+args:\s+\["diff", "--check"\]/u);
   assert.match(source, /--summary/u);

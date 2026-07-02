@@ -1,0 +1,17 @@
+name = "ziwei-agent"
+main = "src/cloudflareWorker.js"
+compatibility_date = "2026-07-02"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[vars]
+NODE_ENV = "production"
+ZIWEI_API_OBSERVABILITY = "stdout"
+ZIWEI_API_MAX_BODY_BYTES = "100000"
+ZIWEI_API_RATE_LIMIT_WINDOW_MS = "60000"
+ZIWEI_API_RATE_LIMIT_MAX = "60"
+ZIWEI_RELEASE_VERSION = "development"
+ZIWEI_RELEASE_SOURCE = "cloudflare-workers"

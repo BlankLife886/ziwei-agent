@@ -24,6 +24,11 @@ const CHECKS = [
     args: ["run", "validate:deploy"]
   },
   {
+    name: "cloudflare",
+    command: "npm",
+    args: ["run", "validate:cloudflare"]
+  },
+  {
     name: "env-example-deployment",
     command: process.execPath,
     args: ["--env-file=.env.example", "src/validateDeployment.js"]

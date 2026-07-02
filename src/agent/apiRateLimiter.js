@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createMemoryApiQuotaStore } from "./apiQuotaStore.js";
+import { createMemoryApiQuotaStore } from "./memoryApiQuotaStore.js";
 
 const DEFAULT_WINDOW_MS = 60_000;
 const DEFAULT_MAX_REQUESTS = 60;

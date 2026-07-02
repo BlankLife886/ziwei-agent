@@ -45,3 +45,18 @@ test("runtime secret example keeps credentials in the supported JSON shape", asy
   assert.deepEqual(parsedSecret.ZIWEI_API_CREDENTIALS[0].scopes, ["reports:write"]);
   assert.equal(typeof parsedSecret.ZIWEI_LLM_API_KEY, "string");
 });
+
+test("cloudflare deployment wires Worker entry, assets, and Node compatibility", async () => {
+  const wrangler = await readFile("wrangler.toml", "utf8");
+  const worker = await readFile("src/cloudflareWorker.js", "utf8");
+  const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+
+  assert.match(wrangler, /main = "src\/cloudflareWorker\.js"/u);
+  assert.match(wrangler, /compatibility_flags = \["nodejs_compat"\]/u);
+  assert.match(wrangler, /\[assets\]/u);
+  assert.match(wrangler, /binding = "ASSETS"/u);
+  assert.match(worker, /handleZiweiApiRequest/u);
+  assert.match(worker, /buildChart -> runZiweiPipelineAsync -> reportAuditor -> reportPublisher/u);
+  assert.equal(packageJson.scripts["deploy:cloudflare"], "wrangler deploy");
+  assert.equal(packageJson.scripts["validate:cloudflare"], "node src/validateCloudflare.js");
+});

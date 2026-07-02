@@ -1,0 +1,14 @@
+{
+  "profile": {
+    "name": "示例用户",
+    "gender": "female",
+    "calendar": "solar",
+    "birth_date": "1990-06-15",
+    "birth_time": "08:30",
+    "birth_place": "上海",
+    "timezone": "Asia/Shanghai",
+    "use_true_solar_time": false,
+    "analysis_date": "2026-07-02"
+  },
+  "query": "我想看婚姻、财富、事业和当前运势"
+}

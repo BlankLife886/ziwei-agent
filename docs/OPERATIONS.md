@@ -76,10 +76,11 @@ ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
 
 ## 部署模板
 
-本仓库提供两个部署模板：
+本仓库提供三个部署模板：
 
 - `deploy/docker-compose.yml`：本地或单机容器运行模板，挂载 `deploy/runtime-secrets.example.json` 为 runtime secret，并把 `.runtime` 映射为持久化 volume。
 - `deploy/kubernetes.yml`：Kubernetes Namespace、Secret、PVC、Deployment 和 Service 模板，包含 `/health` livenessProbe、`/ready` readinessProbe、runtime secret 挂载和 quota state PVC。
+- `wrangler.toml`：Cloudflare Workers 模板，入口是 `src/cloudflareWorker.js`，静态 Web UI 通过 Cloudflare Assets binding 提供，业务 API 复用同一条 agent pipeline。
 
 发布前必须替换模板中的示例 token 和模型 key。使用模板前仍需执行启动前门禁；模板只固定运行边界，不替代测试、知识库审计和 API smoke。
 
@@ -94,6 +95,59 @@ Kubernetes 示例：
 ```bash
 kubectl apply -f deploy/kubernetes.yml
 ```
+
+Cloudflare 示例：
+
+```bash
+npm run validate:cloudflare
+npx wrangler secret put ZIWEI_API_CREDENTIALS
+npx wrangler deploy
+```
+
+`ZIWEI_API_CREDENTIALS` 的 secret 值仍使用同一套 JSON 数组格式：
+
+```json
+[
+  {
+    "id": "cloudflare-client",
+    "token": "replace-with-secret",
+    "scopes": ["reports:write"]
+  }
+]
+```
+
+Cloudflare Worker 没有本地文件系统，因此不要在 Cloudflare 上使用 `ZIWEI_KNOWLEDGE_STORE`、`ZIWEI_API_QUOTA_STORE`、`ZIWEI_RUNTIME_SECRETS_FILE` 或 `*_FILE` secret 路径。Cloudflare 知识片段使用 `ZIWEI_KNOWLEDGE_SNIPPETS` 环境变量或 secret，值可以是：
+
+```json
+{
+  "snippets": []
+}
+```
+
+如果后续知识库规模超过 Worker 环境变量适用范围，应接入 KV、R2、D1 或外部检索服务；接入前仍要保持知识片段 schema 审计和 `reportAuditor` 发布门禁。
+
+Cloudflare 上线后执行真实部署验证：
+
+```bash
+BASE_URL=https://<your-worker-domain>
+TOKEN=<your-reports-write-token>
+
+curl "$BASE_URL/health"
+curl "$BASE_URL/ready"
+curl "$BASE_URL/openapi.json"
+curl -X POST "$BASE_URL/v1/reports" \
+  -H "content-type: application/json" \
+  -H "authorization: Bearer $TOKEN" \
+  --data @examples/report-request.example.json
+```
+
+验证标准：
+
+- `/health` 返回 `status=ok`，`checks.platform=cloudflare-workers`。
+- `/ready` 返回 `status=ready`，`checks.agentEntry.pipeline` 仍包含 `reportPublisher`。
+- `/openapi.json` 返回 OpenAPI `3.1.0`，且包含 `POST /v1/reports`。
+- `POST /v1/reports` 返回 `status=published`，响应里有 `chart`、`report`、`audits.report` 和 `audits.readiness`。
+- `release.source` 应为 `cloudflare-workers`，生产发布时应额外设置真实 `ZIWEI_RELEASE_VERSION` 和 `ZIWEI_RELEASE_COMMIT`。
 
 外部大模型 provider 只通过报告生成器合同接入：
 
