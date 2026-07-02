@@ -316,6 +316,12 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.lu-quan-pair",
+    "interpretation.four-transformations.lu-ke-pair",
+    "interpretation.four-transformations.lu-ji-pair",
+    "interpretation.four-transformations.quan-ke-pair",
+    "interpretation.four-transformations.quan-ji-pair",
+    "interpretation.four-transformations.ke-ji-pair",
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-wealth-palace",
     "interpretation.four-transformations.on-siblings-palace",
@@ -324,7 +330,7 @@ test("transformation sections include four transformation type boundaries from m
   assert.deepEqual(buildSectionInterpretationRefs(
     "current-stage",
     currentStageEvidenceItems
-  ).slice(0, 12), [
+  ).slice(0, 18), [
     "interpretation.current-stage.static-only",
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
@@ -333,6 +339,12 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.lu-quan-pair",
+    "interpretation.four-transformations.lu-ke-pair",
+    "interpretation.four-transformations.lu-ji-pair",
+    "interpretation.four-transformations.quan-ke-pair",
+    "interpretation.four-transformations.quan-ji-pair",
+    "interpretation.four-transformations.ke-ji-pair",
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-wealth-palace",
     "interpretation.four-transformations.on-siblings-palace",

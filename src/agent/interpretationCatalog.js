@@ -61,6 +61,12 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_QUAN_STRUCTURE: "interpretation.four-transformations.quan-structure",
   FOUR_TRANSFORMATION_KE_STRUCTURE: "interpretation.four-transformations.ke-structure",
   FOUR_TRANSFORMATION_JI_STRUCTURE: "interpretation.four-transformations.ji-structure",
+  FOUR_TRANSFORMATION_LU_QUAN_PAIR: "interpretation.four-transformations.lu-quan-pair",
+  FOUR_TRANSFORMATION_LU_KE_PAIR: "interpretation.four-transformations.lu-ke-pair",
+  FOUR_TRANSFORMATION_LU_JI_PAIR: "interpretation.four-transformations.lu-ji-pair",
+  FOUR_TRANSFORMATION_QUAN_KE_PAIR: "interpretation.four-transformations.quan-ke-pair",
+  FOUR_TRANSFORMATION_QUAN_JI_PAIR: "interpretation.four-transformations.quan-ji-pair",
+  FOUR_TRANSFORMATION_KE_JI_PAIR: "interpretation.four-transformations.ke-ji-pair",
   FOUR_TRANSFORMATION_ON_LIFE_PALACE: "interpretation.four-transformations.on-life-palace",
   FOUR_TRANSFORMATION_ON_SPOUSE_PALACE: "interpretation.four-transformations.on-spouse-palace",
   FOUR_TRANSFORMATION_ON_WEALTH_PALACE: "interpretation.four-transformations.on-wealth-palace",
@@ -284,6 +290,33 @@ const FOUR_TRANSFORMATION_TYPE_RULES = [
   {
     transformationName: "化忌",
     interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE
+  }
+];
+
+const FOUR_TRANSFORMATION_PAIR_RULES = [
+  {
+    transformationNames: ["化禄", "化权"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_QUAN_PAIR
+  },
+  {
+    transformationNames: ["化禄", "化科"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_KE_PAIR
+  },
+  {
+    transformationNames: ["化禄", "化忌"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_JI_PAIR
+  },
+  {
+    transformationNames: ["化权", "化科"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_KE_PAIR
+  },
+  {
+    transformationNames: ["化权", "化忌"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_JI_PAIR
+  },
+  {
+    transformationNames: ["化科", "化忌"],
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_JI_PAIR
   }
 ];
 
@@ -894,6 +927,66 @@ const INTERPRETATIONS = [
     text: "化忌在本系统中先作为牵挂、约束、摩擦、滞留或需要修正的结构信号；它不能单独写成灾祸、失败或不可改变的坏结果。"
   },
   {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_QUAN_PAIR,
+    title: "禄权合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化禄", "化权"],
+    synthesis: "资源流动与推动责任同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "禄权合参时，只能说明资源流动与推动责任需要同看：有可用资源处也可能伴随主动承担、控制需求或推进压力；不能写成必得权势、财富扩大或事业成功。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_KE_PAIR,
+    title: "禄科合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化禄", "化科"],
+    synthesis: "资源可用性与秩序修饰同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "禄科合参时，只能说明资源可用性与秩序修饰、表达整理或可见度需要同看；不能写成名利双收、考试成功或问题自然化解。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_JI_PAIR,
+    title: "禄忌合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化禄", "化忌"],
+    synthesis: "资源牵引与约束摩擦同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "禄忌合参时，只能说明资源牵引与约束、牵挂或修正课题同时存在，需要观察取用方式和代价感；不能写成先得后失、破财或结果反复。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_KE_PAIR,
+    title: "权科合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化权", "化科"],
+    synthesis: "推动责任与秩序可见同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "权科合参时，只能说明推动责任需要通过秩序、名分、表达整理或规则化方式呈现；不能写成升迁、声望提高或权威确认。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_JI_PAIR,
+    title: "权忌合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化权", "化忌"],
+    synthesis: "推动压力与约束摩擦同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "权忌合参时，只能说明推进、控制、责任压力与约束摩擦需要同时评估，适合提示压力管理和边界修正；不能写成冲突失败、官非灾断或关系破裂。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_JI_PAIR,
+    title: "科忌合参的结构解释边界",
+    topic: "four-transformation-pair",
+    transformationNames: ["化科", "化忌"],
+    synthesis: "修饰缓冲与约束课题同看",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "科忌合参时，只能说明秩序修饰、表达整理或缓冲机制与牵挂约束并存，适合提示需要耐心修正；不能写成问题自动解决或长期困局。"
+  },
+  {
     id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_LIFE_PALACE,
     title: "四化落命宫的结构解释边界",
     topic: "four-transformation-palace",
@@ -1211,6 +1304,21 @@ export function findFourTransformationTypeInterpretationRefs(transformations = [
     }
 
     return [rule.interpretationId];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationPairInterpretationRefs(transformations = []) {
+  const transformationNames = new Set(transformations.flatMap((transformation) => {
+    return transformation?.name ? [transformation.name] : [];
+  }));
+  const refs = FOUR_TRANSFORMATION_PAIR_RULES.flatMap((rule) => {
+    const hasPair = rule.transformationNames.every((transformationName) => {
+      return transformationNames.has(transformationName);
+    });
+
+    return hasPair ? [rule.interpretationId] : [];
   });
 
   return [...new Set(refs)];

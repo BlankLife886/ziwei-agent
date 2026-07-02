@@ -433,6 +433,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("化权在本系统中先作为推动力"));
   assert.ok(paragraph.text.includes("化科在本系统中先作为秩序修饰"));
   assert.ok(paragraph.text.includes("化忌在本系统中先作为牵挂"));
+  assert.ok(paragraph.text.includes("禄权合参时，只能说明资源流动与推动责任需要同看"));
+  assert.ok(paragraph.text.includes("禄忌合参时，只能说明资源牵引与约束"));
+  assert.ok(paragraph.text.includes("权忌合参时，只能说明推进、控制、责任压力"));
+  assert.ok(paragraph.text.includes("科忌合参时，只能说明秩序修饰"));
   assert.ok(paragraph.text.includes("四化落夫妻宫时"));
   assert.ok(paragraph.text.includes("四化落迁移宫时"));
   assert.ok(paragraph.text.includes("四化落福德宫时"));
@@ -460,6 +464,12 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.quan-structure",
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
+    "interpretation.four-transformations.lu-quan-pair",
+    "interpretation.four-transformations.lu-ke-pair",
+    "interpretation.four-transformations.lu-ji-pair",
+    "interpretation.four-transformations.quan-ke-pair",
+    "interpretation.four-transformations.quan-ji-pair",
+    "interpretation.four-transformations.ke-ji-pair",
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-travel-palace",
     "interpretation.four-transformations.on-wellbeing-palace",
