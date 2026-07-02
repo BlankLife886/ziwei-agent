@@ -245,7 +245,13 @@ test("createReportPlan turns ready agent context into report sections", () => {
     reportPlan.sections
       .find((section) => section.id === "birth-year-transformations")
       .interpretationRefs,
-    ["interpretation.four-transformations.birth-year-static-only"]
+    [
+      "interpretation.four-transformations.birth-year-static-only",
+      "interpretation.four-transformations.lu-structure",
+      "interpretation.four-transformations.quan-structure",
+      "interpretation.four-transformations.ke-structure",
+      "interpretation.four-transformations.ji-structure"
+    ]
   );
   assert.ok(
     reportPlan.sections
@@ -380,6 +386,10 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
     "interpretation.four-transformations.annual-structure-only",
+    "interpretation.four-transformations.lu-structure",
+    "interpretation.four-transformations.quan-structure",
+    "interpretation.four-transformations.ke-structure",
+    "interpretation.four-transformations.ji-structure",
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",

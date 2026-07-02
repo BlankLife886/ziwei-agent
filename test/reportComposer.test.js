@@ -215,6 +215,18 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
   );
   assert.ok(
     reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("资源流动、可用性")
+  );
+  assert.ok(
+    reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("不能单独写成灾祸")
+  );
+  assert.ok(
+    reportDraft.sections
       .find((section) => section.id === "major-periods")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("4-13岁命宫巳")
@@ -405,6 +417,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("流年四化骨架"));
   assert.ok(paragraph.text.includes("天同化禄在本命子女宫"));
   assert.ok(paragraph.text.includes("年度观察方向"));
+  assert.ok(paragraph.text.includes("化禄在本系统中先作为资源流动"));
+  assert.ok(paragraph.text.includes("化权在本系统中先作为推动力"));
+  assert.ok(paragraph.text.includes("化科在本系统中先作为秩序修饰"));
+  assert.ok(paragraph.text.includes("化忌在本系统中先作为牵挂"));
   assert.ok(paragraph.text.includes("流月骨架"));
   assert.ok(paragraph.text.includes("月份事件、应期或吉凶"));
   assert.ok(paragraph.text.includes("安全触发候选只列观察点"));
@@ -422,6 +438,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
     "interpretation.four-transformations.annual-structure-only",
+    "interpretation.four-transformations.lu-structure",
+    "interpretation.four-transformations.quan-structure",
+    "interpretation.four-transformations.ke-structure",
+    "interpretation.four-transformations.ji-structure",
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",

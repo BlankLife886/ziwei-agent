@@ -462,7 +462,8 @@ function buildBirthYearTransformationEvidenceItems(chart) {
       "birth-year-transformations.summary",
       `生年四化：${formatBirthYearFourTransformations(chart)}`,
       "chart.starAnchors.birthYearTransformations",
-      [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
+      [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+      buildBirthYearTransformationEvidenceMetadata(chart)
     )
   ];
 }
@@ -514,7 +515,8 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       "current-stage.birth-year-transformations",
       `生年四化参照：${formatBirthYearFourTransformations(chart)}`,
       "chart.starAnchors.birthYearTransformations",
-      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS]
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+      buildBirthYearTransformationEvidenceMetadata(chart)
     )
   ];
 
@@ -527,7 +529,11 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       "current-stage.major-period-transformations",
       `当前大限四化骨架：${formatCurrentMajorPeriodTransformations(chart)}`,
       "chart.currentMajorPeriod.transformations",
-      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS]
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS],
+      {
+        transformationScope: "major-period",
+        transformations: chart.currentMajorPeriod.transformations.transformations
+      }
     ));
   }
 
@@ -545,7 +551,11 @@ function buildCurrentStageEvidenceItems(chart, palaceByName) {
       "current-stage.annual-transformations",
       `流年四化骨架：${formatAnnualTransformations(chart)}`,
       "chart.annualPeriod.transformations",
-      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS]
+      [REFERENCE_IDS.CURRENT_STAGE, REFERENCE_IDS.ANNUAL_FOUR_TRANSFORMATIONS],
+      {
+        transformationScope: "annual",
+        transformations: chart.annualPeriod.transformations.transformations
+      }
     ));
   }
 
@@ -652,6 +662,35 @@ function buildPalaceEvidenceMetadata(palace) {
       maleficStars: [...palace.maleficStars],
       voidStars: [...palace.voidStars]
     }
+  };
+}
+
+function buildBirthYearTransformationEvidenceMetadata(chart) {
+  const anchor = chart.starAnchors.birthYearTransformations;
+
+  if (!anchor) {
+    return {
+      transformationScope: "birth-year",
+      transformations: []
+    };
+  }
+
+  return {
+    transformationScope: "birth-year",
+    transformations: Object.entries(anchor)
+      .filter(([key]) => key !== "yearStem")
+      .map(([name, star]) => {
+        const palace = findPalaceContainingStar(chart, star);
+
+        return {
+          name,
+          star,
+          source: "birth-year-stem",
+          yearStem: anchor.yearStem,
+          targetPalaceName: palace?.name ?? null,
+          targetPalaceBranch: palace?.branch ?? null
+        };
+      })
   };
 }
 

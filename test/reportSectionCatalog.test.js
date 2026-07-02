@@ -283,6 +283,55 @@ test("current stage section includes timing trigger boundary only when candidate
   );
 });
 
+test("transformation sections include four transformation type boundaries from metadata", () => {
+  const transformationEvidenceItems = [
+    {
+      id: "birth-year-transformations.summary",
+      text: "生年四化：太阳化禄在兄弟宫辰；武曲化权在夫妻宫卯；太阴化科在财帛宫丑；天同化忌在子女宫寅",
+      metadata: {
+        transformations: [
+          { name: "化禄", star: "太阳" },
+          { name: "化权", star: "武曲" },
+          { name: "化科", star: "太阴" },
+          { name: "化忌", star: "天同" }
+        ]
+      }
+    }
+  ];
+  const currentStageEvidenceItems = [
+    {
+      id: "current-stage.current-major-period",
+      text: "当前阶段定位：测试",
+      metadata: {}
+    },
+    ...transformationEvidenceItems
+  ];
+
+  assert.deepEqual(buildSectionInterpretationRefs(
+    "birth-year-transformations",
+    transformationEvidenceItems
+  ), [
+    "interpretation.four-transformations.birth-year-static-only",
+    "interpretation.four-transformations.lu-structure",
+    "interpretation.four-transformations.quan-structure",
+    "interpretation.four-transformations.ke-structure",
+    "interpretation.four-transformations.ji-structure"
+  ]);
+  assert.deepEqual(buildSectionInterpretationRefs(
+    "current-stage",
+    currentStageEvidenceItems
+  ).slice(0, 8), [
+    "interpretation.current-stage.static-only",
+    "interpretation.four-transformations.major-period-stage-only",
+    "interpretation.annual-period.structure-only",
+    "interpretation.four-transformations.annual-structure-only",
+    "interpretation.four-transformations.lu-structure",
+    "interpretation.four-transformations.quan-structure",
+    "interpretation.four-transformations.ke-structure",
+    "interpretation.four-transformations.ji-structure"
+  ]);
+});
+
 function createPalaceEvidence(palaceName, starGroups) {
   return {
     id: `test.${palaceName}`,

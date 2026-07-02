@@ -1,5 +1,6 @@
 import {
   INTERPRETATION_IDS,
+  findFourTransformationTypeInterpretationRefs,
   findStarRoleInterpretationRefs
 } from "./interpretationCatalog.js";
 
@@ -99,7 +100,7 @@ const SECTION_DEFINITIONS = {
       "哪些内容仍需等待大限四化、流年四化合参后才能判断？"
     ],
     writingPrompt: "只说明生年四化在本命盘中的结构牵引，不推具体年份和事件。",
-    interpretationRefs: [INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY]
+    buildInterpretationRefs: buildBirthYearTransformationInterpretationRefs
   },
   "major-periods": {
     guidingQuestions: [
@@ -279,6 +280,7 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,
     INTERPRETATION_IDS.ANNUAL_PERIOD_STRUCTURE_ONLY,
     INTERPRETATION_IDS.ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY,
+    ...getFourTransformationTypeInterpretationRefs(evidenceItems),
     ...getMonthlyPeriodInterpretationRefs(evidenceItems),
     ...getTimingTriggerInterpretationRefs(evidenceItems),
     ...getTimingCombinationInterpretationRefs(evidenceItems),
@@ -287,6 +289,21 @@ function buildCurrentStageInterpretationRefs(evidenceItems) {
     ...getPalaceRoleInterpretationRefs(evidenceItems),
     ...getStarRoleInterpretationRefs(evidenceItems)
   ];
+}
+
+function buildBirthYearTransformationInterpretationRefs(evidenceItems) {
+  return [
+    INTERPRETATION_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY,
+    ...getFourTransformationTypeInterpretationRefs(evidenceItems)
+  ];
+}
+
+function getFourTransformationTypeInterpretationRefs(evidenceItems) {
+  const transformations = evidenceItems.flatMap((item) => {
+    return item.metadata?.transformations ?? [];
+  });
+
+  return findFourTransformationTypeInterpretationRefs(transformations);
 }
 
 function getMonthlyPeriodInterpretationRefs(evidenceItems) {

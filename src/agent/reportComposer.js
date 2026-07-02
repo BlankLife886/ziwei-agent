@@ -369,7 +369,8 @@ function composeBirthYearTransformationsParagraph(section) {
 
   return `【草稿判断】${joinJudgmentParts([
     section.evidence[0],
-    boundaryText
+    boundaryText,
+    ...getFourTransformationTypeInterpretationTexts(section)
   ])}`;
 }
 
@@ -442,6 +443,7 @@ function composeCurrentStageParagraph(section) {
     majorPeriodTransformationText,
     annualPeriodText,
     annualTransformationText,
+    ...getFourTransformationTypeInterpretationTexts(section),
     monthlyPeriodText,
     composeTimingTriggerCandidateSynthesis(section),
     timingTriggerText,
@@ -453,6 +455,21 @@ function composeCurrentStageParagraph(section) {
     timingCrossLayerText,
     starRoleSynthesis
   ])}`;
+}
+
+function getFourTransformationTypeInterpretationTexts(section) {
+  return [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE
+  ].flatMap((interpretationId) => {
+    if (!section.interpretationRefs?.includes(interpretationId)) {
+      return [];
+    }
+
+    return [getInterpretationText(section, interpretationId)];
+  });
 }
 
 function composeClosing(reportPlan) {

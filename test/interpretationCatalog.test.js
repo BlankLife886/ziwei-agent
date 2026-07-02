@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   INTERPRETATION_IDS,
+  findFourTransformationTypeInterpretationRefs,
   findInterpretations,
   findStarRoleInterpretationRefs
 } from "../src/agent/interpretationCatalog.js";
@@ -79,6 +80,33 @@ test("findStarRoleInterpretationRefs maps palace stars to controlled items", () 
   );
   assert.ok(interpretations[0].text.includes("不能直接断定财富结果"));
   assert.ok(interpretations[0].synthesis.includes("资源秩序"));
+});
+
+test("findFourTransformationTypeInterpretationRefs maps transformation names to controlled items", () => {
+  const interpretationRefs = findFourTransformationTypeInterpretationRefs([
+    { name: "化禄", star: "太阳" },
+    { name: "化权", star: "武曲" },
+    { name: "化科", star: "太阴" },
+    { name: "化忌", star: "天同" }
+  ]);
+
+  assert.deepEqual(interpretationRefs, [
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_STRUCTURE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE
+  ]);
+
+  const interpretations = findInterpretations(interpretationRefs);
+
+  assert.deepEqual(
+    interpretations.map((interpretation) => interpretation.transformationName),
+    ["化禄", "化权", "化科", "化忌"]
+  );
+  assert.ok(interpretations[0].text.includes("不能单独写成得财"));
+  assert.ok(interpretations[1].text.includes("不能单独写成掌权"));
+  assert.ok(interpretations[2].text.includes("不能单独写成成名"));
+  assert.ok(interpretations[3].text.includes("不能单独写成灾祸"));
 });
 
 test("findStarRoleInterpretationRefs maps life palace stars for personality analysis", () => {

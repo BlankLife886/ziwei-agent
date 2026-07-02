@@ -57,6 +57,10 @@ export const INTERPRETATION_IDS = {
   STAR_TAN_LANG_TRAVEL: "interpretation.star.tan-lang.travel",
   STAR_TIAN_GUAN_TRAVEL: "interpretation.star.tian-guan.travel",
   BIRTH_YEAR_FOUR_TRANSFORMATIONS_STATIC_ONLY: "interpretation.four-transformations.birth-year-static-only",
+  FOUR_TRANSFORMATION_LU_STRUCTURE: "interpretation.four-transformations.lu-structure",
+  FOUR_TRANSFORMATION_QUAN_STRUCTURE: "interpretation.four-transformations.quan-structure",
+  FOUR_TRANSFORMATION_KE_STRUCTURE: "interpretation.four-transformations.ke-structure",
+  FOUR_TRANSFORMATION_JI_STRUCTURE: "interpretation.four-transformations.ji-structure",
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY: "interpretation.four-transformations.major-period-stage-only",
   ANNUAL_PERIOD_STRUCTURE_ONLY: "interpretation.annual-period.structure-only",
   ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY: "interpretation.four-transformations.annual-structure-only",
@@ -249,6 +253,25 @@ const STAR_ROLE_INTERPRETATION_RULES = [
     palaceName: "迁移宫",
     starName: "天官",
     interpretationId: INTERPRETATION_IDS.STAR_TIAN_GUAN_TRAVEL
+  }
+];
+
+const FOUR_TRANSFORMATION_TYPE_RULES = [
+  {
+    transformationName: "化禄",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_STRUCTURE
+  },
+  {
+    transformationName: "化权",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_STRUCTURE
+  },
+  {
+    transformationName: "化科",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_STRUCTURE
+  },
+  {
+    transformationName: "化忌",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE
   }
 ];
 
@@ -768,6 +791,46 @@ const INTERPRETATIONS = [
     text: "生年四化可用于标记本命盘中禄、权、科、忌的本命牵引位置；它适合先写本命结构，不宜单独推具体年份事件。"
   },
   {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_LU_STRUCTURE,
+    title: "化禄的结构解释边界",
+    topic: "four-transformation-type",
+    transformationName: "化禄",
+    synthesis: "资源流动与可用性",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "化禄在本系统中先作为资源流动、可用性、吸引力或承接度的结构信号；它不能单独写成得财、收益或结果顺利。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_QUAN_STRUCTURE,
+    title: "化权的结构解释边界",
+    topic: "four-transformation-type",
+    transformationName: "化权",
+    synthesis: "推动力与责任压力",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "化权在本系统中先作为推动力、责任承担、控制需求或压力上升的结构信号；它不能单独写成掌权、升迁或地位结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_KE_STRUCTURE,
+    title: "化科的结构解释边界",
+    topic: "four-transformation-type",
+    transformationName: "化科",
+    synthesis: "秩序修饰与可见度",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "化科在本系统中先作为秩序修饰、名誉可见、缓冲修复或表达整理的结构信号；它不能单独写成成名、考试成功或问题自动化解。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_JI_STRUCTURE,
+    title: "化忌的结构解释边界",
+    topic: "four-transformation-type",
+    transformationName: "化忌",
+    synthesis: "牵挂约束与修正课题",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS],
+    text: "化忌在本系统中先作为牵挂、约束、摩擦、滞留或需要修正的结构信号；它不能单独写成灾祸、失败或不可改变的坏结果。"
+  },
+  {
     id: INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,
     title: "大限四化的阶段解释边界",
     topic: "four-transformations",
@@ -946,6 +1009,21 @@ export function findStarRoleInterpretationRefs(palaceName, starGroups = {}) {
   const starNames = new Set(Object.values(starGroups).flat());
   const refs = STAR_ROLE_INTERPRETATION_RULES.flatMap((rule) => {
     if (rule.palaceName !== palaceName || !starNames.has(rule.starName)) {
+      return [];
+    }
+
+    return [rule.interpretationId];
+  });
+
+  return [...new Set(refs)];
+}
+
+export function findFourTransformationTypeInterpretationRefs(transformations = []) {
+  const transformationNames = new Set(transformations.flatMap((transformation) => {
+    return transformation?.name ? [transformation.name] : [];
+  }));
+  const refs = FOUR_TRANSFORMATION_TYPE_RULES.flatMap((rule) => {
+    if (!transformationNames.has(rule.transformationName)) {
       return [];
     }
 
