@@ -69,6 +69,29 @@ test("buildServerRuntimeConfig accepts scoped credential JSON for required auth"
   assert.equal(config.status, "ready");
 });
 
+test("buildServerRuntimeConfig accepts lifecycle-managed active credentials", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "old-client",
+        token: "old-secret",
+        scopes: ["reports:write"],
+        disabled: true
+      },
+      {
+        id: "active-client",
+        token: "active-secret",
+        scopes: ["reports:write"],
+        notBefore: "2020-01-01T00:00:00Z",
+        expiresAt: "2999-01-01T00:00:00Z"
+      }
+    ])
+  });
+
+  assert.equal(config.status, "ready");
+});
+
 test("buildServerRuntimeConfig rejects malformed scoped credential JSON", () => {
   const config = buildServerRuntimeConfig({
     ZIWEI_REQUIRE_API_AUTH: "true",
@@ -81,6 +104,49 @@ test("buildServerRuntimeConfig rejects malformed scoped credential JSON", () => 
   });
 
   assert.equal(config.status, "invalid");
+});
+
+test("buildServerRuntimeConfig rejects invalid credential lifecycle fields", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "app-client",
+        token: "app-secret",
+        scopes: ["reports:write"],
+        disabled: "no",
+        expiresAt: "not-a-date"
+      }
+    ])
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => issue.includes(".disabled")));
+});
+
+test("buildServerRuntimeConfig requires an active report-writing credential", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "expired-client",
+        token: "expired-secret",
+        scopes: ["reports:write"],
+        expiresAt: "2000-01-01T00:00:00Z"
+      },
+      {
+        id: "future-client",
+        token: "future-secret",
+        scopes: ["reports:write"],
+        notBefore: "2999-01-01T00:00:00Z"
+      }
+    ])
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => {
+    return issue.includes("当前可用");
+  }));
 });
 
 test("buildServerRuntimeConfig requires at least one report-writing credential", () => {

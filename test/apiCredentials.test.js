@@ -139,6 +139,72 @@ test("createApiAuthenticator blocks missing, invalid, and underscoped tokens", (
   );
 });
 
+test("createApiAuthenticator enforces credential lifecycle windows", () => {
+  const authenticator = createApiAuthenticator({
+    now: () => Date.parse("2026-07-02T00:00:00Z"),
+    credentials: [
+      {
+        id: "disabled",
+        token: "disabled-token",
+        scopes: [API_SCOPES.REPORTS_WRITE],
+        disabled: true
+      },
+      {
+        id: "expired",
+        token: "expired-token",
+        scopes: [API_SCOPES.REPORTS_WRITE],
+        expiresAt: "2026-07-01T00:00:00Z"
+      },
+      {
+        id: "future",
+        token: "future-token",
+        scopes: [API_SCOPES.REPORTS_WRITE],
+        notBefore: "2026-07-03T00:00:00Z"
+      },
+      {
+        id: "bad-date",
+        token: "bad-date-token",
+        scopes: [API_SCOPES.REPORTS_WRITE],
+        expiresAt: "not-a-date"
+      },
+      {
+        id: "active",
+        token: "active-token",
+        scopes: [API_SCOPES.REPORTS_WRITE],
+        notBefore: "2026-07-01T00:00:00Z",
+        expiresAt: "2026-07-03T00:00:00Z"
+      }
+    ]
+  });
+
+  for (const token of [
+    "disabled-token",
+    "expired-token",
+    "future-token",
+    "bad-date-token"
+  ]) {
+    const result = authenticator.authenticate({
+      headers: {
+        authorization: `Bearer ${token}`
+      },
+      requiredScope: API_SCOPES.REPORTS_WRITE
+    });
+
+    assert.equal(result.status, "unauthorized");
+    assert.equal(result.reason, "credential_inactive");
+  }
+
+  assert.equal(
+    authenticator.authenticate({
+      headers: {
+        authorization: "Bearer active-token"
+      },
+      requiredScope: API_SCOPES.REPORTS_WRITE
+    }).status,
+    "allowed"
+  );
+});
+
 test("createApiAuthenticator allows anonymous access when credentials are not configured", () => {
   const authenticator = createApiAuthenticator();
   const result = authenticator.authenticate({

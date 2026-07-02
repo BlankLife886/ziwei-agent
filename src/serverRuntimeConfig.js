@@ -5,6 +5,7 @@ const DEFAULT_MAX_REQUEST_BYTES = 100_000;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 const DEFAULT_RATE_LIMIT_MAX = 60;
 const OBSERVABILITY_MODES = new Set(["off", "stdout", undefined, ""]);
+const REPORTS_WRITE_SCOPE = "reports:write";
 
 export function buildServerRuntimeConfig(env = process.env) {
   const issues = [];
@@ -35,8 +36,11 @@ export function buildServerRuntimeConfig(env = process.env) {
     issues.push("ZIWEI_API_OBSERVABILITY 只能为 stdout 或留空。");
   }
 
-  if (!hasValidApiCredentialRuntime(env)) {
-    issues.push("生产部署必须配置 ZIWEI_API_TOKEN 或合法的 ZIWEI_API_CREDENTIALS。");
+  const credentialAudit = auditApiCredentialRuntime(env);
+  issues.push(...credentialAudit.issues);
+
+  if (!credentialAudit.hasActiveReportWriter) {
+    issues.push("生产部署必须配置至少一个当前可用的 reports:write API credential。");
   }
 
   return {
@@ -69,41 +73,141 @@ function parsePositiveIntegerEnv(value, { name, fallback, issues, max = Number.M
   return parsedValue;
 }
 
-function hasValidApiCredentialRuntime(env) {
+function auditApiCredentialRuntime(env) {
+  const issues = [];
+
   if (env.NODE_ENV !== "production" && env.ZIWEI_REQUIRE_API_AUTH !== "true") {
-    return true;
+    return {
+      issues,
+      hasActiveReportWriter: true
+    };
   }
 
   if (env.ZIWEI_API_TOKEN) {
-    return true;
+    return {
+      issues,
+      hasActiveReportWriter: true
+    };
   }
 
-  return hasValidCredentialJson(env.ZIWEI_API_CREDENTIALS);
+  const credentialAudit = auditCredentialJson(env.ZIWEI_API_CREDENTIALS, Date.now());
+
+  return {
+    issues: credentialAudit.issues,
+    hasActiveReportWriter: credentialAudit.hasActiveReportWriter
+  };
 }
 
-function hasValidCredentialJson(rawValue) {
+function auditCredentialJson(rawValue, nowMs) {
   if (!rawValue) {
-    return false;
+    return {
+      issues: [],
+      hasActiveReportWriter: false
+    };
   }
 
   try {
     const parsedValue = JSON.parse(rawValue);
 
-    return Array.isArray(parsedValue) &&
-      parsedValue.length > 0 &&
-      parsedValue.every((credential) => {
-        return credential &&
-          typeof credential.id === "string" &&
-          credential.id.trim() &&
-          typeof credential.token === "string" &&
-          credential.token &&
-          Array.isArray(credential.scopes);
-      }) &&
-      parsedValue.some((credential) => {
-        return credential.scopes.includes("*") ||
-          credential.scopes.includes("reports:write");
-      });
+    if (!Array.isArray(parsedValue) || parsedValue.length === 0) {
+      return {
+        issues: ["ZIWEI_API_CREDENTIALS 必须是非空 JSON 数组。"],
+        hasActiveReportWriter: false
+      };
+    }
+
+    const issues = [];
+    const validCredentials = parsedValue.filter((credential, index) => {
+      return auditCredentialShape(credential, index, issues);
+    });
+    const hasActiveReportWriter = validCredentials.some((credential) => {
+      return isReportWriter(credential) && isCredentialActive(credential, nowMs);
+    });
+
+    return {
+      issues,
+      hasActiveReportWriter
+    };
   } catch {
+    return {
+      issues: ["ZIWEI_API_CREDENTIALS 必须是合法 JSON。"],
+      hasActiveReportWriter: false
+    };
+  }
+}
+
+function auditCredentialShape(credential, index, issues) {
+  const label = `ZIWEI_API_CREDENTIALS[${index}]`;
+  const hasIdentity = credential &&
+    typeof credential.id === "string" &&
+    credential.id.trim() &&
+    typeof credential.token === "string" &&
+    credential.token &&
+    Array.isArray(credential.scopes);
+
+  if (!hasIdentity) {
+    issues.push(`${label} 必须包含 id、token 和 scopes 数组。`);
     return false;
   }
+
+  if (credential.disabled !== undefined && typeof credential.disabled !== "boolean") {
+    issues.push(`${label}.disabled 必须是 boolean。`);
+    return false;
+  }
+
+  if (!isOptionalDateString(credential.notBefore)) {
+    issues.push(`${label}.notBefore 必须是可解析的日期字符串。`);
+    return false;
+  }
+
+  if (!isOptionalDateString(credential.expiresAt)) {
+    issues.push(`${label}.expiresAt 必须是可解析的日期字符串。`);
+    return false;
+  }
+
+  return true;
+}
+
+function isReportWriter(credential) {
+  return credential.scopes.includes("*") ||
+    credential.scopes.includes(REPORTS_WRITE_SCOPE);
+}
+
+function isCredentialActive(credential, nowMs) {
+  if (credential.disabled === true) {
+    return false;
+  }
+
+  const notBeforeMs = parseOptionalTime(credential.notBefore);
+  const expiresAtMs = parseOptionalTime(credential.expiresAt);
+
+  if (Number.isFinite(notBeforeMs) && nowMs < notBeforeMs) {
+    return false;
+  }
+
+  if (Number.isFinite(expiresAtMs) && nowMs >= expiresAtMs) {
+    return false;
+  }
+
+  return true;
+}
+
+function isOptionalDateString(value) {
+  if (value === undefined) {
+    return true;
+  }
+
+  if (typeof value !== "string" || !value.trim()) {
+    return false;
+  }
+
+  return Number.isFinite(Date.parse(value));
+}
+
+function parseOptionalTime(value) {
+  if (typeof value !== "string" || !value.trim()) {
+    return undefined;
+  }
+
+  return Date.parse(value);
 }

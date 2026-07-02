@@ -52,7 +52,7 @@ node --env-file=.env src/server.js
 
 ```bash
 ZIWEI_API_TOKEN=local-secret \
-ZIWEI_API_CREDENTIALS='[{"id":"app-client","token":"app-secret","scopes":["reports:write"]}]' \
+ZIWEI_API_CREDENTIALS='[{"id":"app-client","token":"app-secret","scopes":["reports:write"],"disabled":false}]' \
 ZIWEI_KNOWLEDGE_STORE=data/knowledge-snippets.example.json \
 ZIWEI_API_OBSERVABILITY=stdout \
 ZIWEI_API_RATE_LIMIT_WINDOW_MS=60000 \
@@ -72,11 +72,11 @@ curl -X POST http://localhost:3000/v1/reports \
 
 API 入口同样只调用统一 agent pipeline；它不会绕过报告规划、报告审计或发布门禁。
 
-API 鉴权支持两种配置：`ZIWEI_API_TOKEN` 是兼容旧路径的单 token，会自动获得 `reports:write` 权限；`ZIWEI_API_CREDENTIALS` 支持 JSON 数组，每个元素包含 `id`、`token` 和 `scopes`。`POST /v1/reports` 需要 `reports:write`，token 缺失或错误返回 401，token 有效但 scope 不足返回 403。响应和日志只暴露 principal id 和 scopes，不回显 token。
+API 鉴权支持两种配置：`ZIWEI_API_TOKEN` 是兼容旧路径的单 token，会自动获得 `reports:write` 权限；`ZIWEI_API_CREDENTIALS` 支持 JSON 数组，每个元素包含 `id`、`token` 和 `scopes`，并可选 `disabled`、`notBefore`、`expiresAt` 做禁用、生效时间和过期控制。`POST /v1/reports` 需要当前可用的 `reports:write`，token 缺失或错误返回 401，token 已禁用、未生效、已过期或 scope 不足也会被拒绝。响应和日志只暴露 principal id 和 scopes，不回显 token。
 
 每个 API 响应都会返回 `x-request-id`，响应体也包含同一个 `requestId`。当 `ZIWEI_API_OBSERVABILITY=stdout` 时，服务会输出 JSON 结构化事件，包括请求开始、完成、阻断或失败状态；事件会脱敏 `authorization`、API key 和完整 body。限流默认窗口为 60 秒、每个身份 60 次请求；如果存在 bearer token，限流按 token 哈希分桶，否则按 `x-forwarded-for` 或远端地址分桶。超过配额会返回 `429 rate_limited` 和 `retryAfterMs`。默认配额只保存在进程内存；设置 `ZIWEI_API_QUOTA_STORE` 后，窗口计数会写入 JSON 文件，服务重启后仍会沿用尚未过期的窗口。配额文件读取或写入失败时限流器会 fail closed，阻断请求，避免异常状态下无限放行。
 
-生产模式下（`NODE_ENV=production`，或显式设置 `ZIWEI_REQUIRE_API_AUTH=true`），服务启动前会校验 API credential、端口、请求体上限、限流窗口、限流次数和观测模式。生产部署必须提供 `ZIWEI_API_TOKEN` 或至少一个带 `reports:write` scope 的 `ZIWEI_API_CREDENTIALS`；配置不合格时服务不会启动。
+生产模式下（`NODE_ENV=production`，或显式设置 `ZIWEI_REQUIRE_API_AUTH=true`），服务启动前会校验 API credential、端口、请求体上限、限流窗口、限流次数和观测模式。生产部署必须提供 `ZIWEI_API_TOKEN` 或至少一个当前可用且带 `reports:write` scope 的 `ZIWEI_API_CREDENTIALS`；配置不合格时服务不会启动。
 
 Docker 构建和运行示例：
 

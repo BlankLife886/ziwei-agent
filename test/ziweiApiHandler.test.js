@@ -63,6 +63,34 @@ test("handleZiweiApiRequest rejects scoped credentials without report access", a
   assert.equal(JSON.stringify(response.body).includes("read-token"), false);
 });
 
+test("handleZiweiApiRequest rejects inactive credentials before running reports", async () => {
+  const response = await handleZiweiApiRequest({
+    method: "POST",
+    path: "/v1/reports",
+    headers: {
+      authorization: "Bearer expired-token"
+    },
+    body: JSON.stringify({
+      profile: createSampleProfile()
+    })
+  }, {
+    apiCredentials: [
+      {
+        id: "expired-client",
+        token: "expired-token",
+        scopes: ["reports:write"],
+        expiresAt: "2000-01-01T00:00:00Z"
+      }
+    ],
+    requestId: "inactive-credential-request"
+  });
+
+  assert.equal(response.statusCode, 401);
+  assert.equal(response.body.status, "unauthorized");
+  assert.equal(response.body.authorization.reason, "credential_inactive");
+  assert.equal(response.body.chart, undefined);
+});
+
 test("handleZiweiApiRequest runs the full agent pipeline and returns a user report", async () => {
   const response = await handleZiweiApiRequest({
     method: "POST",

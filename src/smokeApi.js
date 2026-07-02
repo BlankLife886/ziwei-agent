@@ -96,8 +96,9 @@ async function assertReport(baseUrl, { env, profile }) {
 function buildAuthHeaders(env) {
   // 如果环境启用了 bearer credential，smoke 脚本自动选取第一个具备
   // reports:write 权限的凭证；本地未配置鉴权时则走匿名开发模式。
+  const nowMs = Date.now();
   const credential = parseApiCredentialsFromRuntime({ env }).find((item) => {
-    return item.scopes.includes("*") || item.scopes.includes("reports:write");
+    return hasReportWriteScope(item) && isCredentialActive(item, nowMs);
   });
 
   if (!credential) {
@@ -107,6 +108,42 @@ function buildAuthHeaders(env) {
   return {
     authorization: `Bearer ${credential.token}`
   };
+}
+
+function hasReportWriteScope(credential) {
+  return credential.scopes.includes("*") ||
+    credential.scopes.includes("reports:write");
+}
+
+function isCredentialActive(credential, nowMs) {
+  if (credential.disabled === true) {
+    return false;
+  }
+
+  const notBeforeMs = parseOptionalTime(credential.notBefore);
+  const expiresAtMs = parseOptionalTime(credential.expiresAt);
+
+  if (Number.isNaN(notBeforeMs) || Number.isNaN(expiresAtMs)) {
+    return false;
+  }
+
+  if (Number.isFinite(notBeforeMs) && nowMs < notBeforeMs) {
+    return false;
+  }
+
+  if (Number.isFinite(expiresAtMs) && nowMs >= expiresAtMs) {
+    return false;
+  }
+
+  return true;
+}
+
+function parseOptionalTime(value) {
+  if (typeof value !== "string" || !value.trim()) {
+    return undefined;
+  }
+
+  return Date.parse(value);
 }
 
 function listen(server) {

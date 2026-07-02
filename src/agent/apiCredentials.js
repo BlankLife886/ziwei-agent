@@ -27,6 +27,7 @@ export function parseApiCredentialsFromRuntime({
 
 export function createApiAuthenticator(options = {}) {
   const credentials = normalizeCredentials(options.credentials ?? []);
+  const now = typeof options.now === "function" ? options.now : Date.now;
 
   return {
     authenticate({ headers = {}, requiredScope } = {}) {
@@ -63,6 +64,15 @@ export function createApiAuthenticator(options = {}) {
         };
       }
 
+      if (!isCredentialActive(matchedCredential, now())) {
+        return {
+          status: "unauthorized",
+          mode: "bearer",
+          reason: "credential_inactive",
+          message: "当前 token 已失效或尚未生效。"
+        };
+      }
+
       if (!hasScope(matchedCredential.scopes, requiredScope)) {
         return {
           status: "forbidden",
@@ -85,6 +95,7 @@ export function summarizeAuthResult(authResult) {
   return {
     status: authResult.status,
     mode: authResult.mode,
+    reason: authResult.reason,
     principalId: authResult.principal?.id,
     scopes: authResult.principal?.scopes
   };
@@ -133,7 +144,10 @@ function normalizeCredentials(credentials) {
       return {
         id: credential.id.trim(),
         token: credential.token,
-        scopes: normalizeScopes(credential.scopes)
+        scopes: normalizeScopes(credential.scopes),
+        disabled: credential.disabled === true,
+        notBeforeMs: parseCredentialTime(credential.notBefore),
+        expiresAtMs: parseCredentialTime(credential.expiresAt)
       };
     });
 }
@@ -146,8 +160,20 @@ function isCredentialShape(credential) {
     credential.token;
   const hasValidScopes = credential?.scopes === undefined ||
     Array.isArray(credential.scopes);
+  const hasValidLifecycle = credential?.disabled === undefined ||
+    typeof credential.disabled === "boolean";
+  const hasValidNotBefore = credential?.notBefore === undefined ||
+    typeof credential.notBefore === "string";
+  const hasValidExpiresAt = credential?.expiresAt === undefined ||
+    typeof credential.expiresAt === "string";
 
-  return Boolean(hasIdentity && hasValidScopes);
+  return Boolean(
+    hasIdentity &&
+    hasValidScopes &&
+    hasValidLifecycle &&
+    hasValidNotBefore &&
+    hasValidExpiresAt
+  );
 }
 
 function normalizeScopes(scopes) {
@@ -186,6 +212,36 @@ function hasScope(scopes, requiredScope) {
   }
 
   return scopes.includes("*") || scopes.includes(requiredScope);
+}
+
+function isCredentialActive(credential, nowMs) {
+  if (credential.disabled) {
+    return false;
+  }
+
+  if (Number.isNaN(credential.notBeforeMs) || Number.isNaN(credential.expiresAtMs)) {
+    return false;
+  }
+
+  if (Number.isFinite(credential.notBeforeMs) && nowMs < credential.notBeforeMs) {
+    return false;
+  }
+
+  if (Number.isFinite(credential.expiresAtMs) && nowMs >= credential.expiresAtMs) {
+    return false;
+  }
+
+  return true;
+}
+
+function parseCredentialTime(value) {
+  if (typeof value !== "string" || !value.trim()) {
+    return undefined;
+  }
+
+  const parsedValue = Date.parse(value);
+
+  return Number.isFinite(parsedValue) ? parsedValue : Number.NaN;
 }
 
 function publicPrincipal(credential) {
