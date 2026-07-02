@@ -67,6 +67,12 @@ export const INTERPRETATION_IDS = {
   FOUR_TRANSFORMATION_ON_CAREER_PALACE: "interpretation.four-transformations.on-career-palace",
   FOUR_TRANSFORMATION_ON_TRAVEL_PALACE: "interpretation.four-transformations.on-travel-palace",
   FOUR_TRANSFORMATION_ON_WELLBEING_PALACE: "interpretation.four-transformations.on-wellbeing-palace",
+  FOUR_TRANSFORMATION_ON_SIBLINGS_PALACE: "interpretation.four-transformations.on-siblings-palace",
+  FOUR_TRANSFORMATION_ON_CHILDREN_PALACE: "interpretation.four-transformations.on-children-palace",
+  FOUR_TRANSFORMATION_ON_HEALTH_PALACE: "interpretation.four-transformations.on-health-palace",
+  FOUR_TRANSFORMATION_ON_PROPERTY_PALACE: "interpretation.four-transformations.on-property-palace",
+  FOUR_TRANSFORMATION_ON_FRIENDS_PALACE: "interpretation.four-transformations.on-friends-palace",
+  FOUR_TRANSFORMATION_ON_PARENTS_PALACE: "interpretation.four-transformations.on-parents-palace",
   MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY: "interpretation.four-transformations.major-period-stage-only",
   ANNUAL_PERIOD_STRUCTURE_ONLY: "interpretation.annual-period.structure-only",
   ANNUAL_FOUR_TRANSFORMATIONS_STRUCTURE_ONLY: "interpretation.four-transformations.annual-structure-only",
@@ -305,6 +311,30 @@ const FOUR_TRANSFORMATION_TARGET_PALACE_RULES = [
   {
     palaceName: "福德宫",
     interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE
+  },
+  {
+    palaceName: "兄弟宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SIBLINGS_PALACE
+  },
+  {
+    palaceName: "子女宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CHILDREN_PALACE
+  },
+  {
+    palaceName: "疾厄宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_HEALTH_PALACE
+  },
+  {
+    palaceName: "田宅宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PROPERTY_PALACE
+  },
+  {
+    palaceName: "仆役宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_FRIENDS_PALACE
+  },
+  {
+    palaceName: "父母宫",
+    interpretationId: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PARENTS_PALACE
   }
 ];
 
@@ -922,6 +952,66 @@ const INTERPRETATIONS = [
     riskLevel: "medium",
     sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
     text: "四化落福德宫时，只能说明内在感受、精神满足或承压恢复议题被相应四化标记；它不能直接写成心理定论、福分高低或吉凶结果。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SIBLINGS_PALACE,
+    title: "四化落兄弟宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "兄弟宫",
+    synthesis: "同辈协作被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落兄弟宫时，只能说明同辈关系、协作资源或横向支持议题被相应四化标记；它不能直接写成手足事件、朋友结果或具体人际成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CHILDREN_PALACE,
+    title: "四化落子女宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "子女宫",
+    synthesis: "延展事务被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落子女宫时，只能说明延展事务、创作表达、下属后辈或子女主题被相应四化标记；它不能直接写成生育结果、子女事件或具体项目成败。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_HEALTH_PALACE,
+    title: "四化落疾厄宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "疾厄宫",
+    synthesis: "身心节律被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落疾厄宫时，只能说明身心节律、压力承接或生活习惯议题被相应四化标记；它不能直接写成疾病诊断、医疗结论或健康吉凶。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PROPERTY_PALACE,
+    title: "四化落田宅宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "田宅宫",
+    synthesis: "居住承载被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落田宅宫时，只能说明居住环境、家庭承载、资产载体或稳定感议题被相应四化标记；它不能直接写成置业结果、房产涨跌或家庭事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_FRIENDS_PALACE,
+    title: "四化落仆役宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "仆役宫",
+    synthesis: "团队社群被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落仆役宫时，只能说明团队协作、社群互动、下属伙伴或外部支持议题被相应四化标记；它不能直接写成贵人结果、团队成败或具体人际事件。"
+  },
+  {
+    id: INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PARENTS_PALACE,
+    title: "四化落父母宫的结构解释边界",
+    topic: "four-transformation-palace",
+    palaceName: "父母宫",
+    synthesis: "长辈制度被四化牵引",
+    riskLevel: "medium",
+    sourceRefs: [REFERENCE_IDS.BIRTH_YEAR_FOUR_TRANSFORMATIONS, REFERENCE_IDS.PALACE_ROLE],
+    text: "四化落父母宫时，只能说明长辈关系、制度支持、文书名分或上级框架议题被相应四化标记；它不能直接写成父母事件、文书结果或上级评价。"
   },
   {
     id: INTERPRETATION_IDS.MAJOR_PERIOD_FOUR_TRANSFORMATIONS_STAGE_ONLY,

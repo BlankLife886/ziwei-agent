@@ -317,12 +317,14 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
     "interpretation.four-transformations.on-spouse-palace",
-    "interpretation.four-transformations.on-wealth-palace"
+    "interpretation.four-transformations.on-wealth-palace",
+    "interpretation.four-transformations.on-siblings-palace",
+    "interpretation.four-transformations.on-children-palace"
   ]);
   assert.deepEqual(buildSectionInterpretationRefs(
     "current-stage",
     currentStageEvidenceItems
-  ).slice(0, 10), [
+  ).slice(0, 12), [
     "interpretation.current-stage.static-only",
     "interpretation.four-transformations.major-period-stage-only",
     "interpretation.annual-period.structure-only",
@@ -332,7 +334,9 @@ test("transformation sections include four transformation type boundaries from m
     "interpretation.four-transformations.ke-structure",
     "interpretation.four-transformations.ji-structure",
     "interpretation.four-transformations.on-spouse-palace",
-    "interpretation.four-transformations.on-wealth-palace"
+    "interpretation.four-transformations.on-wealth-palace",
+    "interpretation.four-transformations.on-siblings-palace",
+    "interpretation.four-transformations.on-children-palace"
   ]);
 });
 

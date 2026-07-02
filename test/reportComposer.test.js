@@ -233,6 +233,12 @@ test("createReportDraft writes cautious draft sections from a report plan", () =
   );
   assert.ok(
     reportDraft.sections
+      .find((section) => section.id === "birth-year-transformations")
+      .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
+      .text.includes("四化落子女宫时")
+  );
+  assert.ok(
+    reportDraft.sections
       .find((section) => section.id === "major-periods")
       .paragraphs.find((paragraph) => paragraph.kind === "interpretation")
       .text.includes("4-13岁命宫巳")
@@ -430,6 +436,9 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
   assert.ok(paragraph.text.includes("四化落夫妻宫时"));
   assert.ok(paragraph.text.includes("四化落迁移宫时"));
   assert.ok(paragraph.text.includes("四化落福德宫时"));
+  assert.ok(paragraph.text.includes("四化落子女宫时"));
+  assert.ok(paragraph.text.includes("四化落仆役宫时"));
+  assert.ok(paragraph.text.includes("四化落父母宫时"));
   assert.ok(paragraph.text.includes("流月骨架"));
   assert.ok(paragraph.text.includes("月份事件、应期或吉凶"));
   assert.ok(paragraph.text.includes("安全触发候选只列观察点"));
@@ -454,6 +463,10 @@ test("createReportDraft writes current stage as conservative stage synthesis", (
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-travel-palace",
     "interpretation.four-transformations.on-wellbeing-palace",
+    "interpretation.four-transformations.on-siblings-palace",
+    "interpretation.four-transformations.on-children-palace",
+    "interpretation.four-transformations.on-friends-palace",
+    "interpretation.four-transformations.on-parents-palace",
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",

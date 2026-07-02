@@ -251,7 +251,10 @@ test("createReportPlan turns ready agent context into report sections", () => {
       "interpretation.four-transformations.quan-structure",
       "interpretation.four-transformations.ke-structure",
       "interpretation.four-transformations.ji-structure",
-      "interpretation.four-transformations.on-spouse-palace"
+      "interpretation.four-transformations.on-spouse-palace",
+      "interpretation.four-transformations.on-siblings-palace",
+      "interpretation.four-transformations.on-children-palace",
+      "interpretation.four-transformations.on-friends-palace"
     ]
   );
   assert.ok(
@@ -395,6 +398,10 @@ test("createReportPlan includes current stage synthesis when available", () => {
     "interpretation.four-transformations.on-spouse-palace",
     "interpretation.four-transformations.on-travel-palace",
     "interpretation.four-transformations.on-wellbeing-palace",
+    "interpretation.four-transformations.on-siblings-palace",
+    "interpretation.four-transformations.on-children-palace",
+    "interpretation.four-transformations.on-friends-palace",
+    "interpretation.four-transformations.on-parents-palace",
     "interpretation.monthly-period.structure-only",
     "interpretation.timing-trigger.candidate-only",
     "interpretation.timing-combination.verified-only",

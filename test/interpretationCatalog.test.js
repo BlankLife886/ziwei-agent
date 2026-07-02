@@ -118,7 +118,12 @@ test("findFourTransformationTargetPalaceInterpretationRefs maps supported target
     { name: "化忌", star: "天机", targetPalaceName: "官禄宫" },
     { name: "化禄", star: "贪狼", targetPalaceName: "迁移宫" },
     { name: "化科", star: "天梁", targetPalaceName: "福德宫" },
-    { name: "化忌", star: "天同", targetPalaceName: "子女宫" }
+    { name: "化忌", star: "天同", targetPalaceName: "兄弟宫" },
+    { name: "化禄", star: "天同", targetPalaceName: "子女宫" },
+    { name: "化权", star: "廉贞", targetPalaceName: "疾厄宫" },
+    { name: "化科", star: "天府", targetPalaceName: "田宅宫" },
+    { name: "化忌", star: "巨门", targetPalaceName: "仆役宫" },
+    { name: "化禄", star: "太阳", targetPalaceName: "父母宫" }
   ]);
 
   assert.deepEqual(interpretationRefs, [
@@ -127,18 +132,40 @@ test("findFourTransformationTargetPalaceInterpretationRefs maps supported target
     INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WEALTH_PALACE,
     INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CAREER_PALACE,
     INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_TRAVEL_PALACE,
-    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_WELLBEING_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_SIBLINGS_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_CHILDREN_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_HEALTH_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PROPERTY_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_FRIENDS_PALACE,
+    INTERPRETATION_IDS.FOUR_TRANSFORMATION_ON_PARENTS_PALACE
   ]);
 
   const interpretations = findInterpretations(interpretationRefs);
 
   assert.deepEqual(
     interpretations.map((interpretation) => interpretation.palaceName),
-    ["命宫", "夫妻宫", "财帛宫", "官禄宫", "迁移宫", "福德宫"]
+    [
+      "命宫",
+      "夫妻宫",
+      "财帛宫",
+      "官禄宫",
+      "迁移宫",
+      "福德宫",
+      "兄弟宫",
+      "子女宫",
+      "疾厄宫",
+      "田宅宫",
+      "仆役宫",
+      "父母宫"
+    ]
   );
   assert.ok(interpretations[1].text.includes("不是婚姻结果判断"));
   assert.ok(interpretations[2].text.includes("不是财富结果判断"));
   assert.ok(interpretations[3].text.includes("不是事业结果判断"));
+  assert.ok(interpretations[7].text.includes("不能直接写成生育结果"));
+  assert.ok(interpretations[8].text.includes("不能直接写成疾病诊断"));
+  assert.ok(interpretations[9].text.includes("不能直接写成置业结果"));
 });
 
 test("findStarRoleInterpretationRefs maps life palace stars for personality analysis", () => {
