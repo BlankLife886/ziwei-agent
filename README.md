@@ -105,6 +105,15 @@ docker run --rm -p 3000:3000 \
   ziwei-agent
 ```
 
+也可以使用部署模板：
+
+```bash
+docker compose -f deploy/docker-compose.yml up --build
+kubectl apply -f deploy/kubernetes.yml
+```
+
+`deploy/docker-compose.yml` 和 `deploy/kubernetes.yml` 都示范了 runtime secret 文件、配额文件持久化、`/health` liveness 和 `/ready` readiness。模板里的 secret 是示例值，生产发布前必须替换。
+
 ## 当前模块
 
 - `src/intake.js`: 校验用户出生资料，并把出生时间标准化为十二时辰。
@@ -124,6 +133,7 @@ docker run --rm -p 3000:3000 \
 - `src/serverRuntimeConfig.js`: 校验 API 服务运行时配置，生产模式下要求可用鉴权配置。
 - `src/validateRuntimeConfig.js`: 命令行运行时配置校验入口，供部署前检查环境变量。
 - `src/validateDeployment.js`: 部署前校验入口，串联运行时配置、知识库审计和 API smoke。
+- `deploy/`: Compose、Kubernetes 和 runtime secret 示例，固定生产部署时的 secret、探针和 quota state 约定。
 - `src/agent/profilePatchParser.js`: 把用户自然语言补充转换为可审计的结构化资料 patch，支持出生资料和分析日期，并保留字段来源片段。
 - `src/agent/queryIntentParser.js`: 把“看当前大限 / 看事业 / 看财帛 / 看运势 / 看四化”等自然语言问题转换为可审计的查询意图，用于收敛本轮报告章节，并保留事业、财帛、迁移等专题上下文。
 - `src/agent/reportDomainCatalog.js`: 定义最终用户报告领域，包括性格、事业、财富、婚姻、运势、因果、前世今生等，并标注当前支持程度和缺失能力。

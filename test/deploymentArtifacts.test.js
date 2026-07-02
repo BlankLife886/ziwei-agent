@@ -1,0 +1,34 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+test("docker compose deployment wires runtime secrets, quota state, and liveness", async () => {
+  const compose = await readFile("deploy/docker-compose.yml", "utf8");
+
+  assert.match(compose, /ZIWEI_RUNTIME_SECRETS_FILE:\s+\/run\/secrets\/ziwei_runtime/u);
+  assert.match(compose, /ZIWEI_API_QUOTA_STORE:\s+\/app\/\.runtime\/api-quota\.json/u);
+  assert.match(compose, /ziwei-runtime:\/app\/\.runtime/u);
+  assert.match(compose, /runtime-secrets\.example\.json/u);
+  assert.match(compose, /\/health/u);
+});
+
+test("kubernetes deployment wires liveness, readiness, secrets, and runtime state", async () => {
+  const manifest = await readFile("deploy/kubernetes.yml", "utf8");
+
+  assert.match(manifest, /kind:\s+Secret/u);
+  assert.match(manifest, /ZIWEI_RUNTIME_SECRETS_FILE/u);
+  assert.match(manifest, /path:\s+\/health/u);
+  assert.match(manifest, /path:\s+\/ready/u);
+  assert.match(manifest, /persistentVolumeClaim/u);
+  assert.match(manifest, /ZIWEI_API_QUOTA_STORE/u);
+});
+
+test("runtime secret example keeps credentials in the supported JSON shape", async () => {
+  const rawSecret = await readFile("deploy/runtime-secrets.example.json", "utf8");
+  const parsedSecret = JSON.parse(rawSecret);
+
+  assert.ok(Array.isArray(parsedSecret.ZIWEI_API_CREDENTIALS));
+  assert.equal(parsedSecret.ZIWEI_API_CREDENTIALS[0].id, "app-client");
+  assert.deepEqual(parsedSecret.ZIWEI_API_CREDENTIALS[0].scopes, ["reports:write"]);
+  assert.equal(typeof parsedSecret.ZIWEI_LLM_API_KEY, "string");
+});

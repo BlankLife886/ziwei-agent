@@ -1,0 +1,39 @@
+services:
+  ziwei-agent:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ziwei-agent:local
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      ZIWEI_API_OBSERVABILITY: stdout
+      ZIWEI_API_MAX_BODY_BYTES: "100000"
+      ZIWEI_API_RATE_LIMIT_WINDOW_MS: "60000"
+      ZIWEI_API_RATE_LIMIT_MAX: "60"
+      ZIWEI_API_QUOTA_STORE: /app/.runtime/api-quota.json
+      ZIWEI_KNOWLEDGE_STORE: data/knowledge-snippets.example.json
+      ZIWEI_RUNTIME_SECRETS_FILE: /run/secrets/ziwei_runtime
+    secrets:
+      - ziwei_runtime
+    volumes:
+      - ziwei-runtime:/app/.runtime
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+secrets:
+  ziwei_runtime:
+    file: ./runtime-secrets.example.json
+
+volumes:
+  ziwei-runtime:

@@ -64,6 +64,27 @@ ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
 
 直接环境变量优先于 secret 文件。secret 文件读取失败、JSON 不合法或包含未支持键时，启动校验和部署校验会失败。
 
+## 部署模板
+
+本仓库提供两个部署模板：
+
+- `deploy/docker-compose.yml`：本地或单机容器运行模板，挂载 `deploy/runtime-secrets.example.json` 为 runtime secret，并把 `.runtime` 映射为持久化 volume。
+- `deploy/kubernetes.yml`：Kubernetes Namespace、Secret、PVC、Deployment 和 Service 模板，包含 `/health` livenessProbe、`/ready` readinessProbe、runtime secret 挂载和 quota state PVC。
+
+发布前必须替换模板中的示例 token 和模型 key。使用模板前仍需执行启动前门禁；模板只固定运行边界，不替代测试、知识库审计和 API smoke。
+
+Compose 示例：
+
+```bash
+docker compose -f deploy/docker-compose.yml up --build
+```
+
+Kubernetes 示例：
+
+```bash
+kubectl apply -f deploy/kubernetes.yml
+```
+
 外部大模型 provider 只通过报告生成器合同接入：
 
 ```bash

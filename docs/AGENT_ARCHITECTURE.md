@@ -176,7 +176,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - 有报告发布门禁。
 - 有 CLI、HTTP API 和 Web UI 入口，UI 通过 HTTP API 进入同一条 pipeline。
 - 有 API 请求大小限制、多凭证 scoped bearer 鉴权、credential 生命周期控制、secret 文件载入、请求追踪、结构化观测、脱敏日志、liveness/readiness 探针、内存限流和可选文件持久化配额。
-- 有运行时配置校验、部署校验、API smoke 校验、运维手册、Dockerfile、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
+- 有运行时配置校验、部署校验、API smoke 校验、运维手册、Dockerfile、Compose/Kubernetes 部署模板、`.dockerignore` 和 `.env.example`，可以在容器中以同一 HTTP API 和 Web UI 入口启动。
 - 有本地参考目录和解释目录。
 - 有 `evidenceRefs`、`referenceRefs`、`sourceRefs`、`knowledgeSnippetRefs`、`interpretationRefs` 的追溯链。
 - 有安全触发观察点、组合验证层、组合主题解释层、跨宫跨限运关系解释层和专题细分任务单，能把多层运限和四化重叠宫位列为待验证主题，筛出证据层数达标的合参主题，把已验证宫位转成阶段合参领域，整理当前大限、流年、流月之间的同宫或分宫关系，并把报告章节拆成可审计的专题角度，但不会输出事件断语。
@@ -185,7 +185,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 
 - 外部知识库片段 schema、检索和可用性审计已建立，示例库已有本地审校框架样本；书籍/PDF内容尚未全量结构化录入。
 - 知识片段录入器和 JSON store 已建立，但尚未接入 OCR、PDF 解析或向量检索。
-- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、运维手册和容器部署工件，但托管密钥平台和真实环境部署尚未接入。
+- 报告生成器合同、provider 选择边界、确定性 provider、异步 provider 链路、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口和轻量 Web UI 已建立；API 已有多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但托管密钥平台和真实环境部署尚未接入。
 - 大限四化、流年骨架、流年四化、流月骨架、组合验证底座、组合主题解释、跨宫跨限运关系解释和专题细分任务单已接入，但细分组合规则和文献支撑仍然很少。
 - 宫位、星曜、四化、运限之间的深层专题化解释仍然需要扩充。
 - 因果、前世今生等主题只有目标登记，还不能生成深入报告。
