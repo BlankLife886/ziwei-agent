@@ -251,7 +251,7 @@ const READINESS_ITEMS = [
         pipelineResult.reportGeneration?.status === "generated" &&
         providerResolution?.status === "ready"
       ) {
-        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、轻量 Web UI、多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、API smoke 校验、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但尚未接入托管密钥平台和真实环境部署。", 0.99);
+        return partial("已建立报告生成器合同、provider 选择边界、同步/异步 provider 链路、确定性 provider、通用外部 HTTP provider 适配器、超时、重试、响应大小限制、脱敏诊断、CLI 入口、HTTP API 入口、轻量 Web UI、多凭证 scoped bearer 鉴权、credential 禁用/生效/过期控制、secret 文件载入、请求大小限制、请求追踪、结构化观测、liveness/readiness 探针、内存限流、可选文件持久化配额、运行时配置校验、部署校验、发布总门禁、CI 工作流、API smoke 校验、运维手册、Dockerfile 和 Compose/Kubernetes 模板，但尚未接入托管密钥平台和真实环境部署。", 0.99);
       }
 
       if (
