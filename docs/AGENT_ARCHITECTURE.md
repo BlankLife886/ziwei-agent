@@ -82,7 +82,7 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 - `externalLLMReportProvider`：把 generation context 包装为通用 HTTP 大模型请求，并把响应解析为 `reportDraft`；缺配置、HTTP 失败、请求超时、响应过大或响应不可解析都会阻断发布，并返回不含密钥和请求体的诊断信息。
 - `reportComposer`：用确定性模板生成保守正文草稿，作为当前默认 provider 的实现。
 - `reportComposer` 同时生成 `brief` 顶层摘要，包含报告总览、命盘摘要、章节路径和交付边界；该层只汇总已规划章节和证据数量，不新增不可追溯断语。
-- `reportAuditor`：检查报告草稿是否断开证据链、引用链，或出现未被边界约束的高风险断语。
+- `reportAuditor`：检查报告草稿是否断开证据链、引用链，验证章节 refs 能否落到可追溯附录条目，并扫描未被边界约束的高风险断语。
 - `reportApprovalGate`：产品侧人工确认门禁；默认 auto 策略保持本地和自动化链路可发布，`require-review` 策略下必须提供 `approved` 人工决策，否则报告只能返回 blocked 和恢复动作。
 - `reportPublisher`：作为最终发布门禁，只把审计通过的草稿转换为用户报告。
 - `recoveryPlanner`：把缺资料、报告规划阻断、provider 缺配置、报告审计失败、发布门禁阻断和非阻断知识缺口整理成结构化恢复动作，标明 owner、priority、reason 和 nextStep。
@@ -105,13 +105,15 @@ Web UI 只作为同一 HTTP API 的浏览器入口。页面收集出生资料和
 
 ## 证据链契约
 
-每个报告章节必须保留三类引用：
+每个报告章节必须保留五类引用：
 
 - `evidenceRefs`：回指本次命盘已经生成的证据。
 - `referenceRefs`：回指本地规则或分析框架。
+- `sourceRefs`：回指规则或知识片段背后的来源。
+- `knowledgeSnippetRefs`：回指已经通过审计的知识片段。
 - `interpretationRefs`：回指受控解释条目。
 
-这三类引用是后续接入知识库和大模型前的安全底线。大模型只能在这些结构化材料上归纳表达，不能绕过证据直接生成断语。
+这些引用不仅要出现在章节字段里，还必须能落到对应的 evidence、reference、source、knowledge snippet 和 interpretation 附录条目。大模型只能在这些结构化材料上归纳表达，不能绕过证据直接生成断语。
 
 ## 用户报告对象
 

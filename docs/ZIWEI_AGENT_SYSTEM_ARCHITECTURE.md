@@ -85,7 +85,7 @@
 | 知识层 | `knowledgeSnippetCatalog`, `knowledgeSnippetStore`, `knowledgeCoverageAuditor` | 管理 verified 知识片段，审计章节知识覆盖 |
 | 工具执行层 | `toolRuntime` | 登记工具、执行工具、记录 toolId/合同/耗时/阻断原因 |
 | 生成层 | `reportGenerator`, `reportComposer`, `externalLLMReportProvider` | 用受控 generation context 生成报告草稿 |
-| 审计发布层 | `reportAuditor`, `reportApprovalGate`, `reportPublisher` | 阻断越权断语、执行发布确认，发布合格用户报告 |
+| 审计发布层 | `reportAuditor`, `reportApprovalGate`, `reportPublisher` | 阻断断链引用和越权断语、执行发布确认，发布合格用户报告 |
 | 恢复层 | `recoveryPlanner` | 把阻断、审计失败和能力缺口转换为 owner/priority/nextStep 明确的恢复计划 |
 | 部署运维层 | `validateRelease`, `validateDeployment`, `validateCloudflare`, `smokeApi`, `docs/OPERATIONS.md` | 本地、CI、Cloudflare、容器和运维验证 |
 

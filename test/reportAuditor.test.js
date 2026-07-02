@@ -24,8 +24,29 @@ test("auditReportOutput detects refs that bypass the planned section contract", 
     sections: [
       {
         id: "life-triad",
+        evidenceItems: [
+          {
+            id: "life-triad.life-palace",
+            text: "命宫证据",
+            referenceRefs: ["framework.life-triad"]
+          }
+        ],
         evidenceRefs: ["life-triad.life-palace"],
+        references: [
+          {
+            id: "framework.life-triad",
+            title: "命宫三方四正",
+            sourceRefs: []
+          }
+        ],
         referenceRefs: ["framework.life-triad"],
+        interpretations: [
+          {
+            id: "interpretation.life-triad.structure",
+            text: "结构解释",
+            sourceRefs: ["framework.life-triad"]
+          }
+        ],
         interpretationRefs: ["interpretation.life-triad.structure"]
       }
     ]
@@ -64,6 +85,55 @@ test("auditReportOutput detects refs that bypass the planned section contract", 
   );
 });
 
+test("auditReportOutput blocks planned refs that cannot be traced to appendix items", () => {
+  const reportPlan = {
+    status: "planned",
+    sections: [
+      {
+        id: "wealth",
+        evidenceItems: [],
+        evidenceRefs: ["wealth.missing-evidence"],
+        referenceRefs: ["framework.missing-reference"],
+        references: [],
+        sourceRefs: ["source.missing-source"],
+        sources: [],
+        knowledgeSnippetRefs: ["knowledge.missing-snippet"],
+        knowledgeSnippets: [],
+        interpretationRefs: ["interpretation.missing"],
+        interpretations: []
+      }
+    ]
+  };
+  const reportDraft = {
+    status: "drafted",
+    sections: [
+      {
+        id: "wealth",
+        evidenceRefs: ["wealth.missing-evidence"],
+        referenceRefs: ["framework.missing-reference"],
+        sourceRefs: ["source.missing-source"],
+        knowledgeSnippetRefs: ["knowledge.missing-snippet"],
+        interpretationRefs: ["interpretation.missing"],
+        paragraphs: []
+      }
+    ],
+    closing: []
+  };
+  const audit = auditReportOutput(reportPlan, reportDraft);
+
+  assert.equal(audit.status, "failed");
+  assert.deepEqual(
+    audit.issues.map((issue) => issue.id),
+    [
+      "section-ref-without-appendix-item",
+      "section-ref-without-appendix-item",
+      "section-ref-without-appendix-item",
+      "section-ref-without-appendix-item",
+      "section-ref-without-appendix-item"
+    ]
+  );
+});
+
 test("auditReportOutput blocks drafts that omit a planned section", () => {
   const reportPlan = createReportPlan(
     createZiweiAgentResponse(buildChart(createSampleProfile()))
@@ -89,8 +159,29 @@ test("auditReportOutput warns when risky fortune language is not framed as a bou
     sections: [
       {
         id: "current-stage",
+        evidenceItems: [
+          {
+            id: "current-stage.current-major-period",
+            text: "当前大限证据",
+            referenceRefs: ["framework.current-stage"]
+          }
+        ],
         evidenceRefs: ["current-stage.current-major-period"],
+        references: [
+          {
+            id: "framework.current-stage",
+            title: "当前阶段分析",
+            sourceRefs: []
+          }
+        ],
         referenceRefs: ["framework.current-stage"],
+        interpretations: [
+          {
+            id: "interpretation.current-stage.static-only",
+            text: "当前阶段只能作结构观察",
+            sourceRefs: ["framework.current-stage"]
+          }
+        ],
         interpretationRefs: ["interpretation.current-stage.static-only"]
       }
     ]
@@ -129,8 +220,29 @@ test("auditReportOutput warns when timing trigger candidates lose observation fr
     sections: [
       {
         id: "current-stage",
+        evidenceItems: [
+          {
+            id: "current-stage.timing-trigger-candidates",
+            text: "触发候选证据",
+            referenceRefs: ["framework.timing-trigger-candidate"]
+          }
+        ],
         evidenceRefs: ["current-stage.timing-trigger-candidates"],
+        references: [
+          {
+            id: "framework.timing-trigger-candidate",
+            title: "触发候选边界",
+            sourceRefs: []
+          }
+        ],
         referenceRefs: ["framework.timing-trigger-candidate"],
+        interpretations: [
+          {
+            id: "interpretation.timing-trigger.candidate-only",
+            text: "触发候选只能作为观察点",
+            sourceRefs: ["framework.timing-trigger-candidate"]
+          }
+        ],
         interpretationRefs: ["interpretation.timing-trigger.candidate-only"]
       }
     ]

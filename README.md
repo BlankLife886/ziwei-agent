@@ -181,7 +181,7 @@ kubectl apply -f deploy/kubernetes.yml
 - `src/agent/reportGenerator.js`: 定义报告生成器合同层，把 report plan、证据、引用、知识片段、解释条目、专题细分任务单和 guardrails 组织为 generation context；当前默认 provider 使用确定性模板，也支持选择外部大模型 provider。若选择外部大模型但未配置可调用 provider，会在生成前阻断，避免绕过审计链路。
 - `src/agent/externalLLMReportProvider.js`: 把 generation context 包装成外部 HTTP 大模型请求，并把返回结果解析为 `reportDraft`；缺配置、HTTP 失败、超时、响应过大或解析失败都会阻断后续发布，并返回不含密钥和请求体的诊断信息。
 - `src/agent/reportComposer.js`: 根据报告规划生成保守的正文草稿，确保每段内容能通过 `evidenceRefs` 回指到已有证据，并通过 `referenceRefs` 回指到规则/分析框架。
-- `src/agent/reportAuditor.js`: 审计报告草稿是否遵守章节引用契约，并扫描未被边界约束的高风险断语。
+- `src/agent/reportAuditor.js`: 审计报告草稿是否遵守章节引用契约、refs 是否能落到可追溯附录条目，并扫描未被边界约束的高风险断语。
 - `src/agent/reportPublisher.js`: 作为最终发布门禁，只有审计通过的草稿才会转换成可交付的用户报告。
 - `src/agent/reportMarkdownExporter.js`: 把已发布的 `reportOutput` 和可选命盘结构转成 Markdown 用户报告，保留命盘图、证据、规则、来源、知识片段和解释条目的可追溯附录。
 - `src/formatters.js`: 把结构化排盘结果转换为 CLI 展示文本，避免展示逻辑混入排盘流程。

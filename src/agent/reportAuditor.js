@@ -65,12 +65,92 @@ export function auditReportOutput(reportPlan, reportDraft) {
     return [section.id, section];
   }));
 
+  auditPlanTraceability(reportPlan, issues);
   auditPlannedSectionsPresent(reportPlan, reportDraft, issues);
   auditDraftSections(reportDraft, sectionsById, issues);
   auditRiskLanguage(reportDraft, warnings);
   auditTimingTriggerFraming(reportDraft, warnings);
 
   return buildAuditResult(issues, warnings);
+}
+
+function auditPlanTraceability(reportPlan, issues) {
+  reportPlan.sections.forEach((section) => {
+    auditTraceableRefGroup({
+      issues,
+      sectionId: section.id,
+      refName: "evidenceRefs",
+      refs: section.evidenceRefs,
+      itemFieldName: "evidenceItems",
+      itemIds: collectItemIds(section.evidenceItems)
+    });
+    auditTraceableRefGroup({
+      issues,
+      sectionId: section.id,
+      refName: "referenceRefs",
+      refs: section.referenceRefs,
+      itemFieldName: "references",
+      itemIds: collectItemIds(section.references)
+    });
+    auditTraceableRefGroup({
+      issues,
+      sectionId: section.id,
+      refName: "sourceRefs",
+      refs: section.sourceRefs,
+      itemFieldName: "sources",
+      itemIds: collectItemIds(section.sources)
+    });
+    auditTraceableRefGroup({
+      issues,
+      sectionId: section.id,
+      refName: "knowledgeSnippetRefs",
+      refs: section.knowledgeSnippetRefs,
+      itemFieldName: "knowledgeSnippets",
+      itemIds: collectItemIds(section.knowledgeSnippets)
+    });
+    auditTraceableRefGroup({
+      issues,
+      sectionId: section.id,
+      refName: "interpretationRefs",
+      refs: section.interpretationRefs,
+      itemFieldName: "interpretations",
+      itemIds: collectItemIds(section.interpretations)
+    });
+  });
+}
+
+function auditTraceableRefGroup({
+  issues,
+  sectionId,
+  refName,
+  refs = [],
+  itemFieldName,
+  itemIds
+}) {
+  const danglingRefs = refs.filter((ref) => {
+    return !itemIds.has(ref);
+  });
+
+  if (danglingRefs.length === 0) {
+    return;
+  }
+
+  issues.push(createIssue(
+    "section-ref-without-appendix-item",
+    `${sectionId} 的 ${refName} 无法在 ${itemFieldName} 中找到可追溯条目：${danglingRefs.join("、")}。`,
+    {
+      sectionId,
+      refName,
+      itemFieldName,
+      refs: danglingRefs
+    }
+  ));
+}
+
+function collectItemIds(items = []) {
+  return new Set(items.map((item) => {
+    return item.id;
+  }).filter(Boolean));
 }
 
 function auditPlannedSectionsPresent(reportPlan, reportDraft, issues) {
