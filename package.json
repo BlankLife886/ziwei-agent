@@ -8,7 +8,7 @@
     "serve": "node src/server.js",
     "test": "node --test",
     "smoke:api": "node src/smokeApi.js",
-    "deploy:cloudflare": "wrangler deploy",
+    "deploy:cloudflare": "node src/deployCloudflare.js",
     "validate:cloudflare": "node src/validateCloudflare.js",
     "validate:architecture": "node src/validateAgentArchitecture.js",
     "validate:release": "node src/validateRelease.js",

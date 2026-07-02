@@ -13,6 +13,7 @@ npm run validate:architecture
 node --env-file=.env src/validateRuntimeConfig.js
 node --env-file=.env src/validateDeployment.js
 npm run validate:release
+npm run deploy:cloudflare
 npm run validate:release:summary
 ```
 
@@ -24,6 +25,7 @@ npm run validate:release:summary
 - `validateRuntimeConfig.js`：验证端口、请求体上限、限流、观测模式和生产鉴权配置。
 - `validateDeployment.js`：复用运行时门禁，审计知识库，并临时启动同一个 HTTP server 请求 `/`、`/health`、`/v1/reports`。
 - `validate:release`：串联全量测试、知识库、运行时、部署、Cloudflare dry-run、架构合规审计、`.env.example` 部署校验和 `git diff --check`；GitHub Actions 在 push/PR 上执行同一条 release gate，并额外跑 Compose 配置检查和 Docker build。
+- `deploy:cloudflare`：通过 `src/deployCloudflare.js` 调用项目本地 Wrangler，并在部署时注入 `ZIWEI_RELEASE_VERSION=<package-version>+<short-commit>`、`ZIWEI_RELEASE_COMMIT=<full-commit>` 和 `ZIWEI_RELEASE_SOURCE=cloudflare-workers`，让 `/health` 与 `/ready` 能证明当前线上版本。
 - `validate:release:summary`：运行同一条 release gate，并写出 `.runtime/release-summary.json`，供 CI artifact、部署平台或人工发布审计读取。也可以直接执行 `node src/validateRelease.js --summary <path>` 或设置 `ZIWEI_RELEASE_SUMMARY_PATH=<path>`。
 
 任何一项返回非零退出码，都不应继续发布。
@@ -149,7 +151,7 @@ curl -X POST "$BASE_URL/v1/reports" \
 - `/ready` 返回 `status=ready`，`checks.agentEntry.pipeline` 仍包含 `reportPublisher`。
 - `/openapi.json` 返回 OpenAPI `3.1.0`，且包含 `POST /v1/reports`。
 - `POST /v1/reports` 返回 `status=published`，响应里有 `chart`、`report`、`audits.report` 和 `audits.readiness`。
-- `release.source` 应为 `cloudflare-workers`，生产发布时应额外设置真实 `ZIWEI_RELEASE_VERSION` 和 `ZIWEI_RELEASE_COMMIT`。
+- `release.source` 应为 `cloudflare-workers`，`release.commit` 应等于本次部署 commit，`release.version` 应包含包版本和短 commit。
 
 外部大模型 provider 只通过报告生成器合同接入：
 

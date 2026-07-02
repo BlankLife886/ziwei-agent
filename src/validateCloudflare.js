@@ -43,8 +43,8 @@ async function validateWranglerConfig(issues) {
 async function validatePackageScripts(issues) {
   const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 
-  if (packageJson.scripts?.["deploy:cloudflare"] !== "wrangler deploy") {
-    issues.push("package.json 缺少 deploy:cloudflare 脚本。");
+  if (packageJson.scripts?.["deploy:cloudflare"] !== "node src/deployCloudflare.js") {
+    issues.push("package.json 缺少带 release metadata 注入的 deploy:cloudflare 脚本。");
   }
 
   if (packageJson.scripts?.["validate:cloudflare"] !== "node src/validateCloudflare.js") {
