@@ -1,5 +1,9 @@
 import { loadKnowledgeSnippetStore } from "./agent/knowledgeSnippetStore.js";
-import { formatKnowledgeStoreValidation } from "./agent/knowledgeStoreFormatter.js";
+import { auditKnowledgeStoreCoverage } from "./agent/knowledgeStoreCoverageAuditor.js";
+import {
+  formatKnowledgeStoreCoverage,
+  formatKnowledgeStoreValidation
+} from "./agent/knowledgeStoreFormatter.js";
 
 // 知识库文件校验入口。
 //
@@ -18,7 +22,12 @@ async function main() {
   }
 
   const store = await loadKnowledgeSnippetStore(filePath);
-  const lines = formatKnowledgeStoreValidation(store, filePath);
+  const coverageAudit = auditKnowledgeStoreCoverage(store);
+  const lines = [
+    ...formatKnowledgeStoreValidation(store, filePath),
+    "",
+    ...formatKnowledgeStoreCoverage(coverageAudit)
+  ];
 
   for (const line of lines) {
     console.log(line);

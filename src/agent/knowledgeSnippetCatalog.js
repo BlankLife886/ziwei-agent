@@ -80,6 +80,10 @@ export function findKnowledgeSources(sourceRefs = []) {
   return KNOWLEDGE_SOURCES.filter((source) => refSet.has(source.id));
 }
 
+export function listKnowledgeSources() {
+  return [...KNOWLEDGE_SOURCES];
+}
+
 export function findKnowledgeSnippets(snippetRefs = [], options = {}) {
   const refSet = new Set(snippetRefs);
   const snippets = options.snippets ?? KNOWLEDGE_SNIPPETS;
