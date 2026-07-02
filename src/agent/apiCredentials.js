@@ -4,6 +4,9 @@ export const API_SCOPES = {
   REPORTS_WRITE: "reports:write"
 };
 
+const TOKEN_HASH_PREFIX = "sha256:";
+const TOKEN_HASH_PATTERN = /^sha256:[0-9a-f]{64}$/iu;
+
 export function parseApiCredentialsFromRuntime({
   env = process.env,
   legacyApiToken
@@ -26,11 +29,22 @@ export function parseApiCredentialsFromRuntime({
 }
 
 export function createApiAuthenticator(options = {}) {
-  const credentials = normalizeCredentials(options.credentials ?? []);
+  const configuredCredentials = Array.isArray(options.credentials) ? options.credentials : [];
+  const credentials = normalizeCredentials(configuredCredentials);
+  const invalidCredentialConfig = configuredCredentials.length > 0 && credentials.length === 0;
   const now = typeof options.now === "function" ? options.now : Date.now;
 
   return {
     authenticate({ headers = {}, requiredScope } = {}) {
+      if (invalidCredentialConfig) {
+        return {
+          status: "unauthorized",
+          mode: "bearer",
+          reason: "invalid_credential_config",
+          message: "API credential 配置不合法。"
+        };
+      }
+
       if (credentials.length === 0) {
         return {
           status: "allowed",
@@ -53,7 +67,7 @@ export function createApiAuthenticator(options = {}) {
       }
 
       const matchedCredential = credentials.find((credential) => {
-        return safeTokenEquals(token, credential.token);
+        return safeTokenEquals(token, credential.tokenHash);
       });
 
       if (!matchedCredential) {
@@ -89,6 +103,14 @@ export function createApiAuthenticator(options = {}) {
       };
     }
   };
+}
+
+export function createApiTokenSecret({ byteLength = 32 } = {}) {
+  return `zwt_${randomBytes(byteLength).toString("base64url")}`;
+}
+
+export function createApiTokenHash(token) {
+  return `${TOKEN_HASH_PREFIX}${hashTokenHex(token)}`;
 }
 
 export function summarizeAuthResult(authResult) {
@@ -134,16 +156,19 @@ function createInvalidRuntimeCredential() {
 function normalizeCredentials(credentials) {
   return credentials
     .filter((credential) => {
+      const hasToken = typeof credential?.token === "string" && credential.token;
+      const hasTokenHash = typeof credential?.tokenHash === "string" &&
+        TOKEN_HASH_PATTERN.test(credential.tokenHash);
+
       return credential &&
         typeof credential.id === "string" &&
         credential.id.trim() &&
-        typeof credential.token === "string" &&
-        credential.token;
+        (hasToken || hasTokenHash);
     })
     .map((credential) => {
       return {
         id: credential.id.trim(),
-        token: credential.token,
+        tokenHash: normalizeTokenHash(credential),
         scopes: normalizeScopes(credential.scopes),
         disabled: credential.disabled === true,
         notBeforeMs: parseCredentialTime(credential.notBefore),
@@ -153,11 +178,13 @@ function normalizeCredentials(credentials) {
 }
 
 function isCredentialShape(credential) {
+  const hasToken = typeof credential?.token === "string" && credential.token;
+  const hasTokenHash = typeof credential?.tokenHash === "string" &&
+    TOKEN_HASH_PATTERN.test(credential.tokenHash);
   const hasIdentity = credential &&
     typeof credential.id === "string" &&
     credential.id.trim() &&
-    typeof credential.token === "string" &&
-    credential.token;
+    (hasToken || hasTokenHash);
   const hasValidScopes = credential?.scopes === undefined ||
     Array.isArray(credential.scopes);
   const hasValidLifecycle = credential?.disabled === undefined ||
@@ -197,13 +224,25 @@ function extractBearerToken(headers) {
 
 function safeTokenEquals(providedToken, configuredToken) {
   const providedHash = hashToken(providedToken);
-  const configuredHash = hashToken(configuredToken);
+  const configuredHash = Buffer.from(configuredToken.slice(TOKEN_HASH_PREFIX.length), "hex");
 
   return timingSafeEqual(providedHash, configuredHash);
 }
 
 function hashToken(token) {
   return createHash("sha256").update(token).digest();
+}
+
+function hashTokenHex(token) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function normalizeTokenHash(credential) {
+  if (typeof credential.tokenHash === "string" && TOKEN_HASH_PATTERN.test(credential.tokenHash)) {
+    return credential.tokenHash.toLowerCase();
+  }
+
+  return createApiTokenHash(credential.token);
 }
 
 function hasScope(scopes, requiredScope) {

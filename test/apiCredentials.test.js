@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   API_SCOPES,
   createApiAuthenticator,
+  createApiTokenHash,
   parseApiCredentialsFromRuntime,
   summarizeAuthResult
 } from "../src/agent/apiCredentials.js";
@@ -76,6 +77,28 @@ test("parseApiCredentialsFromRuntime fails closed for invalid credential entries
   assert.equal(result.status, "unauthorized");
 });
 
+test("createApiAuthenticator fails closed for explicit invalid credential lists", () => {
+  const authenticator = createApiAuthenticator({
+    credentials: [
+      {
+        id: "invalid-hash",
+        tokenHash: "sha256:not-a-valid-hash",
+        scopes: [API_SCOPES.REPORTS_WRITE]
+      }
+    ]
+  });
+
+  const result = authenticator.authenticate({
+    headers: {
+      authorization: "Bearer any-token"
+    },
+    requiredScope: API_SCOPES.REPORTS_WRITE
+  });
+
+  assert.equal(result.status, "unauthorized");
+  assert.equal(result.reason, "invalid_credential_config");
+});
+
 test("createApiAuthenticator allows matching scoped credentials without exposing tokens", () => {
   const authenticator = createApiAuthenticator({
     credentials: [
@@ -99,6 +122,32 @@ test("createApiAuthenticator allows matching scoped credentials without exposing
   assert.equal(summary.principalId, "report-writer");
   assert.deepEqual(summary.scopes, [API_SCOPES.REPORTS_WRITE]);
   assert.equal(JSON.stringify(summary).includes("secret-token"), false);
+});
+
+test("createApiAuthenticator supports hashed credentials without storing plaintext tokens", () => {
+  const tokenHash = createApiTokenHash("secret-token");
+  const authenticator = createApiAuthenticator({
+    credentials: [
+      {
+        id: "hashed-report-writer",
+        tokenHash,
+        scopes: [API_SCOPES.REPORTS_WRITE]
+      }
+    ]
+  });
+
+  const result = authenticator.authenticate({
+    headers: {
+      authorization: "Bearer secret-token"
+    },
+    requiredScope: API_SCOPES.REPORTS_WRITE
+  });
+  const summary = summarizeAuthResult(result);
+
+  assert.equal(result.status, "allowed");
+  assert.equal(summary.principalId, "hashed-report-writer");
+  assert.equal(JSON.stringify(summary).includes("secret-token"), false);
+  assert.equal(JSON.stringify(summary).includes(tokenHash), false);
 });
 
 test("createApiAuthenticator blocks missing, invalid, and underscoped tokens", () => {

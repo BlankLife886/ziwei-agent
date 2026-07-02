@@ -42,6 +42,8 @@ test("runtime secret example keeps credentials in the supported JSON shape", asy
 
   assert.ok(Array.isArray(parsedSecret.ZIWEI_API_CREDENTIALS));
   assert.equal(parsedSecret.ZIWEI_API_CREDENTIALS[0].id, "app-client");
+  assert.equal(parsedSecret.ZIWEI_API_CREDENTIALS[0].token, undefined);
+  assert.match(parsedSecret.ZIWEI_API_CREDENTIALS[0].tokenHash, /^sha256:[0-9a-f]{64}$/u);
   assert.deepEqual(parsedSecret.ZIWEI_API_CREDENTIALS[0].scopes, ["reports:write"]);
   assert.equal(typeof parsedSecret.ZIWEI_LLM_API_KEY, "string");
 });

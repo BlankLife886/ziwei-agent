@@ -142,7 +142,7 @@ HTTP API 的 `POST /v1/reports` 会返回：
 - `recovery`：结构化恢复计划；当请求被阻断时给出用户、运营者或 agent 下一步动作，当报告已发布但知识覆盖不足时给出非阻断补强建议。
 - `diagnostics`：请求耗时、排盘状态、报告规划状态、生成状态和发布状态。
 
-当设置 `ZIWEI_API_TOKEN` 时，API 只接受 `authorization: Bearer <token>`，该 legacy token 自动获得 `reports:write`。生产式配置可使用 `ZIWEI_API_CREDENTIALS` JSON 数组登记多个 credential，每个 credential 包含 `id`、`token` 和 `scopes`，并可选 `disabled`、`notBefore`、`expiresAt` 做禁用、生效时间和过期控制；`POST /v1/reports` 必须具备当前可用的 `reports:write`。该鉴权只保护 API 入口，不改变 agent 内部证据、报告规划和审计逻辑。
+当设置 `ZIWEI_API_TOKEN` 时，API 只接受 `authorization: Bearer <token>`，该 legacy token 自动获得 `reports:write`。生产式配置可使用 `ZIWEI_API_CREDENTIALS` JSON 数组登记多个 credential，每个 credential 包含 `id`、`tokenHash` 或兼容用的 `token`、以及 `scopes`，并可选 `disabled`、`notBefore`、`expiresAt` 做禁用、生效时间和过期控制；`POST /v1/reports` 必须具备当前可用的 `reports:write`。推荐用 `npm run token:create -- --id <client-id>` 生成明文 bearer token 和服务端 `sha256:<hex>` tokenHash，服务端只保存 hash。该鉴权只保护 API 入口，不改变 agent 内部证据、报告规划和审计逻辑。
 
 启动边界先经过 `runtimeEnv` 解析。`ZIWEI_MANAGED_SECRET_COMMAND` 可用无 shell 子进程从托管密钥平台 CLI 或内部 sidecar 拉取运行时 secret，输出支持运行时 JSON object、AWS `SecretString`、Azure `value` 或 GCP `payload.data`。`ZIWEI_RUNTIME_SECRETS_FILE` 可从 mounted JSON secret 中补齐 API credential、外部 LLM key 和 provider 配置；`ZIWEI_API_CREDENTIALS_FILE`、`ZIWEI_API_TOKEN_FILE`、`ZIWEI_LLM_API_KEY_FILE` 可从单项 secret 文件补齐对应环境变量。显式环境变量优先于托管密钥命令，托管密钥命令优先于文件内容；命令失败、文件读取或解析失败会进入运行时/部署校验问题列表，不会静默降级为匿名服务。
 

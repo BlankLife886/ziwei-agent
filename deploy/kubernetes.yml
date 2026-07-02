@@ -15,7 +15,7 @@ stringData:
       "ZIWEI_API_CREDENTIALS": [
         {
           "id": "app-client",
-          "token": "replace-with-api-token",
+          "tokenHash": "sha256:974b4879378f30a6e83255dab11d84952cd789b8c355c6f762ee5f47f19a2996",
           "scopes": ["reports:write"],
           "disabled": false
         }

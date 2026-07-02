@@ -186,6 +186,16 @@ function buildAuthHeaders(env) {
     return {};
   }
 
+  if (!credential.token && env.ZIWEI_API_SMOKE_TOKEN) {
+    return {
+      authorization: `Bearer ${env.ZIWEI_API_SMOKE_TOKEN}`
+    };
+  }
+
+  if (!credential.token) {
+    return {};
+  }
+
   return {
     authorization: `Bearer ${credential.token}`
   };

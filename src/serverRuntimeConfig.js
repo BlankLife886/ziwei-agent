@@ -9,6 +9,7 @@ const REPORTS_WRITE_SCOPE = "reports:write";
 const RELEASE_TEXT_PATTERN = /^[A-Za-z0-9._:/@+-]+$/u;
 const RELEASE_COMMIT_PATTERN = /^[0-9a-f]{7,64}$/iu;
 const RELEASE_FIELD_MAX_LENGTH = 128;
+const TOKEN_HASH_PATTERN = /^sha256:[0-9a-f]{64}$/iu;
 
 export function buildServerRuntimeConfig(env = process.env) {
   const issues = [];
@@ -196,15 +197,21 @@ function auditCredentialJson(rawValue, nowMs) {
 
 function auditCredentialShape(credential, index, issues) {
   const label = `ZIWEI_API_CREDENTIALS[${index}]`;
-  const hasIdentity = credential &&
+  const hasToken = typeof credential?.token === "string" && credential.token;
+  const hasTokenHash = typeof credential?.tokenHash === "string" &&
+    TOKEN_HASH_PATTERN.test(credential.tokenHash);
+  const hasBaseIdentity = credential &&
     typeof credential.id === "string" &&
     credential.id.trim() &&
-    typeof credential.token === "string" &&
-    credential.token &&
     Array.isArray(credential.scopes);
 
-  if (!hasIdentity) {
-    issues.push(`${label} 必须包含 id、token 和 scopes 数组。`);
+  if (!hasBaseIdentity || (!hasToken && credential?.tokenHash === undefined)) {
+    issues.push(`${label} 必须包含 id、token 或 tokenHash、以及 scopes 数组。`);
+    return false;
+  }
+
+  if (credential.tokenHash !== undefined && !hasTokenHash) {
+    issues.push(`${label}.tokenHash 必须使用 sha256:<64位hex> 格式。`);
     return false;
   }
 

@@ -103,6 +103,21 @@ test("buildServerRuntimeConfig accepts scoped credential JSON for required auth"
   assert.equal(config.status, "ready");
 });
 
+test("buildServerRuntimeConfig accepts hashed scoped credential JSON for required auth", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "app-client",
+        tokenHash: "sha256:688f510940fa8f0e94ce7b639de7b54152d1616c4540e3f17ce8d3ef7f27003d",
+        scopes: ["reports:write"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "ready");
+});
+
 test("buildServerRuntimeConfig accepts lifecycle-managed active credentials", () => {
   const config = buildServerRuntimeConfig({
     ZIWEI_REQUIRE_API_AUTH: "true",
@@ -138,6 +153,22 @@ test("buildServerRuntimeConfig rejects malformed scoped credential JSON", () => 
   });
 
   assert.equal(config.status, "invalid");
+});
+
+test("buildServerRuntimeConfig rejects malformed token hashes", () => {
+  const config = buildServerRuntimeConfig({
+    ZIWEI_REQUIRE_API_AUTH: "true",
+    ZIWEI_API_CREDENTIALS: JSON.stringify([
+      {
+        id: "bad-hash-client",
+        tokenHash: "sha256:not-a-valid-hash",
+        scopes: ["reports:write"]
+      }
+    ])
+  });
+
+  assert.equal(config.status, "invalid");
+  assert.ok(config.issues.some((issue) => issue.includes(".tokenHash")));
 });
 
 test("buildServerRuntimeConfig rejects invalid credential lifecycle fields", () => {

@@ -37,7 +37,8 @@ npm run validate:release:summary
 ```bash
 NODE_ENV=production
 PORT=3000
-ZIWEI_API_CREDENTIALS=[{"id":"app-client","token":"replace-with-secret","scopes":["reports:write"],"disabled":false}]
+ZIWEI_API_CREDENTIALS=[{"id":"app-client","tokenHash":"sha256:2a98c70ddc28279197e6a78025a717b96c2313a9b50ea6587e353a258eca6dda","scopes":["reports:write"],"disabled":false}]
+ZIWEI_API_SMOKE_TOKEN=replace-with-secret
 ZIWEI_API_OBSERVABILITY=stdout
 ZIWEI_API_MAX_BODY_BYTES=100000
 ZIWEI_API_RATE_LIMIT_WINDOW_MS=60000
@@ -86,7 +87,7 @@ ZIWEI_LLM_API_KEY_FILE=/run/secrets/ziwei-llm-api-key
 - `deploy/kubernetes.yml`：Kubernetes Namespace、Secret、PVC、Deployment 和 Service 模板，包含 `/health` livenessProbe、`/ready` readinessProbe、runtime secret 挂载和 quota state PVC。
 - `wrangler.toml`：Cloudflare Workers 模板，入口是 `src/cloudflareWorker.js`，静态 Web UI 通过 Cloudflare Assets binding 提供，业务 API 复用同一条 agent pipeline。
 
-发布前必须替换模板中的示例 token 和模型 key。使用模板前仍需执行启动前门禁；模板只固定运行边界，不替代测试、知识库审计和 API smoke。
+发布前必须替换模板中的示例 token、tokenHash 和模型 key。推荐执行 `npm run token:create -- --id app-client-YYYY-MM` 生成新的明文 token 和服务端 hash credential；明文 token 只发给调用方或放在部署校验专用 `ZIWEI_API_SMOKE_TOKEN`，服务端 `ZIWEI_API_CREDENTIALS` 优先保存 `tokenHash`。使用模板前仍需执行启动前门禁；模板只固定运行边界，不替代测试、知识库审计和 API smoke。
 
 Compose 示例：
 
@@ -175,7 +176,7 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 [
   {
     "id": "app-client-2026-07",
-    "token": "new-secret",
+    "tokenHash": "sha256:<new-token-sha256-hex>",
     "scopes": ["reports:write"],
     "disabled": false,
     "notBefore": "2026-07-02T00:00:00Z",
@@ -183,7 +184,7 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
   },
   {
     "id": "app-client-2026-04",
-    "token": "old-secret",
+    "tokenHash": "sha256:<old-token-sha256-hex>",
     "scopes": ["reports:write"],
     "disabled": false,
     "expiresAt": "2026-07-15T00:00:00Z"
@@ -193,7 +194,7 @@ ZIWEI_LLM_MAX_RESPONSE_BYTES=200000
 
 轮换流程：
 
-1. 先追加新 credential，设置 `notBefore` 和 `expiresAt`。
+1. 执行 `npm run token:create -- --id app-client-2026-07 --expires-at 2026-10-01T00:00:00Z`，把输出中的明文 `token` 交给客户端，把 `credential.tokenHash` 写入服务端 secret。
 2. 若使用 secret 文件，先更新 mounted secret，再执行 `node --env-file=.env src/validateDeployment.js`。
 3. 发布新环境变量或新 secret 版本并重启服务。
 4. 客户端切换到新 token。

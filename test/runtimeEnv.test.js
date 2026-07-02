@@ -232,3 +232,37 @@ test("runApiSmokeCheck uses resolved runtime secrets for bearer auth", async () 
     });
   }
 });
+
+test("runApiSmokeCheck supports hashed credentials with a smoke-only token", async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), "ziwei-runtime-env-"));
+
+  try {
+    const secretsPath = join(tempDir, "secrets.json");
+    await writeFile(secretsPath, JSON.stringify({
+      ZIWEI_API_CREDENTIALS: [
+        {
+          id: "smoke-hash-client",
+          tokenHash: "sha256:930bbdc51b6aed5c2a5678fd6e28dee7a05e8a4b643cfc0b4427c3efb86c0d94",
+          scopes: ["reports:write"]
+        }
+      ]
+    }));
+
+    const result = await runApiSmokeCheck({
+      env: {
+        NODE_ENV: "production",
+        ZIWEI_RUNTIME_SECRETS_FILE: secretsPath,
+        ZIWEI_API_SMOKE_TOKEN: "secret-token",
+        ZIWEI_KNOWLEDGE_STORE: "data/knowledge-snippets.example.json"
+      }
+    });
+
+    assert.equal(result.status, "ready");
+    assert.equal(result.knowledgeSnippetCount, 10);
+  } finally {
+    await rm(tempDir, {
+      force: true,
+      recursive: true
+    });
+  }
+});

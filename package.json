@@ -7,6 +7,7 @@
     "start": "node src/cli.js examples/profile.example.json data/knowledge-snippets.example.json",
     "serve": "node src/server.js",
     "test": "node --test",
+    "token:create": "node src/manageApiToken.js",
     "smoke:api": "node src/smokeApi.js",
     "deploy:cloudflare": "node src/deployCloudflare.js",
     "validate:cloudflare": "node src/validateCloudflare.js",
