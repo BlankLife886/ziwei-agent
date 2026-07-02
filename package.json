@@ -10,6 +10,7 @@
     "smoke:api": "node src/smokeApi.js",
     "deploy:cloudflare": "wrangler deploy",
     "validate:cloudflare": "node src/validateCloudflare.js",
+    "validate:architecture": "node src/validateAgentArchitecture.js",
     "validate:release": "node src/validateRelease.js",
     "validate:release:summary": "node src/validateRelease.js --summary .runtime/release-summary.json",
     "validate:deploy": "node src/validateDeployment.js",
